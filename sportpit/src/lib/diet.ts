@@ -10,7 +10,6 @@ export const DEFAULT_CARB_SOURCES: ProductRef[] = [
     { value: 'oats', label: 'Овсянка', carbsPer100g: 66, defaultPortion: 160 },
     { value: 'couscous', label: 'Кускус', carbsPer100g: 77.4, defaultPortion: 140 },
     { value: 'spelt', label: 'Полба', carbsPer100g: 70.6, defaultPortion: 150 },
-    { value: 'lentils', label: 'Чечевица', carbsPer100g: 60, proteinPer100g: 24, defaultPortion: 170 },
     { value: 'lentils_cooked', label: 'Чечевица отварная', proteinPer100g: 9, carbsPer100g: 20, fatPer100g: 0.4, defaultPortion: 200 },
     { value: 'chickpeas', label: 'Нут', proteinPer100g: 19, carbsPer100g: 61, fatPer100g: 6, defaultPortion: 150 },
     { value: 'beans', label: 'Фасоль', proteinPer100g: 21, carbsPer100g: 55, fatPer100g: 1, defaultPortion: 150 },
