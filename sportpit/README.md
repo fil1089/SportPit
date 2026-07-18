@@ -24,7 +24,6 @@ JWT_SECRET=...                 # случайная строка для подп
 ## Разработка
 
 ```bash
-cd sportpit
 npm install
 npm run dev
 ```
@@ -32,10 +31,5 @@ npm run dev
 ## Деплой
 
 ```bash
-cd sportpit
 vercel --prod
 ```
-
-## Гайд по питанию
-
-Подробное описание протокола — в файле [GUIDE.md](./GUIDE.md).

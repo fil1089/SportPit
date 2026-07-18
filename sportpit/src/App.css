@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cobalt: #2563eb;
+  --color-cobalt-dark: #1d4ed8;
+  --color-cream: #faf8f5;
+  --color-white: #ffffff;
+  --color-coral: #f87171;
+  --color-lime: #a3e635;
+  --color-silver: #e5e7eb;
+  --color-chrome: #c0c7d0;
+  --color-ink: #111827;
+  --color-steel: #6b7280;
+  --color-surface: #ffffff;
+  --color-muted: #f3f4f6;
+  --color-text: #111827;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: var(--color-ink);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-silver);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-cobalt) 0%, var(--color-lime) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-gradient {
+  background: radial-gradient(circle at 30% 20%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(248, 113, 113, 0.1) 0%, transparent 40%),
+              var(--color-cream);
+}

@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "title": "План питания по протоколу Егорова",
+  "subtitle": "Интервальное голодание + циклирование углеводов",
+  "initial": {
+    "weight": 65,
+    "startDate": "2026-07-19",
+    "carbSources": ["buckwheat", "bulgur", "pasta"],
+    "proteinSources": ["chicken_breast", "turkey", "beef_minced", "tuna", "mackerel_herring", "chicken_thigh", "cottage_cheese", "eggs", "cheese"],
+    "trainingDates": [
+      "2026-07-20",
+      "2026-07-24",
+      "2026-07-28",
+      "2026-08-01",
+      "2026-08-05",
+      "2026-08-09",
+      "2026-08-13",
+      "2026-08-17",
+      "2026-08-21",
+      "2026-08-25",
+      "2026-08-29"
+    ]
+  },
+  "rules": [
+    "Окно питания: 09:00–17:00. Можно есть в любое время внутри, но не раньше и не позже.",
+    "Не смешивать жиры и углеводы в одном приёме. На тренировочных днях углеводы — только в Приёме 1, и там минимум жиров.",
+    "Без сахара и сладкого в любой день.",
+    "Без хлеба, макарон и круп на выходных.",
+    "Без алкоголя — ломает протокол.",
+    "Пить много воды во время голодного окна.",
+    "Если дата не из списка тренировочных — это выходной день, даже если вчера была тренировка.",
+    "Протеин — только на воде, только в Приёме 1 тренировочных дней."
+  ],
+  "macros": {
+    "protein": { "min": 100, "max": 130 },
+    "carbsTraining": { "min": 130, "max": 190 },
+    "carbsRest": { "min": 50, "max": 80 },
+    "fatsTraining": "только в Приёме 2",
+    "fatsRest": "в обоих приёмах"
+  },
+  "supplements": [
+    { "name": "Креатин моногидрат", "dose": "5 г/день", "when": "В любое время, каждый день", "why": "Рост силы и объёма мышц" },
+    { "name": "Бета-аланин", "dose": "По инструкции на упаковке", "when": "Перед тренировкой или равномерно", "why": "Больше повторений, выносливость" },
+    { "name": "Витамин D3 + K2", "dose": "По инструкции", "when": "С жирной пищей", "why": "Гормоны, иммунитет, восстановление" },
+    { "name": "Магний", "dose": "По инструкции", "when": "Вечером", "why": "Нервная система, сон, восстановление" },
+    { "name": "Цинк", "dose": "По инструкции", "when": "С едой", "why": "Тестостерон, иммунитет" }
+  ],
+  "products": {
+    "carbs": [
+      { "value": "buckwheat", "label": "Гречка", "carbsPer100g": 68, "defaultPortion": 160 },
+      { "value": "rice", "label": "Рис", "carbsPer100g": 73.7, "defaultPortion": 150 },
+      { "value": "bulgur", "label": "Булгур", "carbsPer100g": 63, "defaultPortion": 150 },
+      { "value": "pasta", "label": "Макароны из твёрдых сортов", "carbsPer100g": 74.9, "defaultPortion": 145 },
+      { "value": "potato", "label": "Картофель", "carbsPer100g": 18.1, "defaultPortion": 400 },
+      { "value": "quinoa", "label": "Киноа", "carbsPer100g": 64.2, "defaultPortion": 160 },
+      { "value": "oats", "label": "Овсянка", "carbsPer100g": 66, "defaultPortion": 160 },
+      { "value": "couscous", "label": "Кускус", "carbsPer100g": 77.4, "defaultPortion": 140 },
+      { "value": "spelt", "label": "Полба", "carbsPer100g": 70.6, "defaultPortion": 150 },
+      { "value": "lentils", "label": "Чечевица", "carbsPer100g": 60, "defaultPortion": 170 }
+    ],
+    "protein": [
+      { "value": "chicken_breast", "label": "Куриная грудка", "proteinPer100g": 23, "defaultPortion": 150 },
+      { "value": "turkey", "label": "Филе индейки", "proteinPer100g": 24, "defaultPortion": 150 },
+      { "value": "chicken_thigh", "label": "Куриные бёдра", "proteinPer100g": 20, "defaultPortion": 250 },
+      { "value": "beef_minced", "label": "Говяжий фарш", "proteinPer100g": 19, "defaultPortion": 300 },
+      { "value": "beef", "label": "Говядина", "proteinPer100g": 26, "defaultPortion": 200 },
+      { "value": "pork_tenderloin", "label": "Свиная вырезка", "proteinPer100g": 22, "defaultPortion": 200 },
+      { "value": "tuna", "label": "Тунец в собственном соку", "proteinPer100g": 23, "defaultPortion": 320 },
+      { "value": "mackerel_herring", "label": "Скумбрия/сельдь", "proteinPer100g": 18, "defaultPortion": 250 },
+      { "value": "salmon_trout", "label": "Сёмга/форель", "proteinPer100g": 20, "defaultPortion": 220 },
+      { "value": "cod", "label": "Треска/хек", "proteinPer100g": 17, "defaultPortion": 300 },
+      { "value": "eggs", "label": "Яйца", "proteinPer100g": 13, "defaultPortion": 200 },
+      { "value": "cottage_cheese_0_5", "label": "Творог 0–5%", "proteinPer100g": 18, "defaultPortion": 200 },
+      { "value": "cottage_cheese_9", "label": "Творог 9%", "proteinPer100g": 14, "defaultPortion": 200 },
+      { "value": "cheese", "label": "Твёрдый сыр", "proteinPer100g": 25, "defaultPortion": 50 },
+      { "value": "adygei_cheese", "label": "Сыр Адыгейский", "proteinPer100g": 18, "defaultPortion": 50 },
+      { "value": "brynza", "label": "Брынза", "proteinPer100g": 17, "defaultPortion": 80 },
+      { "value": "whey_protein", "label": "Сывороточный протеин", "proteinPerPortion": 18, "defaultPortion": 1 },
+      { "value": "kefir_25", "label": "Кефир 2.5%", "proteinPer100g": 3, "defaultPortion": 250 }
+    ]
+  },
+  "weekBasket": {
+    "Яйца": "~30 шт.",
+    "Куриная грудка": "~600 г",
+    "Куриные бёдра": "~1.5 кг",
+    "Индейка": "~600 г",
+    "Говяжий фарш": "~1.2 кг",
+    "Тунец в банке": "~6–8 банок",
+    "Скумбрия/сельдь": "~500 г",
+    "Гречка сухая": "~320 г",
+    "Рис сухой": "~280 г",
+    "Сыры (твёрдый, адыгейский, брынза)": "~700 г",
+    "Масло сливочное": "~200 г",
+    "Оливковое масло": "~200 мл",
+    "Овощи (огурцы, помидоры, перец, капуста, зелень)": "~6–8 кг",
+    "Семечки подсолнечные": "~700 г",
+    "Творог 0–5% и 9%": "~1 кг",
+    "Протеин": "порций по тренировочным дням"
+  }
+}
