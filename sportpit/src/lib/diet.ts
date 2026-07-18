@@ -708,7 +708,6 @@ export function buildDayPlan(
     }
 
     const globalViableAnimal = DEFAULT_PROTEIN_SOURCES.filter(s => s.proteinType === 'animal' && isViablePrimary(s));
-    const globalViablePlant = DEFAULT_PROTEIN_SOURCES.filter(s => s.proteinType === 'plant' && isViablePrimary(s));
 
     // Тренировочный Приём 1 (Белок + Углеводы) — ТОЛЬКО постные (fat < 5г/100г)
     const leanAnimal = animal.filter((s) => (s.fatPer100g ?? 0) < 5);
