@@ -442,18 +442,16 @@ function DayCard({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {plan.meals.map((meal) => (
                     <div key={meal.name} className="bg-cream rounded-2xl border border-silver p-4">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                            <div>
-                                <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="text-xs font-bold uppercase tracking-wide text-steel">{meal.name}</span>
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-white text-ink border border-silver">{meal.time}</span>
-                                </div>
-                                {meal.dishIdea && (
-                                    <p className="text-sm font-semibold text-ink">{meal.dishIdea}</p>
-                                )}
+                        <div className="flex items-center justify-between gap-3 mb-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className="text-xs font-bold uppercase tracking-wide text-steel">{meal.name}</span>
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-white text-ink border border-silver">{meal.time}</span>
                             </div>
+                            {meal.dishIdea && (
+                                <span className="text-xs text-steel italic text-right leading-tight">{meal.dishIdea}</span>
+                            )}
                         </div>
-                        <div className="text-xs font-medium text-steel mb-2">{meal.template}</div>
+                        <div className="text-xs font-semibold text-cobalt mb-2">{meal.template}</div>
                         <ul className="text-sm text-ink space-y-1 list-disc list-inside">
                             {meal.items.map((item, i) => (
                                 <li key={i}>{item}</li>
