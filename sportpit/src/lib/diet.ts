@@ -382,13 +382,13 @@ export function generateWeekPlan(
     macros = DEFAULT_MACROS,
     weeks = 6
 ): { date: string; plan: DayPlan }[] {
-    const start = new Date(startDate + 'T00:00:00');
+    const start = parseLocalDate(startDate);
     const days: { date: string; plan: DayPlan }[] = [];
 
     for (let i = 0; i < weeks * 7; i++) {
         const date = new Date(start);
         date.setDate(start.getDate() + i);
-        const iso = date.toISOString().split('T')[0];
+        const iso = formatISOLocal(date);
         const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, macros);
         days.push({ date: iso, plan });
     }
@@ -396,10 +396,22 @@ export function generateWeekPlan(
     return days;
 }
 
+export function parseLocalDate(iso: string): Date {
+    const [year, month, day] = iso.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
+export function formatISOLocal(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 export function addDays(date: string, days: number): string {
-    const d = new Date(date + 'T00:00:00');
+    const d = parseLocalDate(date);
     d.setDate(d.getDate() + days);
-    return d.toISOString().split('T')[0];
+    return formatISOLocal(d);
 }
 
 export function generateDatesFromRanges(ranges: { month: number; year: number; days: number[] }[]): string[] {

@@ -20,7 +20,8 @@ function animalProteinPercent(macros: { animalProtein: number; plantProtein: num
 }
 
 function formatDate(iso: string) {
-    const d = new Date(iso + 'T00:00:00');
+    const [year, month, day] = iso.split('-').map(Number);
+    const d = new Date(year, month - 1, day);
     return d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
@@ -196,7 +197,8 @@ function Calendar({
     weeks?: number;
 }) {
     const weeksData = useMemo(() => {
-        const start = new Date(startDate + 'T00:00:00');
+        const [year, month, day] = startDate.split('-').map(Number);
+        const start = new Date(year, month - 1, day);
         const result: { date: string; day: number; month: string; weekday: string }[][] = [];
         for (let w = 0; w < weeks; w++) {
             const week: { date: string; day: number; month: string; weekday: string }[] = [];
@@ -204,7 +206,7 @@ function Calendar({
                 const idx = w * 7 + d;
                 const current = new Date(start);
                 current.setDate(start.getDate() + idx);
-                const iso = current.toISOString().split('T')[0];
+                const iso = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
                 week.push({
                     date: iso,
                     day: current.getDate(),
