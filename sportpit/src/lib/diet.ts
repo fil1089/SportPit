@@ -737,11 +737,16 @@ export function buildDayPlan(
     const plantSource = pickRotationExcluding(pool3, excludeForPlant, date + '3');
 
     // Target: ~60% animal, ~40% plant protein
-    const animalTarget = proteinTarget * 0.6;
-    const plantTarget = proteinTarget * 0.4;
+    const isPlantFallbackToAnimal = plantSource.proteinType === 'animal';
+    
+    // В дни отдыха, если нет растительного белка (fallback на мясо), мы не делаем мясной гарнир к мясу.
+    // Просто увеличиваем основные порции животного белка. В тренировочные дни оставляем для 3-го приема (перекуса).
+    const animalTarget = (!training && isPlantFallbackToAnimal) ? proteinTarget : proteinTarget * 0.6;
+    const plantTarget = (!training && isPlantFallbackToAnimal) ? 0 : proteinTarget * 0.4;
+    
     const animalPortion1 = proteinPortion(animalTarget * 0.55, animalSource1);
     const animalPortion2 = proteinPortion(animalTarget * 0.45, animalSource2);
-    const plantPortion = proteinPortion(plantTarget, plantSource);
+    const plantPortion = plantTarget > 0 ? proteinPortion(plantTarget, plantSource) : 0;
 
 
     function formatProtein(source: ProductRef, portion: number): string {
@@ -802,10 +807,10 @@ export function buildDayPlan(
                 template: 'Белок + Жиры',
                 items: [
                     formatProtein(animalSource1, animalPortion1),
-                    formatProtein(plantSource, Math.round(plantPortion * 0.6)),
+                    ...(plantPortion > 0 ? [formatProtein(plantSource, Math.round(plantPortion * 0.6))] : []),
                     'Овощной салат с оливковым маслом',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource1, plantSource], 'fat', date),
+                dishIdea: generateDishIdea(null, [animalSource1, ...(plantPortion > 0 ? [plantSource] : [])], 'fat', date),
                 notes: 'Углеводы только из овощей/зелени/орехов, до 50–80 г в день.',
             },
             {
@@ -815,11 +820,11 @@ export function buildDayPlan(
                 items: [
                     formatProtein(animalSource2, animalPortion2),
                     ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
-                    formatProtein(plantSource, Math.round(plantPortion * 0.4)),
+                    ...(plantPortion > 0 ? [formatProtein(plantSource, Math.round(plantPortion * 0.4))] : []),
                     'Большой овощной салат с оливковым маслом',
                     'Орехи или семечки 30 г',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource2, plantSource], 'fat', date),
+                dishIdea: generateDishIdea(null, [animalSource2, ...(plantPortion > 0 ? [plantSource] : [])], 'fat', date),
             },
         ];
 
