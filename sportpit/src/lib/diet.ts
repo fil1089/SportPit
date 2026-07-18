@@ -16,34 +16,34 @@ export const DEFAULT_CARB_SOURCES: ProductRef[] = [
 ];
 
 export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
-    { value: 'chicken_breast', label: 'Куриная грудка', proteinPer100g: 23, fatPer100g: 1.5, defaultPortion: 150, proteinType: 'animal' },
-    { value: 'turkey', label: 'Филе индейки', proteinPer100g: 24, fatPer100g: 1.2, defaultPortion: 150, proteinType: 'animal' },
-    { value: 'chicken_thigh', label: 'Куриные бёдра', proteinPer100g: 20, fatPer100g: 8, defaultPortion: 250, proteinType: 'animal' },
-    { value: 'beef_minced', label: 'Говяжий фарш', proteinPer100g: 19, fatPer100g: 20, defaultPortion: 300, proteinType: 'animal' },
-    { value: 'beef', label: 'Говядина', proteinPer100g: 26, fatPer100g: 16, defaultPortion: 200, proteinType: 'animal' },
-    { value: 'pork_tenderloin', label: 'Свиная вырезка', proteinPer100g: 22, fatPer100g: 7, defaultPortion: 200, proteinType: 'animal' },
-    { value: 'tuna', label: 'Тунец в собственном соку', proteinPer100g: 23, fatPer100g: 1, defaultPortion: 320, proteinType: 'animal' },
-    { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250, proteinType: 'animal' },
-    { value: 'salmon_trout', label: 'Сёмга/форель', proteinPer100g: 20, fatPer100g: 14, defaultPortion: 220, proteinType: 'animal' },
-    { value: 'cod', label: 'Треска/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300, proteinType: 'animal' },
-    { value: 'eggs', label: 'Яйца', proteinPer100g: 13, fatPer100g: 11, proteinPerPortion: 6.5, defaultPortion: 4, proteinType: 'animal', portionUnit: 'pcs' },
-    { value: 'cottage_cheese_0_5', label: 'Творог 0–5%', proteinPer100g: 18, fatPer100g: 4, defaultPortion: 200, proteinType: 'animal' },
-    { value: 'cottage_cheese_9', label: 'Творог 9%', proteinPer100g: 14, fatPer100g: 9, defaultPortion: 200, proteinType: 'animal' },
-    { value: 'cheese', label: 'Твёрдый сыр', proteinPer100g: 25, fatPer100g: 27, defaultPortion: 50, proteinType: 'animal' },
-    { value: 'adygei_cheese', label: 'Сыр Адыгейский', proteinPer100g: 18, fatPer100g: 14, defaultPortion: 50, proteinType: 'animal' },
-    { value: 'brynza', label: 'Брынза', proteinPer100g: 17, fatPer100g: 20, defaultPortion: 80, proteinType: 'animal' },
-    { value: 'whey_protein', label: 'Сывороточный протеин', proteinPerPortion: 18, defaultPortion: 1, proteinType: 'animal' },
-    { value: 'kefir_25', label: 'Кефир 2.5%', proteinPer100g: 3, fatPer100g: 2.5, defaultPortion: 250, proteinType: 'animal' },
+    { value: 'chicken_breast', label: 'Куриная грудка', proteinPer100g: 23, fatPer100g: 1.5, defaultPortion: 150, proteinType: 'animal', fatLevel: 'lean' },
+    { value: 'turkey', label: 'Филе индейки', proteinPer100g: 24, fatPer100g: 1.2, defaultPortion: 150, proteinType: 'animal', fatLevel: 'lean' },
+    { value: 'chicken_thigh', label: 'Куриные бёдра', proteinPer100g: 20, fatPer100g: 8, defaultPortion: 250, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'beef_minced', label: 'Говяжий фарш', proteinPer100g: 19, fatPer100g: 20, defaultPortion: 300, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'beef', label: 'Говядина', proteinPer100g: 26, fatPer100g: 16, defaultPortion: 200, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'pork_tenderloin', label: 'Свиная вырезка', proteinPer100g: 22, fatPer100g: 7, defaultPortion: 200, proteinType: 'animal', fatLevel: 'lean' },
+    { value: 'tuna', label: 'Тунец в собственном соку', proteinPer100g: 23, fatPer100g: 1, defaultPortion: 320, proteinType: 'animal', fatLevel: 'lean' },
+    { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'salmon_trout', label: 'Сёмга/форель', proteinPer100g: 20, fatPer100g: 14, defaultPortion: 220, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'cod', label: 'Треска/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300, proteinType: 'animal', fatLevel: 'lean' },
+    { value: 'eggs', label: 'Яйца', proteinPer100g: 13, fatPer100g: 11, proteinPerPortion: 6.5, defaultPortion: 4, proteinType: 'animal', fatLevel: 'fatty', portionUnit: 'pcs' },
+    { value: 'cottage_cheese_0_5', label: 'Творог 0–5%', proteinPer100g: 18, fatPer100g: 4, defaultPortion: 200, proteinType: 'animal', fatLevel: 'lean' },
+    { value: 'cottage_cheese_9', label: 'Творог 9%', proteinPer100g: 14, fatPer100g: 9, defaultPortion: 200, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'cheese', label: 'Твёрдый сыр', proteinPer100g: 25, fatPer100g: 27, defaultPortion: 50, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'adygei_cheese', label: 'Сыр Адыгейский', proteinPer100g: 18, fatPer100g: 14, defaultPortion: 50, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'brynza', label: 'Брынза', proteinPer100g: 17, fatPer100g: 20, defaultPortion: 80, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'whey_protein', label: 'Сывороточный протеин', proteinPerPortion: 18, defaultPortion: 1, proteinType: 'animal', fatLevel: 'lean' },
+    { value: 'kefir_25', label: 'Кефир 2.5%', proteinPer100g: 3, fatPer100g: 2.5, defaultPortion: 250, proteinType: 'animal', fatLevel: 'fatty' },
     // Растительный белок
-    { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant' },
-    { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant' },
-    { value: 'soybeans', label: 'Соевые бобы', proteinPer100g: 36, carbsPer100g: 30, fatPer100g: 15, defaultPortion: 80, proteinType: 'plant' },
-    { value: 'mushrooms', label: 'Грибы', proteinPer100g: 3.5, fatPer100g: 0.5, defaultPortion: 300, proteinType: 'plant' },
-    { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant' },
-    { value: 'almonds', label: 'Миндаль', proteinPer100g: 18.5, fatPer100g: 54, defaultPortion: 50, proteinType: 'plant' },
-    { value: 'sunflower_seeds', label: 'Семечки подсолнечные', proteinPer100g: 20, fatPer100g: 52, defaultPortion: 50, proteinType: 'plant' },
-    { value: 'pumpkin_seeds', label: 'Семена тыквы', proteinPer100g: 25, fatPer100g: 45, defaultPortion: 50, proteinType: 'plant' },
-    { value: 'walnuts', label: 'Грецкий орех', proteinPer100g: 15, fatPer100g: 65, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant', fatLevel: 'lean' },
+    { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant', fatLevel: 'fatty' },
+    { value: 'soybeans', label: 'Соевые бобы', proteinPer100g: 36, carbsPer100g: 30, fatPer100g: 15, defaultPortion: 80, proteinType: 'plant', fatLevel: 'fatty' },
+    { value: 'mushrooms', label: 'Грибы', proteinPer100g: 3.5, fatPer100g: 0.5, defaultPortion: 300, proteinType: 'plant', fatLevel: 'lean' },
+    { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
+    { value: 'almonds', label: 'Миндаль', proteinPer100g: 18.5, fatPer100g: 54, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
+    { value: 'sunflower_seeds', label: 'Семечки подсолнечные', proteinPer100g: 20, fatPer100g: 52, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
+    { value: 'pumpkin_seeds', label: 'Семена тыквы', proteinPer100g: 25, fatPer100g: 45, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
+    { value: 'walnuts', label: 'Грецкий орех', proteinPer100g: 15, fatPer100g: 65, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
 ];
 
 export const DEFAULT_MACROS: MacroTargets = {
@@ -420,6 +420,7 @@ export interface Meal {
     time: string;
     template: string;
     items: string[];
+    dishIdea?: string;
     notes?: string;
     macros?: Macros;
 }
@@ -436,6 +437,49 @@ export interface DayMacros {
 function pickRotation<T>(items: T[], date: string): T {
     const hash = date.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
     return items[hash % items.length];
+}
+
+function generateDishIdea(
+    carbSource: ProductRef | null,
+    proteinSources: ProductRef[],
+    isTraining: boolean,
+    mealType: 'meal1' | 'snack' | 'meal2'
+): string {
+    if (isTraining) {
+        if (mealType === 'meal1') {
+            // Углеводный приём после тренировки
+            const carb = carbSource?.label || 'крупа';
+            const protein = proteinSources[0]?.label || 'постный белок';
+            const ideas = [
+                `${carb} с ${protein.toLowerCase()}`,
+                `${protein} с гарниром из ${carb.toLowerCase()}`,
+                `Отварная ${carb.toLowerCase()} + ${protein.toLowerCase()}`,
+            ];
+            return ideas[Math.abs(proteinSources.reduce((sum, p) => sum + p.value.charCodeAt(0), 0)) % ideas.length];
+        } else if (mealType === 'snack') {
+            const protein = proteinSources[0]?.label || 'растительный белок';
+            return protein;
+        } else {
+            // Жировой приём вечером
+            const protein = proteinSources[0]?.label || 'жирный белок';
+            const ideas = [
+                `${protein} под сырной шапкой с грибами`,
+                `Жареная ${protein.toLowerCase()} с овощным салатом`,
+                `${protein} с сыром и зеленью`,
+            ];
+            return ideas[Math.abs(proteinSources.reduce((sum, p) => sum + p.value.charCodeAt(0), 0)) % ideas.length];
+        }
+    } else {
+        // День отдыха - только жировые приёмы
+        const protein = proteinSources[0]?.label || 'белок';
+        const ideas = [
+            `${protein} с сыром и овощами`,
+            `Жареная ${protein.toLowerCase()} с маслом`,
+            `${protein} под сырной корочкой`,
+            `Салат с ${protein.toLowerCase()} и заправкой`,
+        ];
+        return ideas[Math.abs(proteinSources.reduce((sum, p) => sum + p.value.charCodeAt(0), 0)) % ideas.length];
+    }
 }
 
 function isHighCarbPlant(source: ProductRef): boolean {
@@ -501,6 +545,7 @@ export function buildDayPlan(
                     'Овощной салат без масла',
                     'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
                 ],
+                dishIdea: generateDishIdea(carbSource, [animalSource1], training, 'meal1'),
                 notes: 'Никаких жиров: ни масла, ни сыра, ни жирных соусов.',
             },
             {
@@ -511,6 +556,7 @@ export function buildDayPlan(
                     formatProtein(plantSource, plantPortion),
                     'или 1 порция растительного протеина на воде',
                 ],
+                dishIdea: generateDishIdea(null, [plantSource], training, 'snack'),
             },
             {
                 name: 'Приём 2',
@@ -522,6 +568,7 @@ export function buildDayPlan(
                     'Овощной салат с 1 ст.л. оливкового масла',
                     'Опционально: 30 г орехов или семечек',
                 ],
+                dishIdea: generateDishIdea(null, [animalSource2], training, 'meal2'),
                 notes: 'Никаких углеводов: ни круп, ни хлеба, ни фруктов.',
             },
         ]
@@ -535,6 +582,7 @@ export function buildDayPlan(
                     formatProtein(plantSource, Math.round(plantPortion * 0.6)),
                     'Овощной салат с оливковым маслом',
                 ],
+                dishIdea: generateDishIdea(null, [animalSource1, plantSource], training, 'meal1'),
                 notes: 'Углеводы только из овощей/зелени/орехов, до 50–80 г в день.',
             },
             {
@@ -548,6 +596,7 @@ export function buildDayPlan(
                     'Большой овощной салат с оливковым маслом',
                     'Орехи или семечки 30 г',
                 ],
+                dishIdea: generateDishIdea(null, [animalSource2], training, 'meal2'),
             },
         ];
 

@@ -13,6 +13,7 @@ export interface DietRecord {
 }
 
 export type ProteinType = 'animal' | 'plant';
+export type FatLevel = 'lean' | 'fatty';
 
 export interface ProductRef {
     value: string;
@@ -23,6 +24,7 @@ export interface ProductRef {
     proteinPerPortion?: number;
     defaultPortion: number;
     proteinType?: ProteinType;
+    fatLevel?: FatLevel;
     portionUnit?: 'g' | 'pcs';
 }
 

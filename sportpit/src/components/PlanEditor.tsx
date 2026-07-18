@@ -80,6 +80,16 @@ function usePlan(initial: DietData | null) {
         [proteinSources, plan.products.protein]
     );
 
+    const leanProteins = useMemo(
+        () => plan.products.protein.filter((p) => p.fatLevel === 'lean'),
+        [plan.products.protein]
+    );
+
+    const fattyProteins = useMemo(
+        () => plan.products.protein.filter((p) => p.fatLevel === 'fatty'),
+        [plan.products.protein]
+    );
+
     const weekPlan = useMemo(() => {
         return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates);
     }, [startDate, weight, carbProducts, proteinProducts, trainingDates]);
@@ -119,7 +129,7 @@ function usePlan(initial: DietData | null) {
     };
 
     const autoSelectProtein = () => {
-        const defaultSelection = ['chicken_breast', 'turkey', 'chicken_thigh', 'eggs', 'cottage_cheese_5', 'greek_yogurt_2', 'tofu', 'tempeh'];
+        const defaultSelection = ['chicken_breast', 'turkey', 'chicken_thigh', 'eggs', 'cottage_cheese_0_5', 'cottage_cheese_9', 'tuna', 'cod', 'tofu', 'tempeh', 'mushrooms'];
         setProteinSources(defaultSelection.filter(v => plan.products.protein.some(p => p.value === v)));
     };
 
@@ -164,6 +174,8 @@ function usePlan(initial: DietData | null) {
         weekPlan,
         carbProducts,
         proteinProducts,
+        leanProteins,
+        fattyProteins,
         data,
         uploadError,
         handleFileUpload,
@@ -435,6 +447,12 @@ function DayCard({
                             <span className="text-xs px-2 py-0.5 rounded-full bg-white text-ink border border-silver">{meal.time}</span>
                         </div>
                         <div className="text-sm font-bold text-cobalt mb-2">{meal.template}</div>
+                        {meal.dishIdea && (
+                            <div className="mb-3 p-2 bg-lime/10 rounded-lg border border-lime/30">
+                                <span className="text-xs font-semibold text-lime-800">💡 Идея блюда: </span>
+                                <span className="text-sm text-lime-900">{meal.dishIdea}</span>
+                            </div>
+                        )}
                         <ul className="text-sm text-ink space-y-1 list-disc list-inside">
                             {meal.items.map((item, i) => (
                                 <li key={i}>{item}</li>
@@ -465,6 +483,8 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         weekPlan,
         carbProducts,
         proteinProducts,
+        leanProteins,
+        fattyProteins,
         data,
         uploadError,
         handleFileUpload,
@@ -567,7 +587,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="mb-6">
                     <MultiSelect
                         label="Источники углеводов"
                         options={plan.products.carbs}
@@ -575,12 +595,21 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         onToggle={(value) => toggleProduct(value, carbSources, setCarbSources)}
                         onAutoSelect={autoSelectCarbs}
                     />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <MultiSelect
-                        label="Источники белка"
-                        options={plan.products.protein}
+                        label="Постные белки (для углеводных приёмов)"
+                        options={leanProteins}
                         selected={proteinSources}
                         onToggle={(value) => toggleProduct(value, proteinSources, setProteinSources)}
                         onAutoSelect={autoSelectProtein}
+                    />
+                    <MultiSelect
+                        label="Жирные белки (для жировых приёмов)"
+                        options={fattyProteins}
+                        selected={proteinSources}
+                        onToggle={(value) => toggleProduct(value, proteinSources, setProteinSources)}
                     />
                 </div>
 
