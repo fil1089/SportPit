@@ -129,15 +129,9 @@ export const DEFAULT_PLAN: PlanSchema = {
 
 function mergeProducts(saved: ProductRef[] | undefined, defaults: ProductRef[]): ProductRef[] {
     const savedMap = new Map((saved || []).map((p) => [p.value, p]));
-    const merged = defaults.map((p) => ({ ...p, ...(savedMap.get(p.value) || {}) }));
-    // Append saved custom products that are not in defaults
-    for (const p of saved || []) {
-        if (!savedMap.has(p.value)) continue;
-        if (!merged.some((m) => m.value === p.value)) {
-            merged.push(p);
-        }
-    }
-    return merged;
+    // Overwrite defaults with saved data for products that still exist in defaults.
+    // Products removed from defaults (e.g. deprecated sources) are dropped.
+    return defaults.map((p) => ({ ...p, ...(savedMap.get(p.value) || {}) }));
 }
 
 const BASKET_LABELS: Record<string, string> = {
@@ -256,13 +250,27 @@ export function buildWeeklyBaskets(
     return weeks;
 }
 
+function filterValidSources(selected: string[] | undefined, available: ProductRef[], fallback: string[]): string[] {
+    if (!selected?.length) return fallback;
+    const valid = selected.filter((v) => available.some((p) => p.value === v));
+    return valid.length ? valid : fallback;
+}
+
 export function resolvePlan(plan?: PlanSchema): PlanSchema {
     if (!plan) return DEFAULT_PLAN;
     const carbs = mergeProducts(plan.products?.carbs, DEFAULT_CARB_SOURCES);
     const protein = mergeProducts(plan.products?.protein, DEFAULT_PROTEIN_SOURCES);
+    const carbSources = filterValidSources(plan.initial?.carbSources, carbs, DEFAULT_PLAN.initial.carbSources);
+    const proteinSources = filterValidSources(plan.initial?.proteinSources, protein, DEFAULT_PLAN.initial.proteinSources);
     return {
         ...DEFAULT_PLAN,
         ...plan,
+        initial: {
+            ...DEFAULT_PLAN.initial,
+            ...plan.initial,
+            carbSources,
+            proteinSources,
+        },
         products: { carbs, protein },
         macros: plan.macros || DEFAULT_MACROS,
         rules: plan.rules?.length ? plan.rules : DEFAULT_RULES,
