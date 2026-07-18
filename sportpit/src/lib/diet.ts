@@ -439,6 +439,14 @@ function pickRotation<T>(items: T[], date: string): T {
     return items[hash % items.length];
 }
 
+// Безопасная версия: никогда не получает пустой массив
+function safePickRotation<T>(items: T[], fallback: T[], date: string): T {
+    const pool = items.length ? items : fallback;
+    if (!pool.length) throw new Error('safePickRotation: both items and fallback are empty');
+    const hash = date.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    return pool[hash % pool.length];
+}
+
 // ─── База блюд ────────────────────────────────────────────────────────────────
 
 interface DishEntry {
@@ -663,38 +671,45 @@ export function buildDayPlan(
 
     const carbTarget = Math.round((carbMacro.min + carbMacro.max) / 2);
     const proteinTarget = Math.round((proteinMacro.min + proteinMacro.max) / 2);
-    const carbSource = pickRotation(carbSources, date);
+    const carbSource = safePickRotation(carbSources, DEFAULT_CARB_SOURCES, date);
     const carbPortionG = carbPortion(carbTarget, carbSource);
+
 
     const { animal, plant } = splitByProteinType(proteinSources, training);
 
-    // Минимальная плотность белка для использования как основного источника
-    // Кефир (3г/100г), грибы (3.5г/100г) — слишком мало, дают огромные порции
+    // Абсолютный fallback — хоть что-то из всех источников
+    const anyProtein = proteinSources.length ? proteinSources : DEFAULT_PROTEIN_SOURCES;
+
+    // Минимальная плотность белка для основного источника
+    // Кефир (3г/100г), грибы (3.5г/100г) дают огромные порции — не используем как основной
     function isViablePrimary(s: ProductRef): boolean {
-        if (s.portionUnit === 'pcs') return true;                // яйца — через штуки
-        if (s.proteinPerPortion !== undefined) return true;      // протеин — через порции
+        if (s.portionUnit === 'pcs') return true;
+        if (s.proteinPerPortion !== undefined) return true;
         return (s.proteinPer100g ?? 0) >= 8;
     }
 
-    function viableOr(pool: ProductRef[], fallback: ProductRef[]): ProductRef[] {
-        const f = pool.filter(isViablePrimary);
-        return f.length ? f : fallback.filter(isViablePrimary).length ? fallback.filter(isViablePrimary) : fallback;
+    // Из пула берём viable, иначе весь пул, иначе fallback
+    function bestPool(primary: ProductRef[], fallback: ProductRef[]): ProductRef[] {
+        const viable = primary.filter(isViablePrimary);
+        if (viable.length) return viable;
+        if (primary.length) return primary;
+        const vf = fallback.filter(isViablePrimary);
+        if (vf.length) return vf;
+        return fallback.length ? fallback : anyProtein;
     }
 
     // Тренировочный Приём 1 (Белок + Углеводы) — ТОЛЬКО постные (fat < 5г/100г)
     // Яйца (11г жира), бёдра (8г жира) туда не попадают
     const leanAnimal = animal.filter((s) => (s.fatPer100g ?? 0) < 5);
-    const animalSource1Pool = viableOr(leanAnimal, animal);
-    const animalSource1 = pickRotation(animalSource1Pool, date);
+    const animalSource1 = safePickRotation(bestPool(leanAnimal, animal), anyProtein, date);
 
     // Жировые приёмы — предпочитаем жирные белки (бёдра, говядина, яйца, творог 9%)
     const fattyAnimal = animal.filter((s) => (s.fatPer100g ?? 0) >= 5);
-    const animalSource2Pool = viableOr(fattyAnimal.length ? fattyAnimal : animal, animal);
-    const animalSource2 = pickRotation(animalSource2Pool, date + '2');
+    const animalSource2 = safePickRotation(bestPool(fattyAnimal, animal), anyProtein, date + '2');
 
     // Растительный белок — только с достаточной плотностью
-    const plantPool = viableOr(plant, plant.length ? plant : proteinSources.filter((s) => s.proteinType === 'plant'));
-    const plantSource = pickRotation(plantPool.length ? plantPool : plant, date + '3');
+    const allPlant = proteinSources.filter((s) => s.proteinType === 'plant');
+    const plantSource = safePickRotation(bestPool(plant, allPlant), anyProtein, date + '3');
 
     // Target: ~60% animal, ~40% plant protein
     const animalTarget = proteinTarget * 0.6;
