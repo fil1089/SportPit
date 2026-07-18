@@ -1,8 +1,8 @@
 interface HeaderProps {
     email: string | null;
     onSignOut: () => void;
-    page: 'plan' | 'guide';
-    onPageChange: (page: 'plan' | 'guide') => void;
+    page: 'plan' | 'guide' | 'system';
+    onPageChange: (page: 'plan' | 'guide' | 'system') => void;
 }
 
 export function Header({ email, onSignOut, page, onPageChange }: HeaderProps) {
@@ -39,6 +39,15 @@ export function Header({ email, onSignOut, page, onPageChange }: HeaderProps) {
                                 }`}
                             >
                                 Гайд
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onPageChange('system')}
+                                className={`px-3 sm:px-4 py-1.5 rounded-xl text-sm font-semibold transition ${
+                                    page === 'system' ? 'bg-white text-cobalt shadow-sm' : 'text-steel hover:text-ink'
+                                }`}
+                            >
+                                О системе
                             </button>
                         </nav>
                         <span className="text-sm text-steel hidden sm:inline">{email}</span>
