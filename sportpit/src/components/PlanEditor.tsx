@@ -191,10 +191,9 @@ function Calendar({
 }) {
     const weeksData = useMemo(() => {
         const start = new Date(startDate + 'T00:00:00');
-        // Calendar starts strictly from startDate, no Monday-shift
-        const result: { date: string; day: number; month: string; dayOfWeek: number }[][] = [];
+        const result: { date: string; day: number; month: string; weekday: string }[][] = [];
         for (let w = 0; w < weeks; w++) {
-            const week: { date: string; day: number; month: string; dayOfWeek: number }[] = [];
+            const week: { date: string; day: number; month: string; weekday: string }[] = [];
             for (let d = 0; d < 7; d++) {
                 const idx = w * 7 + d;
                 const current = new Date(start);
@@ -204,7 +203,7 @@ function Calendar({
                     date: iso,
                     day: current.getDate(),
                     month: current.toLocaleDateString('ru-RU', { month: 'short' }),
-                    dayOfWeek: current.getDay() === 0 ? 6 : current.getDay() - 1,
+                    weekday: current.toLocaleDateString('ru-RU', { weekday: 'short' }),
                 });
             }
             result.push(week);
@@ -218,19 +217,13 @@ function Calendar({
                 <div key={wIdx}>
                     <div className="text-xs font-bold text-steel mb-2">Неделя {wIdx + 1}</div>
                     <div className="grid grid-cols-7 gap-1 sm:gap-2">
-                        {['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map((wd) => (
-                            <div key={wd} className="text-center text-xs font-bold text-steel py-1 uppercase">
-                                {wd}
-                            </div>
-                        ))}
-                        {week.map(({ date, day, month, dayOfWeek }) => {
+                        {week.map(({ date, day, month, weekday }) => {
                             const active = trainingDates.includes(date);
                             return (
                                 <button
                                     key={date}
                                     type="button"
                                     onClick={() => onToggle(date)}
-                                    style={{ gridColumnStart: dayOfWeek + 1 }}
                                     className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-xl border text-xs transition min-h-[52px] ${
                                         active
                                             ? 'bg-cobalt text-white border-cobalt shadow-lg shadow-cobalt/25'
@@ -239,6 +232,7 @@ function Calendar({
                                 >
                                     <span className="font-bold">{day}</span>
                                     <span className={`text-[10px] ${active ? 'text-blue-100' : 'text-steel'}`}>{month}</span>
+                                    <span className={`text-[9px] uppercase ${active ? 'text-blue-100' : 'text-steel'}`}>{weekday}</span>
                                 </button>
                             );
                         })}
@@ -523,7 +517,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
             <div className="space-y-6">
                 <div className="flex items-center gap-3">
                     <div className="w-2 h-8 bg-cobalt rounded-full" />
-                    <h2 className="text-2xl font-extrabold text-ink">Расписание на неделю</h2>
+                    <h2 className="text-2xl font-extrabold text-ink">Расписание</h2>
                     {weekPlan[0] && (
                         <span className="ml-auto text-sm text-steel">
                             {formatDate(weekPlan[0].date)} — {formatDate(weekPlan[weekPlan.length - 1].date)}

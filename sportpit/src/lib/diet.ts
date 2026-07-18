@@ -365,12 +365,13 @@ export function generateWeekPlan(
     carbSources: ProductRef[],
     proteinSources: ProductRef[],
     trainingDates: string[],
-    macros = DEFAULT_MACROS
+    macros = DEFAULT_MACROS,
+    weeks = 6
 ): { date: string; plan: DayPlan }[] {
     const start = new Date(startDate + 'T00:00:00');
     const days: { date: string; plan: DayPlan }[] = [];
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < weeks * 7; i++) {
         const date = new Date(start);
         date.setDate(start.getDate() + i);
         const iso = date.toISOString().split('T')[0];
