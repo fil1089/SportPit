@@ -8,6 +8,8 @@ import {
     type DayPlan,
     type WeeklyBasket,
     buildWeeklyBaskets,
+    calcProtein,
+    calcCarbs,
 } from '../lib/diet.js';
 import { useAutoSave } from '../hooks/useAutoSave.js';
 
@@ -79,6 +81,15 @@ function usePlan(initial: DietData | null) {
         return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, plan.macros);
     }, [startDate, weight, carbProducts, proteinProducts, trainingDates, plan.macros]);
 
+    const currentMacros = useMemo(() => {
+        const protein = calcProtein(weight, plan.macros);
+        const carbsTraining = calcCarbs(weight, plan.macros);
+        const carbsRest = plan.macros.carbsRest.min === 50 && plan.macros.carbsRest.max === 80
+            ? { min: Math.round(weight * 0.8), max: Math.round(weight * 1.2) }
+            : plan.macros.carbsRest;
+        return { protein, carbsTraining, carbsRest };
+    }, [weight, plan.macros]);
+
     const data: DietData | null = useMemo(
         () => ({
             weight,
@@ -99,6 +110,16 @@ function usePlan(initial: DietData | null) {
         setTrainingDates((prev) =>
             prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date].sort()
         );
+    };
+
+    const autoSelectCarbs = () => {
+        const defaultSelection = ['buckwheat', 'rice', 'bulgur', 'pasta', 'potato', 'oats'];
+        setCarbSources(defaultSelection.filter(v => plan.products.carbs.some(p => p.value === v)));
+    };
+
+    const autoSelectProtein = () => {
+        const defaultSelection = ['chicken_breast', 'turkey', 'chicken_thigh', 'eggs', 'cottage_cheese_5', 'greek_yogurt_2', 'tofu', 'tempeh'];
+        setProteinSources(defaultSelection.filter(v => plan.products.protein.some(p => p.value === v)));
     };
 
     const handleFileUpload = async (file: File) => {
@@ -137,6 +158,9 @@ function usePlan(initial: DietData | null) {
         handleFileUpload,
         fileInputRef,
         toggleProduct,
+        currentMacros,
+        autoSelectCarbs,
+        autoSelectProtein,
     };
 }
 
@@ -157,15 +181,28 @@ function MultiSelect({
     options,
     selected,
     onToggle,
+    onAutoSelect,
 }: {
     label: string;
     options: ProductRef[];
     selected: string[];
     onToggle: (value: string) => void;
+    onAutoSelect?: () => void;
 }) {
     return (
         <div>
-            <label className="block text-sm font-semibold text-ink mb-2">{label}</label>
+            <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-ink">{label}</label>
+                {onAutoSelect && (
+                    <button
+                        type="button"
+                        onClick={onAutoSelect}
+                        className="text-xs px-3 py-1 rounded-full bg-lime text-ink font-medium hover:bg-lime/80 transition"
+                    >
+                        Выбрать автоматически
+                    </button>
+                )}
+            </div>
             <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto p-3 border border-silver rounded-2xl bg-cream">
                 {options.map((opt) => {
                     const active = selected.includes(opt.value);
@@ -422,6 +459,9 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         handleFileUpload,
         fileInputRef,
         toggleProduct,
+        currentMacros,
+        autoSelectCarbs,
+        autoSelectProtein,
     } = usePlan(initial);
 
     const weeklyBaskets = useMemo(
@@ -522,19 +562,21 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         options={plan.products.carbs}
                         selected={carbSources}
                         onToggle={(value) => toggleProduct(value, carbSources, setCarbSources)}
+                        onAutoSelect={autoSelectCarbs}
                     />
                     <MultiSelect
                         label="Источники белка"
                         options={plan.products.protein}
                         selected={proteinSources}
                         onToggle={(value) => toggleProduct(value, proteinSources, setProteinSources)}
+                        onAutoSelect={autoSelectProtein}
                     />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <MacroCard label="Углеводы в трен. день" min={plan.macros.carbsTraining.min} max={plan.macros.carbsTraining.max} />
-                    <MacroCard label="Белок в сутки" min={plan.macros.protein.min} max={plan.macros.protein.max} />
-                    <MacroCard label="Углеводы в выходной" min={plan.macros.carbsRest.min} max={plan.macros.carbsRest.max} suffix="овощи" />
+                    <MacroCard label="Углеводы в трен. день" min={currentMacros.carbsTraining.min} max={currentMacros.carbsTraining.max} />
+                    <MacroCard label="Белок в сутки" min={currentMacros.protein.min} max={currentMacros.protein.max} />
+                    <MacroCard label="Углеводы в выходной" min={currentMacros.carbsRest.min} max={currentMacros.carbsRest.max} suffix="овощи" />
                     <div className="bg-cream rounded-2xl p-4 border border-silver">
                         <span className="text-sm text-steel">Жиры</span>
                         <div className="text-sm text-ink font-semibold mt-2 leading-snug">
