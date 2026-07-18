@@ -38,7 +38,6 @@ export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
     { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant' },
     { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant' },
     { value: 'soybeans', label: 'Соевые бобы', proteinPer100g: 36, carbsPer100g: 30, fatPer100g: 15, defaultPortion: 80, proteinType: 'plant' },
-    { value: 'asparagus', label: 'Спаржа', proteinPer100g: 2.2, carbsPer100g: 4, fatPer100g: 0.2, defaultPortion: 300, proteinType: 'plant' },
     { value: 'mushrooms', label: 'Грибы', proteinPer100g: 3.5, fatPer100g: 0.5, defaultPortion: 300, proteinType: 'plant' },
     { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant' },
     { value: 'almonds', label: 'Миндаль', proteinPer100g: 18.5, fatPer100g: 54, defaultPortion: 50, proteinType: 'plant' },
