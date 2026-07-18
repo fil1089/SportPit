@@ -725,8 +725,12 @@ export function buildDayPlan(
     const animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, date + '2');
 
     // Растительный белок — только с достаточной плотностью
+    // Если пользователь не выбрал нормальных растительных белков (тофу, соя),
+    // не заставляем его есть тофу. Добираем белок из ЕГО списка животных продуктов.
     const allPlant = proteinSources.filter((s) => s.proteinType === 'plant');
-    const pool3 = bestPool(plant, allPlant, globalViablePlant);
+    const userViableAnimal = animal.filter(isViablePrimary);
+    const plantFallback = userViableAnimal.length ? userViableAnimal : globalViableAnimal;
+    const pool3 = bestPool(plant, allPlant, plantFallback);
     
     const excludeForPlant = [animalSource1, animalSource2];
     if (isCheese(animalSource1) || isCheese(animalSource2)) {
