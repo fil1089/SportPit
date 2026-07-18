@@ -705,6 +705,10 @@ export function buildDayPlan(
         return safePickRotation(finalPool, anyProtein, seed);
     }
 
+    function isCheese(source: ProductRef): boolean {
+        return ['cheese', 'brynza', 'adygei_cheese'].includes(source.value);
+    }
+
     // Тренировочный Приём 1 (Белок + Углеводы) — ТОЛЬКО постные (fat < 5г/100г)
     const leanAnimal = animal.filter((s) => (s.fatPer100g ?? 0) < 5);
     const pool1 = bestPool(leanAnimal, animal);
@@ -713,12 +717,20 @@ export function buildDayPlan(
     // Жировые приёмы — предпочитаем жирные белки (бёдра, говядина, яйца, творог 9%)
     const fattyAnimal = animal.filter((s) => (s.fatPer100g ?? 0) >= 5);
     const pool2 = bestPool(fattyAnimal, animal);
-    const animalSource2 = pickRotationExcluding(pool2, [animalSource1], date + '2');
+    
+    const excludeForAnimal2 = [animalSource1];
+    if (isCheese(animalSource1)) excludeForAnimal2.push(...proteinSources.filter(isCheese));
+    const animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, date + '2');
 
     // Растительный белок — только с достаточной плотностью
     const allPlant = proteinSources.filter((s) => s.proteinType === 'plant');
     const pool3 = bestPool(plant, allPlant);
-    const plantSource = pickRotationExcluding(pool3, [animalSource1, animalSource2], date + '3');
+    
+    const excludeForPlant = [animalSource1, animalSource2];
+    if (isCheese(animalSource1) || isCheese(animalSource2)) {
+        excludeForPlant.push(...proteinSources.filter(isCheese));
+    }
+    const plantSource = pickRotationExcluding(pool3, excludeForPlant, date + '3');
 
     // Target: ~60% animal, ~40% plant protein
     const animalTarget = proteinTarget * 0.6;
@@ -737,11 +749,6 @@ export function buildDayPlan(
             return `${source.label} ${rounded} ${suffix}`;
         }
         return `${source.label} ${rounded} г`;
-    }
-
-
-    function isCheese(source: ProductRef): boolean {
-        return ['cheese', 'brynza', 'adygea_cheese'].includes(source.value);
     }
 
     const meals: Meal[] = training
