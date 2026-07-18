@@ -10,7 +10,10 @@ export const DEFAULT_CARB_SOURCES: ProductRef[] = [
     { value: 'oats', label: 'Овсянка', carbsPer100g: 66, defaultPortion: 160 },
     { value: 'couscous', label: 'Кускус', carbsPer100g: 77.4, defaultPortion: 140 },
     { value: 'spelt', label: 'Полба', carbsPer100g: 70.6, defaultPortion: 150 },
-    { value: 'lentils', label: 'Чечевица', carbsPer100g: 60, defaultPortion: 170 },
+    { value: 'lentils', label: 'Чечевица', carbsPer100g: 60, proteinPer100g: 24, defaultPortion: 170 },
+    { value: 'lentils_cooked', label: 'Чечевица отварная', proteinPer100g: 9, carbsPer100g: 20, fatPer100g: 0.4, defaultPortion: 200 },
+    { value: 'chickpeas', label: 'Нут', proteinPer100g: 19, carbsPer100g: 61, fatPer100g: 6, defaultPortion: 150 },
+    { value: 'beans', label: 'Фасоль', proteinPer100g: 21, carbsPer100g: 55, fatPer100g: 1, defaultPortion: 150 },
 ];
 
 export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
@@ -36,9 +39,6 @@ export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
     { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant' },
     { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant' },
     { value: 'soybeans', label: 'Соевые бобы', proteinPer100g: 36, carbsPer100g: 30, fatPer100g: 15, defaultPortion: 80, proteinType: 'plant' },
-    { value: 'chickpeas', label: 'Нут', proteinPer100g: 19, carbsPer100g: 61, fatPer100g: 6, defaultPortion: 150, proteinType: 'plant' },
-    { value: 'beans', label: 'Фасоль', proteinPer100g: 21, carbsPer100g: 55, fatPer100g: 1, defaultPortion: 150, proteinType: 'plant' },
-    { value: 'lentils_cooked', label: 'Чечевица отварная', proteinPer100g: 9, carbsPer100g: 20, fatPer100g: 0.4, defaultPortion: 200, proteinType: 'plant' },
     { value: 'asparagus', label: 'Спаржа', proteinPer100g: 2.2, carbsPer100g: 4, fatPer100g: 0.2, defaultPortion: 300, proteinType: 'plant' },
     { value: 'mushrooms', label: 'Грибы', proteinPer100g: 3.5, fatPer100g: 0.5, defaultPortion: 300, proteinType: 'plant' },
     { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant' },
