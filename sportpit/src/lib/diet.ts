@@ -603,31 +603,35 @@ function generateDishIdea(
     const carbValue = carbSource?.value;
     const dishes = mealType === 'carb' ? CARB_DISHES : FAT_DISHES;
 
-    // Считаем рейтинг совпадения каждого блюда с реальными продуктами в приёме:
-    // +3 за совпадение крупы, +2 за каждый белковый продукт, +1 за жировой продукт
+    // Считаем рейтинг совпадения: +3 за крупу, +2 за белковый продукт, +1 за жировой
     const scored = dishes.map((dish) => {
         let score = 0;
         if (carbValue && dish.carbBases?.includes(carbValue)) score += 3;
         for (const pv of dish.proteinBases || []) {
             if (proteinValues.has(pv)) score += 2;
         }
-        // Сыр (cheese) всегда присутствует в жировых приёмах как "Сыр 50 г"
-        if (mealType === 'fat') {
-            for (const fv of dish.fatBases || []) {
-                if (proteinValues.has(fv)) score += 1;
-                if (fv === 'cheese') score += 1;
-            }
+        for (const fv of dish.fatBases || []) {
+            if (proteinValues.has(fv)) score += 1;
         }
         return { dish, score };
     });
 
     const best = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score);
-    const pool = best.length > 0 ? best.map((s) => s.dish) : dishes;
 
-    // Из топ-кандидатов выбираем по дате — ротация без предсказуемых повторов
-    const topCount = Math.min(pool.length, Math.max(3, Math.ceil(pool.length * 0.4)));
-    const top = pool.slice(0, topCount);
-    return pickRotation(top, date + mealType).idea;
+    if (best.length === 0) {
+        // Нет совпадений — берём случайное из всей базы
+        return pickRotation(dishes, date + mealType).idea;
+    }
+
+    // Берём только блюда с максимальным score — реально содержат нужные продукты
+    const maxScore = best[0].score;
+    const topTied = best.filter((s) => s.score === maxScore).map((s) => s.dish);
+    // Если топ одно блюдо — расширяем до score-1 для небольшого разнообразия
+    const pool = topTied.length >= 2
+        ? topTied
+        : best.filter((s) => s.score >= maxScore - 1).map((s) => s.dish);
+
+    return pickRotation(pool, date + mealType).idea;
 }
 
 
