@@ -21,7 +21,7 @@ export function SystemPage() {
                 {/* 1. Митохондрии */}
                 <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg shadow-cobalt/5 border border-silver">
                     <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cobalt to-cobalt-dark text-white flex items-center justify-center text-2xl shrink-0">⚡</div>
+                        <div className="w-10 h-10 rounded-2xl bg-cobalt text-white flex items-center justify-center font-bold text-lg shrink-0">1</div>
                         <div>
                             <h3 className="text-xl font-bold text-ink mb-2">Фундамент: митохондрии выбирают топливо</h3>
                             <p className="text-steel mb-3">
@@ -40,7 +40,7 @@ export function SystemPage() {
                 {/* 2. Смешанное питание */}
                 <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg shadow-cobalt/5 border border-silver">
                     <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-coral text-white flex items-center justify-center text-2xl shrink-0">⚠️</div>
+                        <div className="w-10 h-10 rounded-2xl bg-coral text-white flex items-center justify-center font-bold text-lg shrink-0">2</div>
                         <div>
                             <h3 className="text-xl font-bold text-ink mb-2">Проблема №1: смешанное питание</h3>
                             <p className="text-steel mb-3">
@@ -62,7 +62,7 @@ export function SystemPage() {
                 {/* 3. Дробное питание */}
                 <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg shadow-cobalt/5 border border-silver">
                     <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-coral text-white flex items-center justify-center text-2xl shrink-0">🔁</div>
+                        <div className="w-10 h-10 rounded-2xl bg-coral text-white flex items-center justify-center font-bold text-lg shrink-0">3</div>
                         <div>
                             <h3 className="text-xl font-bold text-ink mb-2">Проблема №2: дробное питание</h3>
                             <p className="text-steel">
@@ -78,7 +78,7 @@ export function SystemPage() {
                 {/* 4. Разделение нутриентов */}
                 <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg shadow-cobalt/5 border border-silver">
                     <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-lime text-ink flex items-center justify-center text-2xl shrink-0">⚖️</div>
+                        <div className="w-10 h-10 rounded-2xl bg-lime text-ink flex items-center justify-center font-bold text-lg shrink-0">4</div>
                         <div>
                             <h3 className="text-xl font-bold text-ink mb-2">Решение: углеводные качели</h3>
                             <p className="text-steel mb-4">Нутриенты разделяются по дням и по приёмам пищи:</p>
@@ -101,7 +101,7 @@ export function SystemPage() {
                 {/* 5. Тренировки натощак */}
                 <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg shadow-cobalt/5 border border-silver">
                     <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cobalt to-lime text-white flex items-center justify-center text-2xl shrink-0">🏋️</div>
+                        <div className="w-10 h-10 rounded-2xl bg-cobalt text-white flex items-center justify-center font-bold text-lg shrink-0">5</div>
                         <div>
                             <h3 className="text-xl font-bold text-ink mb-2">Тренировки строго натощак</h3>
                             <p className="text-steel mb-2">
@@ -120,7 +120,7 @@ export function SystemPage() {
                 {/* 6. Хронобиология */}
                 <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg shadow-cobalt/5 border border-silver">
                     <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cobalt to-cobalt-dark text-white flex items-center justify-center text-2xl shrink-0">🌅</div>
+                        <div className="w-10 h-10 rounded-2xl bg-lime text-ink flex items-center justify-center font-bold text-lg shrink-0">6</div>
                         <div>
                             <h3 className="text-xl font-bold text-ink mb-2">Хронобиология: окно 09:00–17:00</h3>
                             <p className="text-steel mb-3">
@@ -140,7 +140,7 @@ export function SystemPage() {
                 {/* 7. Белок */}
                 <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg shadow-cobalt/5 border border-silver">
                     <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-lime text-ink flex items-center justify-center text-2xl shrink-0">🥩</div>
+                        <div className="w-10 h-10 rounded-2xl bg-coral text-white flex items-center justify-center font-bold text-lg shrink-0">7</div>
                         <div>
                             <h3 className="text-xl font-bold text-ink mb-2">Много белка — главный строительный материал</h3>
                             <p className="text-steel mb-2">

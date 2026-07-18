@@ -168,6 +168,12 @@ function extractAmounts(items: string[], products: ProductRef[]): Map<string, nu
             continue;
         }
 
+        // Овощной салат (считаем 200г на порцию)
+        if (item.match(/Овощной салат/i)) {
+            amounts.set('Овощи для салата', (amounts.get('Овощи для салата') || 0) + 200);
+            continue;
+        }
+
         // Порция протеина
         if (item.includes('протеин') && item.includes('порция')) {
             amounts.set('Сывороточный протеин', (amounts.get('Сывороточный протеин') || 0) + 1);
