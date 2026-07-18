@@ -80,16 +80,6 @@ function usePlan(initial: DietData | null) {
         [proteinSources, plan.products.protein]
     );
 
-    const leanProteins = useMemo(
-        () => plan.products.protein.filter((p) => p.fatLevel === 'lean'),
-        [plan.products.protein]
-    );
-
-    const fattyProteins = useMemo(
-        () => plan.products.protein.filter((p) => p.fatLevel === 'fatty'),
-        [plan.products.protein]
-    );
-
     const weekPlan = useMemo(() => {
         return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates);
     }, [startDate, weight, carbProducts, proteinProducts, trainingDates]);
@@ -129,7 +119,7 @@ function usePlan(initial: DietData | null) {
     };
 
     const autoSelectProtein = () => {
-        const defaultSelection = ['chicken_breast', 'turkey', 'chicken_thigh', 'eggs', 'cottage_cheese_0_5', 'cottage_cheese_9', 'tuna', 'cod', 'tofu', 'tempeh', 'mushrooms'];
+        const defaultSelection = ['chicken_breast', 'turkey', 'chicken_thigh', 'eggs', 'cottage_cheese_5', 'greek_yogurt_2', 'tofu', 'tempeh'];
         setProteinSources(defaultSelection.filter(v => plan.products.protein.some(p => p.value === v)));
     };
 
@@ -174,8 +164,6 @@ function usePlan(initial: DietData | null) {
         weekPlan,
         carbProducts,
         proteinProducts,
-        leanProteins,
-        fattyProteins,
         data,
         uploadError,
         handleFileUpload,
@@ -442,16 +430,11 @@ function DayCard({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {plan.meals.map((meal) => (
                     <div key={meal.name} className="bg-cream rounded-2xl border border-silver p-4">
-                        <div className="flex items-center justify-between gap-3 mb-2">
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <span className="text-xs font-bold uppercase tracking-wide text-steel">{meal.name}</span>
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-white text-ink border border-silver">{meal.time}</span>
-                            </div>
-                            {meal.dishIdea && (
-                                <span className="text-xs text-steel italic text-right leading-tight">{meal.dishIdea}</span>
-                            )}
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-bold uppercase tracking-wide text-steel">{meal.name}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-white text-ink border border-silver">{meal.time}</span>
                         </div>
-                        <div className="text-xs font-semibold text-cobalt mb-2">{meal.template}</div>
+                        <div className="text-sm font-bold text-cobalt mb-2">{meal.template}</div>
                         <ul className="text-sm text-ink space-y-1 list-disc list-inside">
                             {meal.items.map((item, i) => (
                                 <li key={i}>{item}</li>
@@ -482,8 +465,6 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         weekPlan,
         carbProducts,
         proteinProducts,
-        leanProteins,
-        fattyProteins,
         data,
         uploadError,
         handleFileUpload,
@@ -498,6 +479,17 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         () => buildWeeklyBaskets(carbProducts, proteinProducts, weekPlan),
         [carbProducts, proteinProducts, weekPlan]
     );
+
+    // Разделяем белки на постные (fatPer100g < 5) и жирные для двух панелей выбора
+    const leanProteins = useMemo(
+        () => plan.products.protein.filter((p) => (p.fatPer100g ?? 0) < 5),
+        [plan.products.protein]
+    );
+    const fattyProteins = useMemo(
+        () => plan.products.protein.filter((p) => (p.fatPer100g ?? 0) >= 5),
+        [plan.products.protein]
+    );
+
 
     const { saving, error, lastSaved } = useAutoSave(data);
 
