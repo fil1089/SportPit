@@ -126,14 +126,27 @@ export const DEFAULT_PLAN: PlanSchema = {
     weekBasket: DEFAULT_WEEK_BASKET,
 };
 
+function mergeProducts(saved: ProductRef[] | undefined, defaults: ProductRef[]): ProductRef[] {
+    const savedMap = new Map((saved || []).map((p) => [p.value, p]));
+    const merged = defaults.map((p) => ({ ...p, ...(savedMap.get(p.value) || {}) }));
+    // Append saved custom products that are not in defaults
+    for (const p of saved || []) {
+        if (!savedMap.has(p.value)) continue;
+        if (!merged.some((m) => m.value === p.value)) {
+            merged.push(p);
+        }
+    }
+    return merged;
+}
+
 export function resolvePlan(plan?: PlanSchema): PlanSchema {
     if (!plan) return DEFAULT_PLAN;
     return {
         ...DEFAULT_PLAN,
         ...plan,
         products: {
-            carbs: plan.products?.carbs?.length ? plan.products.carbs : DEFAULT_CARB_SOURCES,
-            protein: plan.products?.protein?.length ? plan.products.protein : DEFAULT_PROTEIN_SOURCES,
+            carbs: mergeProducts(plan.products?.carbs, DEFAULT_CARB_SOURCES),
+            protein: mergeProducts(plan.products?.protein, DEFAULT_PROTEIN_SOURCES),
         },
         macros: plan.macros || DEFAULT_MACROS,
         rules: plan.rules?.length ? plan.rules : DEFAULT_RULES,
