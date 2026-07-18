@@ -13,6 +13,12 @@ interface PlanEditorProps {
     initial: DietData | null;
 }
 
+function animalProteinPercent(macros: { animalProtein: number; plantProtein: number }) {
+    const total = macros.animalProtein + macros.plantProtein;
+    if (!total) return 0;
+    return Math.round((macros.animalProtein / total) * 100);
+}
+
 function formatDate(iso: string) {
     const d = new Date(iso + 'T00:00:00');
     return d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -280,6 +286,9 @@ function DayCard({
                     <div className="font-bold text-lg text-ink">{formatDate(date)}</div>
                     <div className="text-sm text-steel">
                         Итого: {plan.macros.calories} ккал · Б {plan.macros.protein} · Ж {plan.macros.fat} · У {plan.macros.carbs}
+                    </div>
+                    <div className="text-xs text-steel mt-1">
+                        Белок: {plan.macros.animalProtein}г живот. ({animalProteinPercent(plan.macros)}%) · {plan.macros.plantProtein}г раст.
                     </div>
                 </div>
                 <button

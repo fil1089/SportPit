@@ -1,4 +1,4 @@
-import { type ProductRef, type PlanSchema, type MacroTargets } from './api.js';
+import { type ProductRef, type PlanSchema, type MacroTargets, type ProteinType } from './api.js';
 
 export const DEFAULT_CARB_SOURCES: ProductRef[] = [
     { value: 'buckwheat', label: 'Гречка', carbsPer100g: 68, defaultPortion: 160 },
@@ -14,24 +14,24 @@ export const DEFAULT_CARB_SOURCES: ProductRef[] = [
 ];
 
 export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
-    { value: 'chicken_breast', label: 'Куриная грудка', proteinPer100g: 23, fatPer100g: 1.5, defaultPortion: 150 },
-    { value: 'turkey', label: 'Филе индейки', proteinPer100g: 24, fatPer100g: 1.2, defaultPortion: 150 },
-    { value: 'chicken_thigh', label: 'Куриные бёдра', proteinPer100g: 20, fatPer100g: 8, defaultPortion: 250 },
-    { value: 'beef_minced', label: 'Говяжий фарш', proteinPer100g: 19, fatPer100g: 20, defaultPortion: 300 },
-    { value: 'beef', label: 'Говядина', proteinPer100g: 26, fatPer100g: 16, defaultPortion: 200 },
-    { value: 'pork_tenderloin', label: 'Свиная вырезка', proteinPer100g: 22, fatPer100g: 7, defaultPortion: 200 },
-    { value: 'tuna', label: 'Тунец в собственном соку', proteinPer100g: 23, fatPer100g: 1, defaultPortion: 320 },
-    { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250 },
-    { value: 'salmon_trout', label: 'Сёмга/форель', proteinPer100g: 20, fatPer100g: 14, defaultPortion: 220 },
-    { value: 'cod', label: 'Треска/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300 },
-    { value: 'eggs', label: 'Яйца', proteinPer100g: 13, fatPer100g: 11, defaultPortion: 200 },
-    { value: 'cottage_cheese_0_5', label: 'Творог 0–5%', proteinPer100g: 18, fatPer100g: 4, defaultPortion: 200 },
-    { value: 'cottage_cheese_9', label: 'Творог 9%', proteinPer100g: 14, fatPer100g: 9, defaultPortion: 200 },
-    { value: 'cheese', label: 'Твёрдый сыр', proteinPer100g: 25, fatPer100g: 27, defaultPortion: 50 },
-    { value: 'adygei_cheese', label: 'Сыр Адыгейский', proteinPer100g: 18, fatPer100g: 14, defaultPortion: 50 },
-    { value: 'brynza', label: 'Брынза', proteinPer100g: 17, fatPer100g: 20, defaultPortion: 80 },
-    { value: 'whey_protein', label: 'Сывороточный протеин', proteinPerPortion: 18, defaultPortion: 1 },
-    { value: 'kefir_25', label: 'Кефир 2.5%', proteinPer100g: 3, fatPer100g: 2.5, defaultPortion: 250 },
+    { value: 'chicken_breast', label: 'Куриная грудка', proteinPer100g: 23, fatPer100g: 1.5, defaultPortion: 150, proteinType: 'animal' },
+    { value: 'turkey', label: 'Филе индейки', proteinPer100g: 24, fatPer100g: 1.2, defaultPortion: 150, proteinType: 'animal' },
+    { value: 'chicken_thigh', label: 'Куриные бёдра', proteinPer100g: 20, fatPer100g: 8, defaultPortion: 250, proteinType: 'animal' },
+    { value: 'beef_minced', label: 'Говяжий фарш', proteinPer100g: 19, fatPer100g: 20, defaultPortion: 300, proteinType: 'animal' },
+    { value: 'beef', label: 'Говядина', proteinPer100g: 26, fatPer100g: 16, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'pork_tenderloin', label: 'Свиная вырезка', proteinPer100g: 22, fatPer100g: 7, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'tuna', label: 'Тунец в собственном соку', proteinPer100g: 23, fatPer100g: 1, defaultPortion: 320, proteinType: 'animal' },
+    { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250, proteinType: 'animal' },
+    { value: 'salmon_trout', label: 'Сёмга/форель', proteinPer100g: 20, fatPer100g: 14, defaultPortion: 220, proteinType: 'animal' },
+    { value: 'cod', label: 'Треска/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300, proteinType: 'animal' },
+    { value: 'eggs', label: 'Яйца', proteinPer100g: 13, fatPer100g: 11, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'cottage_cheese_0_5', label: 'Творог 0–5%', proteinPer100g: 18, fatPer100g: 4, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'cottage_cheese_9', label: 'Творог 9%', proteinPer100g: 14, fatPer100g: 9, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'cheese', label: 'Твёрдый сыр', proteinPer100g: 25, fatPer100g: 27, defaultPortion: 50, proteinType: 'animal' },
+    { value: 'adygei_cheese', label: 'Сыр Адыгейский', proteinPer100g: 18, fatPer100g: 14, defaultPortion: 50, proteinType: 'animal' },
+    { value: 'brynza', label: 'Брынза', proteinPer100g: 17, fatPer100g: 20, defaultPortion: 80, proteinType: 'animal' },
+    { value: 'whey_protein', label: 'Сывороточный протеин', proteinPerPortion: 18, defaultPortion: 1, proteinType: 'animal' },
+    { value: 'kefir_25', label: 'Кефир 2.5%', proteinPer100g: 3, fatPer100g: 2.5, defaultPortion: 250, proteinType: 'animal' },
 ];
 
 export const DEFAULT_MACROS: MacroTargets = {
@@ -150,36 +150,44 @@ export function proteinPortion(protein: number, source: ProductRef): number {
     return Math.round((protein / source.proteinPer100g) * 100);
 }
 
-export function calcMacrosFromItems(items: string[]): Macros {
+export function calcMacrosFromItems(items: string[], products: ProductRef[] = [...DEFAULT_CARB_SOURCES, ...DEFAULT_PROTEIN_SOURCES]): Macros & { animalProtein: number; plantProtein: number } {
     let protein = 0;
     let fat = 0;
     let carbs = 0;
+    let animalProtein = 0;
+    let plantProtein = 0;
+
+    function addProtein(amount: number, type?: ProteinType) {
+        protein += amount;
+        if (type === 'animal') animalProtein += amount;
+        if (type === 'plant') plantProtein += amount;
+    }
 
     for (const item of items) {
         // Протеин порошок: 18г белка, 7.2г углеводов на порцию
         if (item.includes('протеин')) {
-            protein += 18;
+            addProtein(18, 'animal');
             carbs += 7.2;
             continue;
         }
         // Яйца 3-4 шт. ~ 200г
         if (item.includes('Яйца')) {
             const portion = 200;
-            protein += (13 * portion) / 100;
+            addProtein((13 * portion) / 100, 'animal');
             fat += (11 * portion) / 100;
             continue;
         }
         // Сыр 50г
         if (item.includes('Сыр 50')) {
             const portion = 50;
-            protein += (25 * portion) / 100;
+            addProtein((25 * portion) / 100, 'animal');
             fat += (27 * portion) / 100;
             continue;
         }
         // Орехи/семечки 50г
         if (item.includes('Орехи') || item.includes('семечки')) {
             const portion = 50;
-            protein += (18 * portion) / 100;
+            addProtein((18 * portion) / 100, 'plant');
             fat += (50 * portion) / 100;
             carbs += (10 * portion) / 100;
             continue;
@@ -199,10 +207,9 @@ export function calcMacrosFromItems(items: string[]): Macros {
         const match = item.match(/(\d+)\s*г/);
         if (match) {
             const portion = parseInt(match[1], 10);
-            const allProducts = [...DEFAULT_CARB_SOURCES, ...DEFAULT_PROTEIN_SOURCES];
-            const product = allProducts.find((p) => item.includes(p.label));
+            const product = products.find((p) => item.includes(p.label));
             if (product) {
-                if (product.proteinPer100g) protein += (product.proteinPer100g * portion) / 100;
+                if (product.proteinPer100g) addProtein((product.proteinPer100g * portion) / 100, product.proteinType);
                 if (product.carbsPer100g) carbs += (product.carbsPer100g * portion) / 100;
                 if (product.fatPer100g) fat += (product.fatPer100g * portion) / 100;
             }
@@ -214,18 +221,22 @@ export function calcMacrosFromItems(items: string[]): Macros {
         fat: Math.round(fat),
         carbs: Math.round(carbs),
         calories: Math.round(protein * 4 + fat * 9 + carbs * 4),
+        animalProtein: Math.round(animalProtein),
+        plantProtein: Math.round(plantProtein),
     };
 }
 
-export function sumMacros(macros: Macros[]): DayMacros {
+export function sumMacros(macros: (Macros & { animalProtein: number; plantProtein: number })[]): DayMacros {
     return macros.reduce(
         (acc, m) => ({
             protein: acc.protein + m.protein,
             fat: acc.fat + m.fat,
             carbs: acc.carbs + m.carbs,
             calories: acc.calories + m.calories,
+            animalProtein: acc.animalProtein + m.animalProtein,
+            plantProtein: acc.plantProtein + m.plantProtein,
         }),
-        { protein: 0, fat: 0, carbs: 0, calories: 0 }
+        { protein: 0, fat: 0, carbs: 0, calories: 0, animalProtein: 0, plantProtein: 0 }
     );
 }
 
@@ -260,6 +271,8 @@ export interface DayMacros {
     fat: number;
     carbs: number;
     calories: number;
+    animalProtein: number;
+    plantProtein: number;
 }
 
 function pickRotation<T>(items: T[], date: string): T {
@@ -350,7 +363,8 @@ export function buildDayPlan(
             },
         ];
 
-    const mealsWithMacros = meals.map((meal) => ({ ...meal, macros: calcMacrosFromItems(meal.items) }));
+    const allProducts = [...carbSources, ...proteinSources];
+    const mealsWithMacros = meals.map((meal) => ({ ...meal, macros: calcMacrosFromItems(meal.items, allProducts) }));
 
     return {
         type: training ? 'training' : 'rest',

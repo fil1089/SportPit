@@ -12,6 +12,8 @@ export interface DietRecord {
     updated_at?: string;
 }
 
+export type ProteinType = 'animal' | 'plant';
+
 export interface ProductRef {
     value: string;
     label: string;
@@ -20,6 +22,7 @@ export interface ProductRef {
     fatPer100g?: number;
     proteinPerPortion?: number;
     defaultPortion: number;
+    proteinType?: ProteinType;
 }
 
 export interface PlanInitial {
