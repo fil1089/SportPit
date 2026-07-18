@@ -16,34 +16,34 @@ export const DEFAULT_CARB_SOURCES: ProductRef[] = [
 ];
 
 export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
-    { value: 'chicken_breast', label: 'Куриная грудка', proteinPer100g: 23, fatPer100g: 1.5, defaultPortion: 150, proteinType: 'animal', fatLevel: 'lean' },
-    { value: 'turkey', label: 'Филе индейки', proteinPer100g: 24, fatPer100g: 1.2, defaultPortion: 150, proteinType: 'animal', fatLevel: 'lean' },
-    { value: 'chicken_thigh', label: 'Куриные бёдра', proteinPer100g: 20, fatPer100g: 8, defaultPortion: 250, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'beef_minced', label: 'Говяжий фарш', proteinPer100g: 19, fatPer100g: 20, defaultPortion: 300, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'beef', label: 'Говядина', proteinPer100g: 26, fatPer100g: 16, defaultPortion: 200, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'pork_tenderloin', label: 'Свиная вырезка', proteinPer100g: 22, fatPer100g: 7, defaultPortion: 200, proteinType: 'animal', fatLevel: 'lean' },
-    { value: 'tuna', label: 'Тунец в собственном соку', proteinPer100g: 23, fatPer100g: 1, defaultPortion: 320, proteinType: 'animal', fatLevel: 'lean' },
-    { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'salmon_trout', label: 'Сёмга/форель', proteinPer100g: 20, fatPer100g: 14, defaultPortion: 220, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'cod', label: 'Треска/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300, proteinType: 'animal', fatLevel: 'lean' },
-    { value: 'eggs', label: 'Яйца', proteinPer100g: 13, fatPer100g: 11, proteinPerPortion: 6.5, defaultPortion: 4, proteinType: 'animal', fatLevel: 'fatty', portionUnit: 'pcs' },
-    { value: 'cottage_cheese_0_5', label: 'Творог 0–5%', proteinPer100g: 18, fatPer100g: 4, defaultPortion: 200, proteinType: 'animal', fatLevel: 'lean' },
-    { value: 'cottage_cheese_9', label: 'Творог 9%', proteinPer100g: 14, fatPer100g: 9, defaultPortion: 200, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'cheese', label: 'Твёрдый сыр', proteinPer100g: 25, fatPer100g: 27, defaultPortion: 50, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'adygei_cheese', label: 'Сыр Адыгейский', proteinPer100g: 18, fatPer100g: 14, defaultPortion: 50, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'brynza', label: 'Брынза', proteinPer100g: 17, fatPer100g: 20, defaultPortion: 80, proteinType: 'animal', fatLevel: 'fatty' },
-    { value: 'whey_protein', label: 'Сывороточный протеин', proteinPerPortion: 18, defaultPortion: 1, proteinType: 'animal', fatLevel: 'lean' },
-    { value: 'kefir_25', label: 'Кефир 2.5%', proteinPer100g: 3, fatPer100g: 2.5, defaultPortion: 250, proteinType: 'animal', fatLevel: 'fatty' },
+    { value: 'chicken_breast', label: 'Куриная грудка', proteinPer100g: 23, fatPer100g: 1.5, defaultPortion: 150, proteinType: 'animal' },
+    { value: 'turkey', label: 'Филе индейки', proteinPer100g: 24, fatPer100g: 1.2, defaultPortion: 150, proteinType: 'animal' },
+    { value: 'chicken_thigh', label: 'Куриные бёдра', proteinPer100g: 20, fatPer100g: 8, defaultPortion: 250, proteinType: 'animal' },
+    { value: 'beef_minced', label: 'Говяжий фарш', proteinPer100g: 19, fatPer100g: 20, defaultPortion: 300, proteinType: 'animal' },
+    { value: 'beef', label: 'Говядина', proteinPer100g: 26, fatPer100g: 16, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'pork_tenderloin', label: 'Свиная вырезка', proteinPer100g: 22, fatPer100g: 7, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'tuna', label: 'Тунец в собственном соку', proteinPer100g: 23, fatPer100g: 1, defaultPortion: 320, proteinType: 'animal' },
+    { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250, proteinType: 'animal' },
+    { value: 'salmon_trout', label: 'Сёмга/форель', proteinPer100g: 20, fatPer100g: 14, defaultPortion: 220, proteinType: 'animal' },
+    { value: 'cod', label: 'Треска/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300, proteinType: 'animal' },
+    { value: 'eggs', label: 'Яйца', proteinPer100g: 13, fatPer100g: 11, proteinPerPortion: 6.5, defaultPortion: 4, proteinType: 'animal', portionUnit: 'pcs' },
+    { value: 'cottage_cheese_0_5', label: 'Творог 0–5%', proteinPer100g: 18, fatPer100g: 4, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'cottage_cheese_9', label: 'Творог 9%', proteinPer100g: 14, fatPer100g: 9, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'cheese', label: 'Твёрдый сыр', proteinPer100g: 25, fatPer100g: 27, defaultPortion: 50, proteinType: 'animal' },
+    { value: 'adygei_cheese', label: 'Сыр Адыгейский', proteinPer100g: 18, fatPer100g: 14, defaultPortion: 50, proteinType: 'animal' },
+    { value: 'brynza', label: 'Брынза', proteinPer100g: 17, fatPer100g: 20, defaultPortion: 80, proteinType: 'animal' },
+    { value: 'whey_protein', label: 'Сывороточный протеин', proteinPerPortion: 18, defaultPortion: 1, proteinType: 'animal' },
+    { value: 'kefir_25', label: 'Кефир 2.5%', proteinPer100g: 3, fatPer100g: 2.5, defaultPortion: 250, proteinType: 'animal' },
     // Растительный белок
-    { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant', fatLevel: 'lean' },
-    { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant', fatLevel: 'fatty' },
-    { value: 'soybeans', label: 'Соевые бобы', proteinPer100g: 36, carbsPer100g: 30, fatPer100g: 15, defaultPortion: 80, proteinType: 'plant', fatLevel: 'fatty' },
-    { value: 'mushrooms', label: 'Грибы', proteinPer100g: 3.5, fatPer100g: 0.5, defaultPortion: 300, proteinType: 'plant', fatLevel: 'lean' },
-    { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
-    { value: 'almonds', label: 'Миндаль', proteinPer100g: 18.5, fatPer100g: 54, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
-    { value: 'sunflower_seeds', label: 'Семечки подсолнечные', proteinPer100g: 20, fatPer100g: 52, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
-    { value: 'pumpkin_seeds', label: 'Семена тыквы', proteinPer100g: 25, fatPer100g: 45, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
-    { value: 'walnuts', label: 'Грецкий орех', proteinPer100g: 15, fatPer100g: 65, defaultPortion: 50, proteinType: 'plant', fatLevel: 'fatty' },
+    { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant' },
+    { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant' },
+    { value: 'soybeans', label: 'Соевые бобы', proteinPer100g: 36, carbsPer100g: 30, fatPer100g: 15, defaultPortion: 80, proteinType: 'plant' },
+    { value: 'mushrooms', label: 'Грибы', proteinPer100g: 3.5, fatPer100g: 0.5, defaultPortion: 300, proteinType: 'plant' },
+    { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'almonds', label: 'Миндаль', proteinPer100g: 18.5, fatPer100g: 54, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'sunflower_seeds', label: 'Семечки подсолнечные', proteinPer100g: 20, fatPer100g: 52, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'pumpkin_seeds', label: 'Семена тыквы', proteinPer100g: 25, fatPer100g: 45, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'walnuts', label: 'Грецкий орех', proteinPer100g: 15, fatPer100g: 65, defaultPortion: 50, proteinType: 'plant' },
 ];
 
 export const DEFAULT_MACROS: MacroTargets = {
@@ -439,49 +439,48 @@ function pickRotation<T>(items: T[], date: string): T {
     return items[hash % items.length];
 }
 
-// ─── База блюд ───────────────────────────────────────────────────────────────
+// ─── База блюд ────────────────────────────────────────────────────────────────
 
 interface DishEntry {
     idea: string;
     type: 'carb' | 'fat';
-    carbBases?: string[];    // значения value из DEFAULT_CARB_SOURCES
-    proteinBases?: string[]; // значения value из DEFAULT_PROTEIN_SOURCES
-    fatBases?: string[];     // fatty-продукты (сыр, орехи, масло...)
+    carbBases?: string[];    // value из DEFAULT_CARB_SOURCES
+    proteinBases?: string[]; // value из DEFAULT_PROTEIN_SOURCES
+    fatBases?: string[];     // жировые продукты: сыры, орехи, семечки
 }
 
-// Углеводные блюда (postny белок + сложные углеводы)
 const CARB_DISHES: DishEntry[] = [
     // Гречка
     { idea: 'Варёная гречка + варёная куриная грудка', type: 'carb', carbBases: ['buckwheat'], proteinBases: ['chicken_breast'] },
     { idea: 'Варёная гречка + варёное филе индейки', type: 'carb', carbBases: ['buckwheat'], proteinBases: ['turkey'] },
     { idea: 'Варёная гречка + тунец в собственном соку', type: 'carb', carbBases: ['buckwheat'], proteinBases: ['tuna'] },
     { idea: 'Варёная гречка + отварная треска/хек', type: 'carb', carbBases: ['buckwheat'], proteinBases: ['cod'] },
-    { idea: 'Варёная гречка + тушёные шампиньоны', type: 'carb', carbBases: ['buckwheat'], proteinBases: ['mushrooms'] },
+    { idea: 'Варёная гречка + тушёные грибы', type: 'carb', carbBases: ['buckwheat'], proteinBases: ['mushrooms'] },
     { idea: 'Варёная гречка + творог 0–5%', type: 'carb', carbBases: ['buckwheat'], proteinBases: ['cottage_cheese_0_5'] },
     { idea: 'Варёная гречка + свиная вырезка', type: 'carb', carbBases: ['buckwheat'], proteinBases: ['pork_tenderloin'] },
     // Рис
     { idea: 'Отварной рис + варёная куриная грудка', type: 'carb', carbBases: ['rice'], proteinBases: ['chicken_breast'] },
     { idea: 'Отварной рис + варёное филе индейки', type: 'carb', carbBases: ['rice'], proteinBases: ['turkey'] },
     { idea: 'Отварной рис + тунец в собственном соку', type: 'carb', carbBases: ['rice'], proteinBases: ['tuna'] },
-    { idea: 'Отварной рис + тушёные шампиньоны', type: 'carb', carbBases: ['rice'], proteinBases: ['mushrooms'] },
+    { idea: 'Отварной рис + тушёные грибы', type: 'carb', carbBases: ['rice'], proteinBases: ['mushrooms'] },
     { idea: 'Отварной рис + тофу и соевые бобы', type: 'carb', carbBases: ['rice'], proteinBases: ['tofu', 'soybeans'] },
     { idea: 'Отварной рис + отварная треска/хек', type: 'carb', carbBases: ['rice'], proteinBases: ['cod'] },
     // Макароны
     { idea: 'Макароны с тунцом в собственном соку', type: 'carb', carbBases: ['pasta'], proteinBases: ['tuna'] },
-    { idea: 'Макароны с куриной грудкой и шампиньонами', type: 'carb', carbBases: ['pasta'], proteinBases: ['chicken_breast', 'mushrooms'] },
+    { idea: 'Макароны с куриной грудкой и грибами', type: 'carb', carbBases: ['pasta'], proteinBases: ['chicken_breast', 'mushrooms'] },
     { idea: 'Макароны с филе индейки', type: 'carb', carbBases: ['pasta'], proteinBases: ['turkey'] },
     { idea: 'Макароны с творогом 0–5% и зеленью', type: 'carb', carbBases: ['pasta'], proteinBases: ['cottage_cheese_0_5'] },
     { idea: 'Макароны с отварной треской/хеком', type: 'carb', carbBases: ['pasta'], proteinBases: ['cod'] },
     // Картофель
     { idea: 'Запечённый картофель + куриная грудка', type: 'carb', carbBases: ['potato'], proteinBases: ['chicken_breast'] },
     { idea: 'Отварной картофель + тунец в собственном соку', type: 'carb', carbBases: ['potato'], proteinBases: ['tuna'] },
-    { idea: 'Отварной картофель + тушёные шампиньоны', type: 'carb', carbBases: ['potato'], proteinBases: ['mushrooms'] },
+    { idea: 'Отварной картофель + тушёные грибы', type: 'carb', carbBases: ['potato'], proteinBases: ['mushrooms'] },
     { idea: 'Картофельное пюре (без масла) + тушёная свиная вырезка', type: 'carb', carbBases: ['potato'], proteinBases: ['pork_tenderloin'] },
     { idea: 'Запечённый картофель + отварная треска/хек', type: 'carb', carbBases: ['potato'], proteinBases: ['cod'] },
     // Булгур
     { idea: 'Отварной булгур + куриная грудка', type: 'carb', carbBases: ['bulgur'], proteinBases: ['chicken_breast'] },
     { idea: 'Отварной булгур + тунец в собственном соку', type: 'carb', carbBases: ['bulgur'], proteinBases: ['tuna'] },
-    { idea: 'Отварной булгур с треской/хеком и шампиньонами', type: 'carb', carbBases: ['bulgur'], proteinBases: ['cod', 'mushrooms'] },
+    { idea: 'Отварной булгур с треской/хеком и грибами', type: 'carb', carbBases: ['bulgur'], proteinBases: ['cod', 'mushrooms'] },
     { idea: 'Отварной булгур + филе индейки', type: 'carb', carbBases: ['bulgur'], proteinBases: ['turkey'] },
     // Киноа
     { idea: 'Отварное киноа + куриная грудка', type: 'carb', carbBases: ['quinoa'], proteinBases: ['chicken_breast'] },
@@ -490,29 +489,27 @@ const CARB_DISHES: DishEntry[] = [
     // Овсянка
     { idea: 'Овсянка на воде + творог 0–5%', type: 'carb', carbBases: ['oats'], proteinBases: ['cottage_cheese_0_5'] },
     { idea: 'Овсянка на воде + порция сывороточного протеина', type: 'carb', carbBases: ['oats'], proteinBases: ['whey_protein'] },
-    { idea: 'Овсяноблин из белков + творог 0–5%', type: 'carb', carbBases: ['oats'], proteinBases: ['cottage_cheese_0_5'] },
     // Кускус / Полба
-    { idea: 'Кускус с куриной грудкой и шампиньонами', type: 'carb', carbBases: ['couscous'], proteinBases: ['chicken_breast', 'mushrooms'] },
+    { idea: 'Кускус с куриной грудкой и грибами', type: 'carb', carbBases: ['couscous'], proteinBases: ['chicken_breast', 'mushrooms'] },
     { idea: 'Отварная полба + тунец в собственном соку', type: 'carb', carbBases: ['spelt'], proteinBases: ['tuna'] },
     { idea: 'Отварная полба + куриная грудка', type: 'carb', carbBases: ['spelt'], proteinBases: ['chicken_breast'] },
     // Бобовые
     { idea: 'Отварная чечевица + куриная грудка', type: 'carb', carbBases: ['lentils_cooked'], proteinBases: ['chicken_breast'] },
     { idea: 'Отварная чечевица + филе индейки', type: 'carb', carbBases: ['lentils_cooked'], proteinBases: ['turkey'] },
     { idea: 'Варёный нут + куриная грудка', type: 'carb', carbBases: ['chickpeas'], proteinBases: ['chicken_breast'] },
-    { idea: 'Варёный нут + тушёные шампиньоны', type: 'carb', carbBases: ['chickpeas'], proteinBases: ['mushrooms'] },
+    { idea: 'Варёный нут + тушёные грибы', type: 'carb', carbBases: ['chickpeas'], proteinBases: ['mushrooms'] },
     { idea: 'Варёная фасоль + филе индейки', type: 'carb', carbBases: ['beans'], proteinBases: ['turkey'] },
     { idea: 'Варёная фасоль + свиная вырезка', type: 'carb', carbBases: ['beans'], proteinBases: ['pork_tenderloin'] },
-    // Универсальные запасные
-    { idea: 'Крупа с куриной грудкой и шампиньонами', type: 'carb', proteinBases: ['chicken_breast', 'mushrooms'] },
+    // Запасные (без конкретной крупы)
+    { idea: 'Крупа с куриной грудкой и грибами', type: 'carb', proteinBases: ['chicken_breast', 'mushrooms'] },
     { idea: 'Крупа с тунцом и овощами без масла', type: 'carb', proteinBases: ['tuna'] },
     { idea: 'Крупа с филе индейки и зеленью', type: 'carb', proteinBases: ['turkey'] },
 ];
 
-// Жировые блюда (жирный белок + жиры, без углеводов)
 const FAT_DISHES: DishEntry[] = [
     // Куриные бёдра
     { idea: 'Жареные куриные бёдра + твёрдый сыр', type: 'fat', proteinBases: ['chicken_thigh'], fatBases: ['cheese'] },
-    { idea: 'Куриные бёдра + жареные шампиньоны', type: 'fat', proteinBases: ['chicken_thigh', 'mushrooms'] },
+    { idea: 'Куриные бёдра + жареные грибы', type: 'fat', proteinBases: ['chicken_thigh', 'mushrooms'] },
     { idea: 'Запечённые куриные бёдра + адыгейский сыр', type: 'fat', proteinBases: ['chicken_thigh'], fatBases: ['adygei_cheese'] },
     { idea: 'Куриные бёдра + брынза + зелень', type: 'fat', proteinBases: ['chicken_thigh'], fatBases: ['brynza'] },
     { idea: 'Куриные бёдра + горсть миндаля', type: 'fat', proteinBases: ['chicken_thigh'], fatBases: ['almonds'] },
@@ -520,27 +517,27 @@ const FAT_DISHES: DishEntry[] = [
     { idea: 'Запечённые куриные бёдра + грецкие орехи', type: 'fat', proteinBases: ['chicken_thigh'], fatBases: ['walnuts'] },
     { idea: 'Куриные бёдра + жареный тофу', type: 'fat', proteinBases: ['chicken_thigh', 'tofu'] },
     // Говядина / Фарш
-    { idea: 'Жареный говяжий фарш + шампиньоны', type: 'fat', proteinBases: ['beef_minced', 'mushrooms'] },
+    { idea: 'Жареный говяжий фарш + грибы', type: 'fat', proteinBases: ['beef_minced', 'mushrooms'] },
     { idea: 'Говяжий фарш + брынза', type: 'fat', proteinBases: ['beef_minced'], fatBases: ['brynza'] },
     { idea: 'Говядина тушёная + твёрдый сыр вприкуску', type: 'fat', proteinBases: ['beef'], fatBases: ['cheese'] },
     { idea: 'Говядина + адыгейский сыр', type: 'fat', proteinBases: ['beef'], fatBases: ['adygei_cheese'] },
-    { idea: 'Говядина тушёная с тофу и шампиньонами', type: 'fat', proteinBases: ['beef', 'tofu', 'mushrooms'] },
+    { idea: 'Говядина тушёная с тофу и грибами', type: 'fat', proteinBases: ['beef', 'tofu', 'mushrooms'] },
     { idea: 'Варёная говядина + семена тыквы', type: 'fat', proteinBases: ['beef'], fatBases: ['pumpkin_seeds'] },
     // Скумбрия / Сельдь
-    { idea: 'Запечённая скумбрия + жареные шампиньоны', type: 'fat', proteinBases: ['mackerel_herring', 'mushrooms'] },
+    { idea: 'Запечённая скумбрия + жареные грибы', type: 'fat', proteinBases: ['mackerel_herring', 'mushrooms'] },
     { idea: 'Жареная скумбрия + твёрдый сыр', type: 'fat', proteinBases: ['mackerel_herring'], fatBases: ['cheese'] },
     { idea: 'Сельдь слабосолёная + варёные яйца', type: 'fat', proteinBases: ['mackerel_herring', 'eggs'] },
     { idea: 'Скумбрия + горсть миндаля', type: 'fat', proteinBases: ['mackerel_herring'], fatBases: ['almonds'] },
     // Сёмга / Форель
     { idea: 'Запечённая сёмга + адыгейский сыр', type: 'fat', proteinBases: ['salmon_trout'], fatBases: ['adygei_cheese'] },
     { idea: 'Запечённая сёмга + брынза и зелень', type: 'fat', proteinBases: ['salmon_trout'], fatBases: ['brynza'] },
-    { idea: 'Стейк из форели + жареные шампиньоны', type: 'fat', proteinBases: ['salmon_trout', 'mushrooms'] },
+    { idea: 'Стейк из форели + жареные грибы', type: 'fat', proteinBases: ['salmon_trout', 'mushrooms'] },
     { idea: 'Жареная форель + грецкие орехи', type: 'fat', proteinBases: ['salmon_trout'], fatBases: ['walnuts'] },
     // Яйца
-    { idea: 'Яичница (3–4 шт.) + жареные шампиньоны', type: 'fat', proteinBases: ['eggs', 'mushrooms'] },
+    { idea: 'Яичница (3–4 шт.) + жареные грибы', type: 'fat', proteinBases: ['eggs', 'mushrooms'] },
     { idea: 'Яичница (3–4 шт.) + твёрдый сыр', type: 'fat', proteinBases: ['eggs'], fatBases: ['cheese'] },
     { idea: 'Яичница (3–4 шт.) + адыгейский сыр', type: 'fat', proteinBases: ['eggs'], fatBases: ['adygei_cheese'] },
-    { idea: 'Омлет с твёрдым сыром и шампиньонами', type: 'fat', proteinBases: ['eggs', 'mushrooms'], fatBases: ['cheese'] },
+    { idea: 'Омлет с твёрдым сыром и грибами', type: 'fat', proteinBases: ['eggs', 'mushrooms'], fatBases: ['cheese'] },
     { idea: 'Варёные яйца (3–4 шт.) + брынза', type: 'fat', proteinBases: ['eggs'], fatBases: ['brynza'] },
     { idea: 'Варёные яйца + горсть арахиса', type: 'fat', proteinBases: ['eggs'], fatBases: ['peanuts'] },
     { idea: 'Варёные яйца + семена тыквы', type: 'fat', proteinBases: ['eggs'], fatBases: ['pumpkin_seeds'] },
@@ -554,27 +551,33 @@ const FAT_DISHES: DishEntry[] = [
     { idea: 'Творог 9% + кефир 2.5% (смешать в миске)', type: 'fat', proteinBases: ['cottage_cheese_9', 'kefir_25'] },
     { idea: 'Кефир 2.5% + горсть миндаля', type: 'fat', proteinBases: ['kefir_25'], fatBases: ['almonds'] },
     { idea: 'Кефир 2.5% + горсть грецких орехов', type: 'fat', proteinBases: ['kefir_25'], fatBases: ['walnuts'] },
-    // Сыры + яйца
+    // Сырная нарезка
     { idea: 'Сырная нарезка (твёрдый + адыгейский) + варёные яйца', type: 'fat', proteinBases: ['eggs'], fatBases: ['cheese', 'adygei_cheese'] },
+    // Треска/хек в жировом контексте (с сыром/орехами)
+    { idea: 'Треска/хек + твёрдый сыр + овощи', type: 'fat', proteinBases: ['cod'], fatBases: ['cheese'] },
+    { idea: 'Треска/хек + грибы + сыр', type: 'fat', proteinBases: ['cod', 'mushrooms'], fatBases: ['cheese'] },
+    { idea: 'Треска/хек + семечки + зелень', type: 'fat', proteinBases: ['cod'], fatBases: ['sunflower_seeds'] },
+    // Куриная грудка в жировом контексте
+    { idea: 'Куриная грудка + твёрдый сыр + зелень', type: 'fat', proteinBases: ['chicken_breast'], fatBases: ['cheese'] },
+    { idea: 'Куриная грудка + грибы + адыгейский сыр', type: 'fat', proteinBases: ['chicken_breast', 'mushrooms'], fatBases: ['adygei_cheese'] },
+    { idea: 'Куриная грудка + грецкие орехи', type: 'fat', proteinBases: ['chicken_breast'], fatBases: ['walnuts'] },
+    // Свиная вырезка в жировом контексте
+    { idea: 'Свиная вырезка + горсть арахиса', type: 'fat', proteinBases: ['pork_tenderloin'], fatBases: ['peanuts'] },
+    { idea: 'Свиная вырезка + твёрдый сыр', type: 'fat', proteinBases: ['pork_tenderloin'], fatBases: ['cheese'] },
+    // Темпе
+    { idea: 'Жареный темпе + грибы + сыр', type: 'fat', proteinBases: ['tempeh', 'mushrooms'], fatBases: ['cheese'] },
+    { idea: 'Темпе + брынза + зелень', type: 'fat', proteinBases: ['tempeh'], fatBases: ['brynza'] },
     // Салаты
     { idea: 'Салат с маслом + жареные куриные бёдра', type: 'fat', proteinBases: ['chicken_thigh'] },
     { idea: 'Салат с маслом + варёная говядина', type: 'fat', proteinBases: ['beef'] },
     { idea: 'Салат с маслом + жареная сёмга/форель', type: 'fat', proteinBases: ['salmon_trout'] },
     { idea: 'Салат с маслом + варёные яйца и сыр', type: 'fat', proteinBases: ['eggs'], fatBases: ['cheese'] },
-    { idea: 'Салат с маслом + жареные шампиньоны и семечки', type: 'fat', proteinBases: ['mushrooms'], fatBases: ['sunflower_seeds'] },
-    // Темпе
-    { idea: 'Жареный темпе + шампиньоны + сыр', type: 'fat', proteinBases: ['tempeh', 'mushrooms'], fatBases: ['cheese'] },
-    { idea: 'Темпе + брынза + зелень', type: 'fat', proteinBases: ['tempeh'], fatBases: ['brynza'] },
-    // Универсальные запасные
-    { idea: 'Жирный белок + жареные шампиньоны + сыр', type: 'fat', proteinBases: ['mushrooms'], fatBases: ['cheese'] },
-    { idea: 'Жирный белок + варёные яйца + твёрдый сыр', type: 'fat', proteinBases: ['eggs'], fatBases: ['cheese'] },
-    { idea: 'Жареное мясо + шампиньоны + зелень', type: 'fat', proteinBases: ['mushrooms'] },
+    { idea: 'Салат с маслом + жареные грибы и семечки', type: 'fat', proteinBases: ['mushrooms'], fatBases: ['sunflower_seeds'] },
 ];
 
-// Идеи для перекуса (только белок, без строгого матчинга)
 const SNACK_IDEAS: string[] = [
     'Тофу или темпе отдельно',
-    'Шампиньоны тушёные',
+    'Грибы тушёные',
     'Растительный протеин на воде',
     'Тофу + зелень',
     'Темпе + горчица',
@@ -583,8 +586,7 @@ const SNACK_IDEAS: string[] = [
 function generateDishIdea(
     carbSource: ProductRef | null,
     mealProteinSources: ProductRef[],
-    _isTraining: boolean,
-    mealType: 'meal1' | 'snack' | 'meal2',
+    mealType: 'carb' | 'fat' | 'snack',
     date: string
 ): string {
     const proteinValues = new Set(mealProteinSources.map((p) => p.value));
@@ -599,27 +601,35 @@ function generateDishIdea(
     }
 
     const carbValue = carbSource?.value;
-    const dishes = mealType === 'meal1' ? CARB_DISHES : FAT_DISHES;
+    const dishes = mealType === 'carb' ? CARB_DISHES : FAT_DISHES;
 
-    // Считаем «рейтинг совпадения» каждого блюда с реальными продуктами в приёме
+    // Считаем рейтинг совпадения каждого блюда с реальными продуктами в приёме:
+    // +3 за совпадение крупы, +2 за каждый белковый продукт, +1 за жировой продукт
     const scored = dishes.map((dish) => {
         let score = 0;
         if (carbValue && dish.carbBases?.includes(carbValue)) score += 3;
         for (const pv of dish.proteinBases || []) {
             if (proteinValues.has(pv)) score += 2;
         }
+        // Сыр (cheese) всегда присутствует в жировых приёмах как "Сыр 50 г"
+        if (mealType === 'fat') {
+            for (const fv of dish.fatBases || []) {
+                if (proteinValues.has(fv)) score += 1;
+                if (fv === 'cheese') score += 1;
+            }
+        }
         return { dish, score };
     });
 
-    // Берём лучшие (score > 0), сортируем по убыванию
     const best = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score);
     const pool = best.length > 0 ? best.map((s) => s.dish) : dishes;
 
-    // Из топ-кандидатов выбираем по дате (ротация без предсказуемого повтора)
+    // Из топ-кандидатов выбираем по дате — ротация без предсказуемых повторов
     const topCount = Math.min(pool.length, Math.max(3, Math.ceil(pool.length * 0.4)));
     const top = pool.slice(0, topCount);
     return pickRotation(top, date + mealType).idea;
 }
+
 
 function isHighCarbPlant(source: ProductRef): boolean {
     return (source.carbsPer100g || 0) > 10;
@@ -684,7 +694,7 @@ export function buildDayPlan(
                     'Овощной салат без масла',
                     'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
                 ],
-                dishIdea: generateDishIdea(carbSource, [animalSource1, plantSource], training, 'meal1', date),
+                dishIdea: generateDishIdea(carbSource, [animalSource1, plantSource], 'carb', date),
                 notes: 'Никаких жиров: ни масла, ни сыра, ни жирных соусов.',
             },
             {
@@ -695,7 +705,7 @@ export function buildDayPlan(
                     formatProtein(plantSource, plantPortion),
                     'или 1 порция растительного протеина на воде',
                 ],
-                dishIdea: generateDishIdea(null, [plantSource], training, 'snack', date),
+                dishIdea: generateDishIdea(null, [plantSource], 'snack', date),
             },
             {
                 name: 'Приём 2',
@@ -707,7 +717,7 @@ export function buildDayPlan(
                     'Овощной салат с 1 ст.л. оливкового масла',
                     'Опционально: 30 г орехов или семечек',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource2, plantSource], training, 'meal2', date),
+                dishIdea: generateDishIdea(null, [animalSource2, plantSource], 'fat', date),
                 notes: 'Никаких углеводов: ни круп, ни хлеба, ни фруктов.',
             },
         ]
@@ -721,7 +731,7 @@ export function buildDayPlan(
                     formatProtein(plantSource, Math.round(plantPortion * 0.6)),
                     'Овощной салат с оливковым маслом',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource1, plantSource], training, 'meal1', date),
+                dishIdea: generateDishIdea(null, [animalSource1, plantSource], 'fat', date),
                 notes: 'Углеводы только из овощей/зелени/орехов, до 50–80 г в день.',
             },
             {
@@ -735,7 +745,7 @@ export function buildDayPlan(
                     'Большой овощной салат с оливковым маслом',
                     'Орехи или семечки 30 г',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource2, plantSource], training, 'meal2', date),
+                dishIdea: generateDishIdea(null, [animalSource2, plantSource], 'fat', date),
             },
         ];
 
