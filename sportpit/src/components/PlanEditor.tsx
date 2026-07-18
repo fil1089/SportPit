@@ -282,28 +282,19 @@ function DayCard({
     return (
         <div className="bg-white rounded-3xl shadow-lg shadow-cobalt/5 border border-silver p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-                <div className="flex items-center gap-3">
-                    <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
-                            plan.type === 'training'
-                                ? 'bg-cobalt/10 text-cobalt border border-cobalt/20'
-                                : 'bg-lime/20 text-lime-700 border border-lime/30'
-                        }`}
-                    >
-                        {plan.type === 'training' ? 'Тренировочный день' : 'День отдыха'}
-                    </span>
-                    <div>
-                        <div className="font-bold text-lg text-ink">{formatDate(date)}</div>
-                        <div className="text-sm text-steel">
-                            Итого: {plan.macros.calories} ккал · Б {plan.macros.protein} · Ж {plan.macros.fat} · У {plan.macros.carbs}
-                        </div>
+                <div>
+                    <div className="font-bold text-lg text-ink">{formatDate(date)}</div>
+                    <div className="text-sm text-steel">
+                        Итого: {plan.macros.calories} ккал · Б {plan.macros.protein} · Ж {plan.macros.fat} · У {plan.macros.carbs}
                     </div>
                 </div>
                 <button
                     type="button"
                     onClick={onToggle}
                     className={`text-sm px-4 py-1.5 rounded-full border font-semibold transition self-start ${
-                        active ? 'bg-cobalt text-white border-cobalt' : 'bg-white text-steel border-silver hover:border-cobalt'
+                        active
+                            ? 'bg-lime text-lime-900 border-lime hover:bg-lime/90'
+                            : 'bg-cobalt text-white border-cobalt hover:bg-cobalt-dark'
                     }`}
                 >
                     {active ? 'Тренировка' : 'Отдых'}
