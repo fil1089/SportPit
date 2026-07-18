@@ -24,7 +24,7 @@ export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
     { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250, proteinType: 'animal' },
     { value: 'salmon_trout', label: 'Сёмга/форель', proteinPer100g: 20, fatPer100g: 14, defaultPortion: 220, proteinType: 'animal' },
     { value: 'cod', label: 'Треска/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300, proteinType: 'animal' },
-    { value: 'eggs', label: 'Яйца', proteinPer100g: 13, fatPer100g: 11, defaultPortion: 200, proteinType: 'animal' },
+    // Яйца не включены в список источников белка — они уже есть в базовом завтраке выходных дней.
     { value: 'cottage_cheese_0_5', label: 'Творог 0–5%', proteinPer100g: 18, fatPer100g: 4, defaultPortion: 200, proteinType: 'animal' },
     { value: 'cottage_cheese_9', label: 'Творог 9%', proteinPer100g: 14, fatPer100g: 9, defaultPortion: 200, proteinType: 'animal' },
     { value: 'cheese', label: 'Твёрдый сыр', proteinPer100g: 25, fatPer100g: 27, defaultPortion: 50, proteinType: 'animal' },
@@ -102,7 +102,7 @@ export const DEFAULT_PLAN: PlanSchema = {
         weight: 65,
         startDate: '2026-07-19',
         carbSources: ['buckwheat', 'bulgur', 'pasta'],
-        proteinSources: ['chicken_breast', 'turkey', 'beef_minced', 'tuna', 'mackerel_herring', 'chicken_thigh', 'cottage_cheese_0_5', 'eggs', 'cheese'],
+        proteinSources: ['chicken_breast', 'turkey', 'beef_minced', 'tuna', 'mackerel_herring', 'chicken_thigh', 'cottage_cheese_0_5', 'cheese'],
         trainingDates: [
             '2026-07-20',
             '2026-07-24',
@@ -152,10 +152,11 @@ function extractAmounts(items: string[], products: ProductRef[]): Map<string, nu
     const amounts = new Map<string, number>();
 
     for (const item of items) {
-        // Яйца 3-4 шт. -> считаем 4 шт.
-        const eggsMatch = item.match(/Яйца\s*(\d+)(?:[–-]\d+)?\s*шт/i);
+        // Яйца 3-4 шт. -> считаем 4 шт. (максимум из диапазона)
+        const eggsMatch = item.match(/Яйца\s*(\d+)(?:[–-](\d+))?\s*шт/i);
         if (eggsMatch) {
-            amounts.set('Яйца', (amounts.get('Яйца') || 0) + Number(eggsMatch[1]));
+            const count = eggsMatch[2] ? Number(eggsMatch[2]) : Number(eggsMatch[1]);
+            amounts.set('Яйца', (amounts.get('Яйца') || 0) + count);
             continue;
         }
 
