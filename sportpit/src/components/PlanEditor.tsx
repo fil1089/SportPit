@@ -18,6 +18,12 @@ function formatDate(iso: string) {
     return d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
+function filterSources(selected: string[] | undefined, available: ProductRef[], fallback: string[]): string[] {
+    if (!selected?.length) return fallback;
+    const valid = selected.filter((v) => available.some((p) => p.value === v));
+    return valid.length ? valid : fallback;
+}
+
 function downloadJson(data: DietData, filename = 'sportpit-plan.json') {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -44,8 +50,8 @@ function usePlan(initial: DietData | null) {
             setPlan(resolved);
             setWeight(initial.weight ?? resolved.initial.weight);
             setStartDate(initial.startDate ?? resolved.initial.startDate);
-            setCarbSources(initial.carbSources ?? resolved.initial.carbSources);
-            setProteinSources(initial.proteinSources ?? resolved.initial.proteinSources);
+            setCarbSources(filterSources(initial.carbSources, resolved.products.carbs, resolved.initial.carbSources));
+            setProteinSources(filterSources(initial.proteinSources, resolved.products.protein, resolved.initial.proteinSources));
             setTrainingDates(initial.trainingDates ?? resolved.initial.trainingDates);
         }
     }, [initial]);
