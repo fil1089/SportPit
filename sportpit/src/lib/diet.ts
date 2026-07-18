@@ -32,6 +32,19 @@ export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
     { value: 'brynza', label: 'Брынза', proteinPer100g: 17, fatPer100g: 20, defaultPortion: 80, proteinType: 'animal' },
     { value: 'whey_protein', label: 'Сывороточный протеин', proteinPerPortion: 18, defaultPortion: 1, proteinType: 'animal' },
     { value: 'kefir_25', label: 'Кефир 2.5%', proteinPer100g: 3, fatPer100g: 2.5, defaultPortion: 250, proteinType: 'animal' },
+    // Растительный белок
+    { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant' },
+    { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant' },
+    { value: 'soybeans', label: 'Соевые бобы', proteinPer100g: 36, fatPer100g: 15, defaultPortion: 80, proteinType: 'plant' },
+    { value: 'chickpeas', label: 'Нут', proteinPer100g: 19, fatPer100g: 6, defaultPortion: 150, proteinType: 'plant' },
+    { value: 'beans', label: 'Фасоль', proteinPer100g: 21, fatPer100g: 1, defaultPortion: 150, proteinType: 'plant' },
+    { value: 'lentils_cooked', label: 'Чечевица отварная', proteinPer100g: 9, fatPer100g: 0.4, defaultPortion: 200, proteinType: 'plant' },
+    { value: 'mushrooms', label: 'Грибы', proteinPer100g: 3.5, fatPer100g: 0.5, defaultPortion: 300, proteinType: 'plant' },
+    { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'almonds', label: 'Миндаль', proteinPer100g: 18.5, fatPer100g: 54, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'sunflower_seeds', label: 'Семечки подсолнечные', proteinPer100g: 20, fatPer100g: 52, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'pumpkin_seeds', label: 'Семена тыквы', proteinPer100g: 25, fatPer100g: 45, defaultPortion: 50, proteinType: 'plant' },
+    { value: 'walnuts', label: 'Грецкий орех', proteinPer100g: 15, fatPer100g: 65, defaultPortion: 50, proteinType: 'plant' },
 ];
 
 export const DEFAULT_MACROS: MacroTargets = {
@@ -280,6 +293,13 @@ function pickRotation<T>(items: T[], date: string): T {
     return items[hash % items.length];
 }
 
+function splitByProteinType(sources: ProductRef[]): { animal: ProductRef[]; plant: ProductRef[] } {
+    return {
+        animal: sources.filter((s) => s.proteinType === 'animal'),
+        plant: sources.filter((s) => s.proteinType === 'plant'),
+    };
+}
+
 export function buildDayPlan(
     date: string,
     _weight: number,
@@ -292,13 +312,19 @@ export function buildDayPlan(
     const carbTarget = Math.round((macros.carbsTraining.min + macros.carbsTraining.max) / 2);
     const proteinTarget = Math.round((macros.protein.min + macros.protein.max) / 2);
     const carbSource = pickRotation(carbSources, date);
-    const proteinSource1 = pickRotation(proteinSources, date);
-    const proteinSource2 = pickRotation(proteinSources, date + '2');
-    const proteinSource3 = pickRotation(proteinSources, date + '3');
-
     const carbPortionG = carbPortion(carbTarget, carbSource);
-    const proteinPortion1 = proteinPortion(proteinTarget * 0.35, proteinSource1);
-    const proteinPortion2 = proteinPortion(proteinTarget * 0.4, proteinSource2);
+
+    const { animal, plant } = splitByProteinType(proteinSources);
+    const animalSource1 = pickRotation(animal.length ? animal : proteinSources, date);
+    const animalSource2 = pickRotation(animal.length ? animal : proteinSources, date + '2');
+    const plantSource = pickRotation(plant.length ? plant : proteinSources, date + '3');
+
+    // Target: ~60% animal, ~40% plant protein
+    const animalTarget = proteinTarget * 0.6;
+    const plantTarget = proteinTarget * 0.4;
+    const animalPortion1 = proteinPortion(animalTarget * 0.55, animalSource1);
+    const animalPortion2 = proteinPortion(animalTarget * 0.45, animalSource2);
+    const plantPortion = proteinPortion(plantTarget, plantSource);
 
     const meals: Meal[] = training
         ? [
@@ -308,7 +334,7 @@ export function buildDayPlan(
                 template: 'Белок + Углеводы',
                 items: [
                     `1 порция сывороточного протеина на воде`,
-                    `${proteinSource1.label} ${proteinPortion1} г`,
+                    `${animalSource1.label} ${animalPortion1} г`,
                     `${carbSource.label} ${carbPortionG} г (сухой вес)`,
                     'Овощной салат без масла',
                     'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
@@ -320,8 +346,8 @@ export function buildDayPlan(
                 time: '~13:30',
                 template: 'Белок',
                 items: [
-                    `${proteinSource3.label} ${proteinPortion(proteinTarget * 0.2, proteinSource3)} г`,
-                    'или 1 порция протеина на воде',
+                    `${plantSource.label} ${plantPortion} г`,
+                    'или 1 порция растительного протеина на воде',
                 ],
             },
             {
@@ -329,10 +355,10 @@ export function buildDayPlan(
                 time: '~17:00',
                 template: 'Белок + Жиры',
                 items: [
-                    `${proteinSource2.label} ${proteinPortion2} г`,
+                    `${animalSource2.label} ${animalPortion2} г`,
                     'Сыр 50 г',
                     'Овощной салат с 1 ст.л. оливкового масла',
-                    'Опционально: 50 г орехов или семечек',
+                    'Опционально: 30 г орехов или семечек',
                 ],
                 notes: 'Никаких углеводов: ни круп, ни хлеба, ни фруктов.',
             },
@@ -344,9 +370,9 @@ export function buildDayPlan(
                 template: 'Белок + Жиры',
                 items: [
                     'Яйца 3–4 шт. на сливочном или топлёном масле',
-                    `${proteinSource1.label} ${proteinPortion(proteinTarget * 0.35, proteinSource1)} г`,
+                    `${animalSource1.label} ${animalPortion1} г`,
+                    `${plantSource.label} ${Math.round(plantPortion * 0.6)} г`,
                     'Овощной салат с оливковым маслом',
-                    'Орехи или семечки 50 г',
                 ],
                 notes: 'Углеводы только из овощей/зелени/орехов, до 50–80 г в день.',
             },
@@ -355,10 +381,11 @@ export function buildDayPlan(
                 time: '14:00–17:00',
                 template: 'Белок + Жиры',
                 items: [
-                    `${proteinSource2.label} ${proteinPortion2} г`,
+                    `${animalSource2.label} ${animalPortion2} г`,
                     'Сыр 50 г',
+                    `${plantSource.label} ${Math.round(plantPortion * 0.4)} г`,
                     'Большой овощной салат с оливковым маслом',
-                    'Орехи или семечки 50 г',
+                    'Орехи или семечки 30 г',
                 ],
             },
         ];
