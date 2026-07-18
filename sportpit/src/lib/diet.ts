@@ -140,19 +140,54 @@ function mergeProducts(saved: ProductRef[] | undefined, defaults: ProductRef[]):
     return merged;
 }
 
+export function buildWeekBasket(carbSources: ProductRef[], proteinSources: ProductRef[]): Record<string, string> {
+    const basket: Record<string, string> = {};
+
+    // Base items always present
+    basket['Яйца'] = '~30 шт.';
+    basket['Масло сливочное'] = '~200 г';
+    basket['Оливковое масло'] = '~200 мл';
+    basket['Овощи (огурцы, помидоры, перец, капуста, зелень)'] = '~6–8 кг';
+
+    // Carb sources
+    for (const source of carbSources) {
+        const portion = source.defaultPortion;
+        basket[source.label] = `~${Math.round(portion * 7)} г (сухой вес)`;
+    }
+
+    // Protein sources
+    const animalProteins = proteinSources.filter((s) => s.proteinType === 'animal');
+    const plantProteins = proteinSources.filter((s) => s.proteinType === 'plant');
+
+    for (const source of animalProteins) {
+        if (source.value === 'whey_protein') {
+            basket['Протеин'] = 'порций по тренировочным дням';
+            continue;
+        }
+        const portion = source.defaultPortion;
+        basket[source.label] = `~${Math.round(portion * 7)} г`;
+    }
+
+    for (const source of plantProteins) {
+        const portion = source.defaultPortion;
+        basket[source.label] = `~${Math.round(portion * 7)} г`;
+    }
+
+    return basket;
+}
+
 export function resolvePlan(plan?: PlanSchema): PlanSchema {
     if (!plan) return DEFAULT_PLAN;
+    const carbs = mergeProducts(plan.products?.carbs, DEFAULT_CARB_SOURCES);
+    const protein = mergeProducts(plan.products?.protein, DEFAULT_PROTEIN_SOURCES);
     return {
         ...DEFAULT_PLAN,
         ...plan,
-        products: {
-            carbs: mergeProducts(plan.products?.carbs, DEFAULT_CARB_SOURCES),
-            protein: mergeProducts(plan.products?.protein, DEFAULT_PROTEIN_SOURCES),
-        },
+        products: { carbs, protein },
         macros: plan.macros || DEFAULT_MACROS,
         rules: plan.rules?.length ? plan.rules : DEFAULT_RULES,
         supplements: plan.supplements?.length ? plan.supplements : DEFAULT_SUPPLEMENTS,
-        weekBasket: plan.weekBasket || DEFAULT_WEEK_BASKET,
+        weekBasket: buildWeekBasket(carbs, protein),
     };
 }
 
