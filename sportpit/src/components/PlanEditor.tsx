@@ -48,6 +48,7 @@ function downloadJson(data: DietData, filename = 'sportpit-plan.json') {
 function usePlan(initial: DietData | null) {
     const [plan, setPlan] = useState<PlanSchema>(() => resolvePlan(initial?.plan));
     const [weight, setWeight] = useState<number>(initial?.weight ?? plan.initial.weight);
+    const [weightInput, setWeightInput] = useState<string>(String(initial?.weight ?? plan.initial.weight));
     const [startDate, setStartDate] = useState<string>(initial?.startDate ?? plan.initial.startDate);
     const [carbSources, setCarbSources] = useState<string[]>(initial?.carbSources ?? plan.initial.carbSources);
     const [proteinSources, setProteinSources] = useState<string[]>(initial?.proteinSources ?? plan.initial.proteinSources);
@@ -59,7 +60,9 @@ function usePlan(initial: DietData | null) {
         if (initial) {
             const resolved = resolvePlan(initial.plan);
             setPlan(resolved);
-            setWeight(initial.weight ?? resolved.initial.weight);
+            const newWeight = initial.weight ?? resolved.initial.weight;
+            setWeight(newWeight);
+            setWeightInput(String(newWeight));
             setStartDate(initial.startDate ?? resolved.initial.startDate);
             setCarbSources(filterSources(initial.carbSources, resolved.products.carbs, resolved.initial.carbSources));
             setProteinSources(filterSources(initial.proteinSources, resolved.products.protein, resolved.initial.proteinSources));
@@ -120,6 +123,14 @@ function usePlan(initial: DietData | null) {
         setProteinSources(defaultSelection.filter(v => plan.products.protein.some(p => p.value === v)));
     };
 
+    const handleWeightChange = (val: string) => {
+        setWeightInput(val);
+        const num = Number(val);
+        if (val !== '' && !isNaN(num) && num >= 30 && num <= 300) {
+            setWeight(num);
+        }
+    };
+
     const handleFileUpload = async (file: File) => {
         setUploadError(null);
         try {
@@ -127,6 +138,7 @@ function usePlan(initial: DietData | null) {
             const parsed = parsePlanJson(text);
             setPlan(parsed);
             setWeight(parsed.initial.weight);
+            setWeightInput(String(parsed.initial.weight));
             setStartDate(parsed.initial.startDate);
             setCarbSources(parsed.initial.carbSources);
             setProteinSources(parsed.initial.proteinSources);
@@ -139,7 +151,8 @@ function usePlan(initial: DietData | null) {
     return {
         plan,
         weight,
-        setWeight,
+        weightInput,
+        handleWeightChange,
         startDate,
         setStartDate,
         carbSources,
@@ -439,8 +452,8 @@ function DayCard({
 export function PlanEditor({ initial }: PlanEditorProps) {
     const {
         plan,
-        weight,
-        setWeight,
+        weightInput,
+        handleWeightChange,
         startDate,
         setStartDate,
         carbSources,
@@ -537,13 +550,8 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                             type="number"
                             min={30}
                             max={300}
-                            value={weight}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === '') return;
-                                const num = Number(val);
-                                if (!isNaN(num)) setWeight(num);
-                            }}
+                            value={weightInput}
+                            onChange={(e) => handleWeightChange(e.target.value)}
                             className="w-full px-4 py-3 bg-cream border border-silver rounded-xl focus:outline-none focus:ring-2 focus:ring-cobalt text-ink"
                         />
                     </div>
