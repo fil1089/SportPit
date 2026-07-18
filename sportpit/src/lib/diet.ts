@@ -284,12 +284,18 @@ export function resolvePlan(plan?: PlanSchema): PlanSchema {
     };
 }
 
-export function calcCarbs(_weight: number, macros = DEFAULT_MACROS): { min: number; max: number } {
-    return macros.carbsTraining;
+export function calcCarbs(weight: number, macros = DEFAULT_MACROS): { min: number; max: number } {
+    // If macros are custom (different from default), use them as-is
+    if (macros !== DEFAULT_MACROS) return macros.carbsTraining;
+    // Otherwise scale based on weight: 2-3g per kg
+    return { min: Math.round(weight * 2), max: Math.round(weight * 3) };
 }
 
-export function calcProtein(_weight: number, macros = DEFAULT_MACROS): { min: number; max: number } {
-    return macros.protein;
+export function calcProtein(weight: number, macros = DEFAULT_MACROS): { min: number; max: number } {
+    // If macros are custom, use them as-is
+    if (macros !== DEFAULT_MACROS) return macros.protein;
+    // Otherwise scale based on weight: 1.5-2g per kg
+    return { min: Math.round(weight * 1.5), max: Math.round(weight * 2) };
 }
 
 export function carbPortion(carbs: number, source: ProductRef): number {
@@ -450,15 +456,24 @@ function splitByProteinType(sources: ProductRef[], allowHighCarbPlant: boolean):
 
 export function buildDayPlan(
     date: string,
-    _weight: number,
+    weight: number,
     carbSources: ProductRef[],
     proteinSources: ProductRef[],
     trainingDates: string[],
     macros = DEFAULT_MACROS
 ): DayPlan {
     const training = isTrainingDay(date, trainingDates);
-    const carbTarget = Math.round((macros.carbsTraining.min + macros.carbsTraining.max) / 2);
-    const proteinTarget = Math.round((macros.protein.min + macros.protein.max) / 2);
+
+    // Calculate macros based on weight
+    const proteinMacro = calcProtein(weight, macros);
+    const carbMacro = training
+        ? calcCarbs(weight, macros)
+        : (macros !== DEFAULT_MACROS
+            ? macros.carbsRest
+            : { min: Math.round(weight * 0.8), max: Math.round(weight * 1.2) });
+
+    const carbTarget = Math.round((carbMacro.min + carbMacro.max) / 2);
+    const proteinTarget = Math.round((proteinMacro.min + proteinMacro.max) / 2);
     const carbSource = pickRotation(carbSources, date);
     const carbPortionG = carbPortion(carbTarget, carbSource);
 
