@@ -698,18 +698,27 @@ export function buildDayPlan(
         return fallback.length ? fallback : anyProtein;
     }
 
+    // Функция для выбора с исключением уже выбранных продуктов (чтобы не было трески 2 раза в день)
+    function pickRotationExcluding(pool: ProductRef[], exclude: ProductRef[], seed: string): ProductRef {
+        const available = pool.filter((p) => !exclude.includes(p));
+        const finalPool = available.length > 0 ? available : pool;
+        return safePickRotation(finalPool, anyProtein, seed);
+    }
+
     // Тренировочный Приём 1 (Белок + Углеводы) — ТОЛЬКО постные (fat < 5г/100г)
-    // Яйца (11г жира), бёдра (8г жира) туда не попадают
     const leanAnimal = animal.filter((s) => (s.fatPer100g ?? 0) < 5);
-    const animalSource1 = safePickRotation(bestPool(leanAnimal, animal), anyProtein, date);
+    const pool1 = bestPool(leanAnimal, animal);
+    const animalSource1 = pickRotationExcluding(pool1, [], date);
 
     // Жировые приёмы — предпочитаем жирные белки (бёдра, говядина, яйца, творог 9%)
     const fattyAnimal = animal.filter((s) => (s.fatPer100g ?? 0) >= 5);
-    const animalSource2 = safePickRotation(bestPool(fattyAnimal, animal), anyProtein, date + '2');
+    const pool2 = bestPool(fattyAnimal, animal);
+    const animalSource2 = pickRotationExcluding(pool2, [animalSource1], date + '2');
 
     // Растительный белок — только с достаточной плотностью
     const allPlant = proteinSources.filter((s) => s.proteinType === 'plant');
-    const plantSource = safePickRotation(bestPool(plant, allPlant), anyProtein, date + '3');
+    const pool3 = bestPool(plant, allPlant);
+    const plantSource = pickRotationExcluding(pool3, [animalSource1, animalSource2], date + '3');
 
     // Target: ~60% animal, ~40% plant protein
     const animalTarget = proteinTarget * 0.6;
@@ -720,11 +729,16 @@ export function buildDayPlan(
 
 
     function formatProtein(source: ProductRef, portion: number): string {
-        if (source.portionUnit === 'pcs') {
-            return `${source.label} ${Math.round(portion)} шт.`;
+        const rounded = Math.round(portion);
+        if (source.portionUnit === 'pcs') return `${source.label} ${rounded} шт.`;
+        if (source.proteinPerPortion !== undefined) {
+            // Для протеина: 1 порция, 2 порции
+            const suffix = rounded === 1 ? 'порция' : (rounded >= 2 && rounded <= 4 ? 'порции' : 'порций');
+            return `${source.label} ${rounded} ${suffix}`;
         }
-        return `${source.label} ${Math.round(portion)} г`;
+        return `${source.label} ${rounded} г`;
     }
+
 
     function isCheese(source: ProductRef): boolean {
         return ['cheese', 'brynza', 'adygea_cheese'].includes(source.value);
