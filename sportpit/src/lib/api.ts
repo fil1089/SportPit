@@ -17,6 +17,7 @@ export interface ProductRef {
     label: string;
     proteinPer100g?: number;
     carbsPer100g?: number;
+    fatPer100g?: number;
     proteinPerPortion?: number;
     defaultPortion: number;
 }
