@@ -583,7 +583,7 @@ const SNACK_IDEAS: string[] = [
 function generateDishIdea(
     carbSource: ProductRef | null,
     mealProteinSources: ProductRef[],
-    isTraining: boolean,
+    _isTraining: boolean,
     mealType: 'meal1' | 'snack' | 'meal2',
     date: string
 ): string {
