@@ -2,11 +2,62 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '../_db.js';
 import { applyCors, getUserFromRequest } from '../_auth.js';
 
+export interface ProductRef {
+    value: string;
+    label: string;
+    proteinPer100g?: number;
+    carbsPer100g?: number;
+    proteinPerPortion?: number;
+    defaultPortion: number;
+}
+
+export interface MacroTargets {
+    protein: { min: number; max: number };
+    carbsTraining: { min: number; max: number };
+    carbsRest: { min: number; max: number };
+    fatsTraining: string;
+    fatsRest: string;
+}
+
+export interface Supplement {
+    name: string;
+    dose: string;
+    when: string;
+    why: string;
+}
+
+export interface PlanSchema {
+    version: number;
+    title: string;
+    subtitle?: string;
+    initial: {
+        weight: number;
+        startDate: string;
+        carbSources: string[];
+        proteinSources: string[];
+        trainingDates: string[];
+    };
+    rules: string[];
+    macros: MacroTargets;
+    supplements: Supplement[];
+    products: {
+        carbs: ProductRef[];
+        protein: ProductRef[];
+    };
+    weekBasket: Record<string, string>;
+}
+
 export interface DietData {
     weight: number;
     trainingDates: string[];
-    carbSource: 'buckwheat' | 'rice' | 'bulgur' | 'pasta' | 'potato';
-    customPlan?: Record<string, unknown>;
+    carbSources: string[];
+    proteinSources: string[];
+    startDate: string;
+    plan?: PlanSchema;
+}
+
+function isValidIsoDate(date: string): boolean {
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(Date.parse(date));
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -33,19 +84,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         if (req.method === 'POST') {
-            const { weight, trainingDates, carbSource, customPlan } = req.body || {};
+            const body = req.body || {};
+            const { weight, trainingDates, carbSources, proteinSources, startDate, plan } = body;
 
             if (typeof weight !== 'number' || weight < 30 || weight > 300) {
                 return res.status(400).json({ error: 'Некорректный вес' });
             }
-            if (!Array.isArray(trainingDates)) {
+            if (!Array.isArray(trainingDates) || trainingDates.some((d) => !isValidIsoDate(d))) {
                 return res.status(400).json({ error: 'Некорректные даты тренировок' });
             }
-            if (!['buckwheat', 'rice', 'bulgur', 'pasta', 'potato'].includes(carbSource)) {
+            if (!Array.isArray(carbSources) || carbSources.some((v) => typeof v !== 'string')) {
                 return res.status(400).json({ error: 'Некорректный источник углеводов' });
             }
+            if (!Array.isArray(proteinSources) || proteinSources.some((v) => typeof v !== 'string')) {
+                return res.status(400).json({ error: 'Некорректный источник белка' });
+            }
+            if (typeof startDate !== 'string' || !isValidIsoDate(startDate)) {
+                return res.status(400).json({ error: 'Некорректная дата начала' });
+            }
 
-            const data: DietData = { weight, trainingDates, carbSource, customPlan };
+            const data: DietData = {
+                weight,
+                trainingDates,
+                carbSources,
+                proteinSources,
+                startDate,
+                plan: plan && typeof plan === 'object' ? plan : undefined,
+            };
+
             const rows = await sql`
                 INSERT INTO sportpit_diet (user_id, data)
                 VALUES (${userId}, ${JSON.stringify(data)}::jsonb)
