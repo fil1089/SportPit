@@ -23,6 +23,7 @@ export interface ProductRef {
     proteinPerPortion?: number;
     defaultPortion: number;
     proteinType?: ProteinType;
+    portionUnit?: 'g' | 'pcs';
 }
 
 export interface PlanInitial {
