@@ -78,17 +78,15 @@ function usePlan(initial: DietData | null) {
     );
 
     const weekPlan = useMemo(() => {
-        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, plan.macros);
-    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, plan.macros]);
+        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates);
+    }, [startDate, weight, carbProducts, proteinProducts, trainingDates]);
 
     const currentMacros = useMemo(() => {
-        const protein = calcProtein(weight, plan.macros);
-        const carbsTraining = calcCarbs(weight, plan.macros);
-        const carbsRest = plan.macros.carbsRest.min === 50 && plan.macros.carbsRest.max === 80
-            ? { min: Math.round(weight * 0.8), max: Math.round(weight * 1.2) }
-            : plan.macros.carbsRest;
+        const protein = calcProtein(weight);
+        const carbsTraining = calcCarbs(weight);
+        const carbsRest = { min: Math.round(weight * 0.8), max: Math.round(weight * 1.2) };
         return { protein, carbsTraining, carbsRest };
-    }, [weight, plan.macros]);
+    }, [weight]);
 
     const data: DietData | null = useMemo(
         () => ({
@@ -540,7 +538,12 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                             min={30}
                             max={300}
                             value={weight}
-                            onChange={(e) => setWeight(Number(e.target.value))}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === '') return;
+                                const num = Number(val);
+                                if (!isNaN(num)) setWeight(num);
+                            }}
                             className="w-full px-4 py-3 bg-cream border border-silver rounded-xl focus:outline-none focus:ring-2 focus:ring-cobalt text-ink"
                         />
                     </div>

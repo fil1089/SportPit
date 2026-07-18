@@ -284,17 +284,13 @@ export function resolvePlan(plan?: PlanSchema): PlanSchema {
     };
 }
 
-export function calcCarbs(weight: number, macros = DEFAULT_MACROS): { min: number; max: number } {
-    // If macros are custom (different from default), use them as-is
-    if (macros !== DEFAULT_MACROS) return macros.carbsTraining;
-    // Otherwise scale based on weight: 2-3g per kg
+export function calcCarbs(weight: number): { min: number; max: number } {
+    // Scale based on weight: 2-3g per kg
     return { min: Math.round(weight * 2), max: Math.round(weight * 3) };
 }
 
-export function calcProtein(weight: number, macros = DEFAULT_MACROS): { min: number; max: number } {
-    // If macros are custom, use them as-is
-    if (macros !== DEFAULT_MACROS) return macros.protein;
-    // Otherwise scale based on weight: 1.5-2g per kg
+export function calcProtein(weight: number): { min: number; max: number } {
+    // Scale based on weight: 1.5-2g per kg
     return { min: Math.round(weight * 1.5), max: Math.round(weight * 2) };
 }
 
@@ -459,18 +455,15 @@ export function buildDayPlan(
     weight: number,
     carbSources: ProductRef[],
     proteinSources: ProductRef[],
-    trainingDates: string[],
-    macros = DEFAULT_MACROS
+    trainingDates: string[]
 ): DayPlan {
     const training = isTrainingDay(date, trainingDates);
 
     // Calculate macros based on weight
-    const proteinMacro = calcProtein(weight, macros);
+    const proteinMacro = calcProtein(weight);
     const carbMacro = training
-        ? calcCarbs(weight, macros)
-        : (macros !== DEFAULT_MACROS
-            ? macros.carbsRest
-            : { min: Math.round(weight * 0.8), max: Math.round(weight * 1.2) });
+        ? calcCarbs(weight)
+        : { min: Math.round(weight * 0.8), max: Math.round(weight * 1.2) };
 
     const carbTarget = Math.round((carbMacro.min + carbMacro.max) / 2);
     const proteinTarget = Math.round((proteinMacro.min + proteinMacro.max) / 2);
@@ -575,7 +568,6 @@ export function generateWeekPlan(
     carbSources: ProductRef[],
     proteinSources: ProductRef[],
     trainingDates: string[],
-    macros = DEFAULT_MACROS,
     weeks = 6
 ): { date: string; plan: DayPlan }[] {
     const start = parseLocalDate(startDate);
@@ -585,7 +577,7 @@ export function generateWeekPlan(
         const date = new Date(start);
         date.setDate(start.getDate() + i);
         const iso = formatISOLocal(date);
-        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, macros);
+        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates);
         days.push({ date: iso, plan });
     }
 
