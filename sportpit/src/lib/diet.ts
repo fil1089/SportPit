@@ -667,9 +667,34 @@ export function buildDayPlan(
     const carbPortionG = carbPortion(carbTarget, carbSource);
 
     const { animal, plant } = splitByProteinType(proteinSources, training);
-    const animalSource1 = pickRotation(animal.length ? animal : proteinSources, date);
-    const animalSource2 = pickRotation(animal.length ? animal : proteinSources, date + '2');
-    const plantSource = pickRotation(plant.length ? plant : proteinSources, date + '3');
+
+    // Минимальная плотность белка для использования как основного источника
+    // Кефир (3г/100г), грибы (3.5г/100г) — слишком мало, дают огромные порции
+    function isViablePrimary(s: ProductRef): boolean {
+        if (s.portionUnit === 'pcs') return true;                // яйца — через штуки
+        if (s.proteinPerPortion !== undefined) return true;      // протеин — через порции
+        return (s.proteinPer100g ?? 0) >= 8;
+    }
+
+    function viableOr(pool: ProductRef[], fallback: ProductRef[]): ProductRef[] {
+        const f = pool.filter(isViablePrimary);
+        return f.length ? f : fallback.filter(isViablePrimary).length ? fallback.filter(isViablePrimary) : fallback;
+    }
+
+    // Тренировочный Приём 1 (Белок + Углеводы) — ТОЛЬКО постные (fat < 5г/100г)
+    // Яйца (11г жира), бёдра (8г жира) туда не попадают
+    const leanAnimal = animal.filter((s) => (s.fatPer100g ?? 0) < 5);
+    const animalSource1Pool = viableOr(leanAnimal, animal);
+    const animalSource1 = pickRotation(animalSource1Pool, date);
+
+    // Жировые приёмы — предпочитаем жирные белки (бёдра, говядина, яйца, творог 9%)
+    const fattyAnimal = animal.filter((s) => (s.fatPer100g ?? 0) >= 5);
+    const animalSource2Pool = viableOr(fattyAnimal.length ? fattyAnimal : animal, animal);
+    const animalSource2 = pickRotation(animalSource2Pool, date + '2');
+
+    // Растительный белок — только с достаточной плотностью
+    const plantPool = viableOr(plant, plant.length ? plant : proteinSources.filter((s) => s.proteinType === 'plant'));
+    const plantSource = pickRotation(plantPool.length ? plantPool : plant, date + '3');
 
     // Target: ~60% animal, ~40% plant protein
     const animalTarget = proteinTarget * 0.6;
@@ -677,6 +702,7 @@ export function buildDayPlan(
     const animalPortion1 = proteinPortion(animalTarget * 0.55, animalSource1);
     const animalPortion2 = proteinPortion(animalTarget * 0.45, animalSource2);
     const plantPortion = proteinPortion(plantTarget, plantSource);
+
 
     function formatProtein(source: ProductRef, portion: number): string {
         if (source.portionUnit === 'pcs') {
