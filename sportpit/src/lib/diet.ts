@@ -10,7 +10,7 @@ export const DEFAULT_CARB_SOURCES: ProductRef[] = [
     { value: 'oats', label: 'Овсянка', carbsPer100g: 66, defaultPortion: 160 },
     { value: 'couscous', label: 'Кускус', carbsPer100g: 77.4, defaultPortion: 140 },
     { value: 'spelt', label: 'Полба', carbsPer100g: 70.6, defaultPortion: 150 },
-    { value: 'lentils_cooked', label: 'Чечевица отварная', proteinPer100g: 9, carbsPer100g: 20, fatPer100g: 0.4, defaultPortion: 200 },
+    { value: 'lentils', label: 'Чечевица', proteinPer100g: 24, carbsPer100g: 60, fatPer100g: 1.5, defaultPortion: 100 },
     { value: 'chickpeas', label: 'Нут', proteinPer100g: 19, carbsPer100g: 61, fatPer100g: 6, defaultPortion: 150 },
     { value: 'beans', label: 'Фасоль', proteinPer100g: 21, carbsPer100g: 55, fatPer100g: 1, defaultPortion: 150 },
 ];
@@ -502,8 +502,8 @@ const CARB_DISHES: DishEntry[] = [
     { idea: 'Отварная полба + тунец в собственном соку', type: 'carb', carbBases: ['spelt'], proteinBases: ['tuna'] },
     { idea: 'Отварная полба + куриная грудка', type: 'carb', carbBases: ['spelt'], proteinBases: ['chicken_breast'] },
     // Бобовые
-    { idea: 'Отварная чечевица + куриная грудка', type: 'carb', carbBases: ['lentils_cooked'], proteinBases: ['chicken_breast'] },
-    { idea: 'Отварная чечевица + филе индейки', type: 'carb', carbBases: ['lentils_cooked'], proteinBases: ['turkey'] },
+    { idea: 'Отварная чечевица + куриная грудка', type: 'carb', carbBases: ['lentils'], proteinBases: ['chicken_breast'] },
+    { idea: 'Отварная чечевица + филе индейки', type: 'carb', carbBases: ['lentils'], proteinBases: ['turkey'] },
     { idea: 'Варёный нут + куриная грудка', type: 'carb', carbBases: ['chickpeas'], proteinBases: ['chicken_breast'] },
     { idea: 'Варёный нут + тушёные грибы', type: 'carb', carbBases: ['chickpeas'], proteinBases: ['mushrooms'] },
     { idea: 'Варёная фасоль + филе индейки', type: 'carb', carbBases: ['beans'], proteinBases: ['turkey'] },
@@ -760,7 +760,7 @@ export function buildDayPlan(
                 items: [
                     `1 порция сывороточного протеина на воде`,
                     formatProtein(animalSource1, animalPortion1),
-                    `${carbSource.label} ${carbPortionG} г (сухой вес)`,
+                    `${carbSource.label} ${carbPortionG} г ` + (carbSource.value === 'potato' ? '(сырой вес/очищенный)' : '(сухой вес)'),
                     'Овощной салат без масла',
                     'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
                 ],
