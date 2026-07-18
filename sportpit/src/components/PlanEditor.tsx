@@ -6,6 +6,8 @@ import {
     generateWeekPlan,
     parsePlanJson,
     type DayPlan,
+    type WeeklyBasket,
+    buildWeeklyBaskets,
 } from '../lib/diet.js';
 import { useAutoSave } from '../hooks/useAutoSave.js';
 
@@ -128,6 +130,8 @@ function usePlan(initial: DietData | null) {
         trainingDates,
         toggleTrainingDate,
         weekPlan,
+        carbProducts,
+        proteinProducts,
         data,
         uploadError,
         handleFileUpload,
@@ -270,6 +274,76 @@ function MacroBadge({ macros, compact }: { macros: { protein: number; fat: numbe
     );
 }
 
+function WeekBasketCard({ basket, onPrev, onNext, hasPrev, hasNext }: {
+    basket: WeeklyBasket;
+    onPrev: () => void;
+    onNext: () => void;
+    hasPrev: boolean;
+    hasNext: boolean;
+}) {
+    const entries = Object.entries(basket.basket);
+    return (
+        <div className="bg-cream rounded-2xl border border-silver p-5">
+            <div className="flex items-center justify-between mb-4">
+                <button
+                    type="button"
+                    onClick={onPrev}
+                    disabled={!hasPrev}
+                    className={`p-2 rounded-xl border transition ${hasPrev ? 'bg-white border-silver hover:border-cobalt text-ink' : 'bg-silver/30 border-silver text-steel cursor-not-allowed'}`}
+                    aria-label="Предыдущая неделя"
+                >
+                    ←
+                </button>
+                <div className="text-center">
+                    <div className="text-sm font-bold text-ink">Неделя {basket.weekIndex}</div>
+                    <div className="text-xs text-steel">{formatDate(basket.startDate)} — {formatDate(basket.endDate)}</div>
+                </div>
+                <button
+                    type="button"
+                    onClick={onNext}
+                    disabled={!hasNext}
+                    className={`p-2 rounded-xl border transition ${hasNext ? 'bg-white border-silver hover:border-cobalt text-ink' : 'bg-silver/30 border-silver text-steel cursor-not-allowed'}`}
+                    aria-label="Следующая неделя"
+                >
+                    →
+                </button>
+            </div>
+            {entries.length > 0 ? (
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-ink">
+                    {entries.map(([name, amount]) => (
+                        <li key={name} className="flex justify-between items-center bg-white rounded-xl px-3 py-2 border border-silver">
+                            <span className="font-medium">{name}</span>
+                            <span className="text-steel">{amount}</span>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p className="text-sm text-steel text-center py-4">Нет данных для корзины</p>
+            )}
+        </div>
+    );
+}
+
+function WeekBasketCarousel({ baskets }: { baskets: WeeklyBasket[] }) {
+    const [index, setIndex] = useState(0);
+
+    if (!baskets.length) {
+        return <p className="text-sm text-steel">Нет данных для корзины</p>;
+    }
+
+    const current = baskets[Math.min(index, baskets.length - 1)];
+
+    return (
+        <WeekBasketCard
+            basket={current}
+            onPrev={() => setIndex((i) => Math.max(0, i - 1))}
+            onNext={() => setIndex((i) => Math.min(baskets.length - 1, i + 1))}
+            hasPrev={index > 0}
+            hasNext={index < baskets.length - 1}
+        />
+    );
+}
+
 function DayCard({
     date,
     plan,
@@ -341,12 +415,19 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         trainingDates,
         toggleTrainingDate,
         weekPlan,
+        carbProducts,
+        proteinProducts,
         data,
         uploadError,
         handleFileUpload,
         fileInputRef,
         toggleProduct,
     } = usePlan(initial);
+
+    const weeklyBaskets = useMemo(
+        () => buildWeeklyBaskets(carbProducts, proteinProducts, weekPlan),
+        [carbProducts, proteinProducts, weekPlan]
+    );
 
     const { saving, error, lastSaved } = useAutoSave(data);
 
@@ -511,19 +592,10 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                 </div>
             )}
 
-            {Object.keys(plan.weekBasket).length > 0 && (
-                <div className="bg-white rounded-3xl shadow-lg shadow-cobalt/5 border border-silver p-6 sm:p-8 mb-8">
-                    <h3 className="text-xl font-bold text-ink mb-4">Продуктовая корзина на неделю</h3>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-ink">
-                        {Object.entries(plan.weekBasket).map(([name, amount]) => (
-                            <li key={name} className="flex justify-between items-center bg-cream rounded-xl px-4 py-3">
-                                <span className="font-medium">{name}</span>
-                                <span className="text-steel text-sm">{amount}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            <div className="bg-white rounded-3xl shadow-lg shadow-cobalt/5 border border-silver p-6 sm:p-8 mb-8">
+                <h3 className="text-xl font-bold text-ink mb-4">Продуктовая корзина по неделям</h3>
+                <WeekBasketCarousel baskets={weeklyBaskets} />
+            </div>
 
             <div className="space-y-6">
                 <div className="flex items-center gap-3">

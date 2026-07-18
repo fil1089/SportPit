@@ -140,40 +140,119 @@ function mergeProducts(saved: ProductRef[] | undefined, defaults: ProductRef[]):
     return merged;
 }
 
-export function buildWeekBasket(carbSources: ProductRef[], proteinSources: ProductRef[]): Record<string, string> {
-    const basket: Record<string, string> = {};
+const BASKET_LABELS: Record<string, string> = {
+    whey_protein: 'Сывороточный протеин',
+};
 
-    // Base items always present
-    basket['Яйца'] = '~30 шт.';
-    basket['Масло сливочное'] = '~200 г';
-    basket['Оливковое масло'] = '~200 мл';
-    basket['Овощи (огурцы, помидоры, перец, капуста, зелень)'] = '~6–8 кг';
+function basketLabel(product: ProductRef): string {
+    return BASKET_LABELS[product.value] || product.label;
+}
 
-    // Carb sources
-    for (const source of carbSources) {
-        const portion = source.defaultPortion;
-        basket[source.label] = `~${Math.round(portion * 7)} г (сухой вес)`;
-    }
+function extractAmounts(items: string[], products: ProductRef[]): Map<string, number> {
+    const amounts = new Map<string, number>();
 
-    // Protein sources
-    const animalProteins = proteinSources.filter((s) => s.proteinType === 'animal');
-    const plantProteins = proteinSources.filter((s) => s.proteinType === 'plant');
-
-    for (const source of animalProteins) {
-        if (source.value === 'whey_protein') {
-            basket['Протеин'] = 'порций по тренировочным дням';
+    for (const item of items) {
+        // Яйца 3-4 шт. -> считаем 4 шт.
+        const eggsMatch = item.match(/Яйца\s*(\d+)(?:[–-]\d+)?\s*шт/i);
+        if (eggsMatch) {
+            amounts.set('Яйца', (amounts.get('Яйца') || 0) + Number(eggsMatch[1]));
             continue;
         }
-        const portion = source.defaultPortion;
-        basket[source.label] = `~${Math.round(portion * 7)} г`;
+
+        // Сыр 50 г
+        const cheeseMatch = item.match(/Сыр\s+(\d+)\s*г/);
+        if (cheeseMatch) {
+            amounts.set('Сыр', (amounts.get('Сыр') || 0) + Number(cheeseMatch[1]));
+            continue;
+        }
+
+        // Орехи или семечки 30 г
+        const nutsMatch = item.match(/Орехи\s+или\s+семечки\s+(\d+)\s*г/);
+        if (nutsMatch) {
+            amounts.set('Орехи/семечки', (amounts.get('Орехи/семечки') || 0) + Number(nutsMatch[1]));
+            continue;
+        }
+
+        // Порция протеина
+        if (item.includes('протеин') && item.includes('порция')) {
+            amounts.set('Сывороточный протеин', (amounts.get('Сывороточный протеин') || 0) + 1);
+            continue;
+        }
+
+        // Продукт с граммовкой
+        const match = item.match(/(\d+)\s*г/);
+        if (!match) continue;
+        const portion = parseInt(match[1], 10);
+        const product = products.find((p) => item.includes(p.label));
+        if (!product) continue;
+        const label = basketLabel(product);
+        amounts.set(label, (amounts.get(label) || 0) + portion);
     }
 
-    for (const source of plantProteins) {
-        const portion = source.defaultPortion;
-        basket[source.label] = `~${Math.round(portion * 7)} г`;
+    return amounts;
+}
+
+function mergeAmounts(a: Map<string, number>, b: Map<string, number>): Map<string, number> {
+    const merged = new Map(a);
+    for (const [label, amount] of b) {
+        merged.set(label, (merged.get(label) || 0) + amount);
+    }
+    return merged;
+}
+
+function formatAmount(label: string, amount: number): string {
+    if (label === 'Яйца') return `~${Math.round(amount)} шт.`;
+    if (label === 'Сывороточный протеин') return `~${Math.round(amount)} порций`;
+    return `~${Math.round(amount)} г`;
+}
+
+export function buildWeekBasket(carbSources: ProductRef[], proteinSources: ProductRef[]): Record<string, string> {
+    return buildWeeklyBaskets(carbSources, proteinSources, [])[0]?.basket ?? {};
+}
+
+export interface WeeklyBasket {
+    weekIndex: number;
+    startDate: string;
+    endDate: string;
+    basket: Record<string, string>;
+}
+
+export function buildWeeklyBaskets(
+    carbSources: ProductRef[],
+    proteinSources: ProductRef[],
+    weekPlan: { date: string; plan: DayPlan }[]
+): WeeklyBasket[] {
+    const products = [...carbSources, ...proteinSources];
+    const weeks: WeeklyBasket[] = [];
+
+    for (let i = 0; i < weekPlan.length; i += 7) {
+        const slice = weekPlan.slice(i, i + 7);
+        if (!slice.length) continue;
+
+        let amounts = new Map<string, number>();
+        for (const day of slice) {
+            for (const meal of day.plan.meals) {
+                amounts = mergeAmounts(amounts, extractAmounts(meal.items, products));
+            }
+        }
+
+        // Базовые продукты, если не попали в блюда
+        if (!amounts.has('Яйца')) amounts.set('Яйца', 0);
+
+        const basket: Record<string, string> = {};
+        for (const [label, amount] of amounts) {
+            if (amount > 0) basket[label] = formatAmount(label, amount);
+        }
+
+        weeks.push({
+            weekIndex: weeks.length + 1,
+            startDate: slice[0].date,
+            endDate: slice[slice.length - 1].date,
+            basket,
+        });
     }
 
-    return basket;
+    return weeks;
 }
 
 export function resolvePlan(plan?: PlanSchema): PlanSchema {
