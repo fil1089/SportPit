@@ -688,14 +688,13 @@ export function buildDayPlan(
         return (s.proteinPer100g ?? 0) >= 8;
     }
 
-    // Из пула берём viable, иначе весь пул, иначе fallback
-    function bestPool(primary: ProductRef[], fallback: ProductRef[]): ProductRef[] {
+    // Из пула берём viable, иначе viable из fallback, иначе global fallback
+    function bestPool(primary: ProductRef[], fallback: ProductRef[], globalFallback: ProductRef[]): ProductRef[] {
         const viable = primary.filter(isViablePrimary);
         if (viable.length) return viable;
-        if (primary.length) return primary;
         const vf = fallback.filter(isViablePrimary);
         if (vf.length) return vf;
-        return fallback.length ? fallback : anyProtein;
+        return globalFallback;
     }
 
     // Функция для выбора с исключением уже выбранных продуктов (чтобы не было трески 2 раза в день)
@@ -709,14 +708,17 @@ export function buildDayPlan(
         return ['cheese', 'brynza', 'adygei_cheese'].includes(source.value);
     }
 
+    const globalViableAnimal = DEFAULT_PROTEIN_SOURCES.filter(s => s.proteinType === 'animal' && isViablePrimary(s));
+    const globalViablePlant = DEFAULT_PROTEIN_SOURCES.filter(s => s.proteinType === 'plant' && isViablePrimary(s));
+
     // Тренировочный Приём 1 (Белок + Углеводы) — ТОЛЬКО постные (fat < 5г/100г)
     const leanAnimal = animal.filter((s) => (s.fatPer100g ?? 0) < 5);
-    const pool1 = bestPool(leanAnimal, animal);
+    const pool1 = bestPool(leanAnimal, animal, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) < 5));
     const animalSource1 = pickRotationExcluding(pool1, [], date);
 
     // Жировые приёмы — предпочитаем жирные белки (бёдра, говядина, яйца, творог 9%)
     const fattyAnimal = animal.filter((s) => (s.fatPer100g ?? 0) >= 5);
-    const pool2 = bestPool(fattyAnimal, animal);
+    const pool2 = bestPool(fattyAnimal, animal, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) >= 5));
     
     const excludeForAnimal2 = [animalSource1];
     if (isCheese(animalSource1)) excludeForAnimal2.push(...proteinSources.filter(isCheese));
@@ -724,7 +726,7 @@ export function buildDayPlan(
 
     // Растительный белок — только с достаточной плотностью
     const allPlant = proteinSources.filter((s) => s.proteinType === 'plant');
-    const pool3 = bestPool(plant, allPlant);
+    const pool3 = bestPool(plant, allPlant, globalViablePlant);
     
     const excludeForPlant = [animalSource1, animalSource2];
     if (isCheese(animalSource1) || isCheese(animalSource2)) {
