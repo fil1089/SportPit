@@ -726,6 +726,10 @@ export function buildDayPlan(
         return `${source.label} ${Math.round(portion)} г`;
     }
 
+    function isCheese(source: ProductRef): boolean {
+        return ['cheese', 'brynza', 'adygea_cheese'].includes(source.value);
+    }
+
     const meals: Meal[] = training
         ? [
             {
@@ -758,7 +762,7 @@ export function buildDayPlan(
                 template: 'Белок + Жиры',
                 items: [
                     formatProtein(animalSource2, animalPortion2),
-                    'Сыр 50 г',
+                    ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
                     'Овощной салат с 1 ст.л. оливкового масла',
                     'Опционально: 30 г орехов или семечек',
                 ],
@@ -785,7 +789,7 @@ export function buildDayPlan(
                 template: 'Белок + Жиры',
                 items: [
                     formatProtein(animalSource2, animalPortion2),
-                    'Сыр 50 г',
+                    ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
                     formatProtein(plantSource, Math.round(plantPortion * 0.4)),
                     'Большой овощной салат с оливковым маслом',
                     'Орехи или семечки 30 г',
