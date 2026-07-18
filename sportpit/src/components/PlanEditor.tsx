@@ -53,6 +53,7 @@ function usePlan(initial: DietData | null) {
     const [carbSources, setCarbSources] = useState<string[]>(initial?.carbSources ?? plan.initial.carbSources);
     const [proteinSources, setProteinSources] = useState<string[]>(initial?.proteinSources ?? plan.initial.proteinSources);
     const [trainingDates, setTrainingDates] = useState<string[]>(initial?.trainingDates ?? plan.initial.trainingDates);
+    const [seedModifiers, setSeedModifiers] = useState<Record<string, number>>({});
     const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -67,6 +68,7 @@ function usePlan(initial: DietData | null) {
             setCarbSources(filterSources(initial.carbSources, resolved.products.carbs, resolved.initial.carbSources));
             setProteinSources(filterSources(initial.proteinSources, resolved.products.protein, resolved.initial.proteinSources));
             setTrainingDates(initial.trainingDates ?? resolved.initial.trainingDates);
+            setSeedModifiers({});
         }
     }, [initial]);
 
@@ -81,8 +83,8 @@ function usePlan(initial: DietData | null) {
     );
 
     const weekPlan = useMemo(() => {
-        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates);
-    }, [startDate, weight, carbProducts, proteinProducts, trainingDates]);
+        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers);
+    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers]);
 
     const currentMacros = useMemo(() => {
         const protein = calcProtein(weight);
@@ -102,6 +104,10 @@ function usePlan(initial: DietData | null) {
         }),
         [weight, trainingDates, carbSources, proteinSources, startDate, plan]
     );
+
+    const refreshDay = (date: string) => {
+        setSeedModifiers(prev => ({ ...prev, [date]: (prev[date] || 0) + 1 }));
+    };
 
     const toggleProduct = (value: string, list: string[], setList: (v: string[]) => void) => {
         setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -172,6 +178,7 @@ function usePlan(initial: DietData | null) {
         currentMacros,
         autoSelectCarbs,
         autoSelectProtein,
+        refreshDay,
     };
 }
 
@@ -397,11 +404,13 @@ function DayCard({
     plan,
     active,
     onToggle,
+    onRefresh,
 }: {
     date: string;
     plan: DayPlan;
     active: boolean;
     onToggle: () => void;
+    onRefresh: () => void;
 }) {
     return (
         <div className="bg-white rounded-3xl shadow-lg shadow-cobalt/5 border border-silver p-5 sm:p-6">
@@ -415,17 +424,30 @@ function DayCard({
                         Белок: {plan.macros.animalProtein}г живот. ({animalProteinPercent(plan.macros)}%) · {plan.macros.plantProtein}г раст.
                     </div>
                 </div>
-                <button
-                    type="button"
-                    onClick={onToggle}
-                    className={`text-sm px-4 py-1.5 rounded-full border font-semibold transition self-start ${
-                        active
-                            ? 'bg-lime text-lime-900 border-lime hover:bg-lime/90'
-                            : 'bg-cobalt text-white border-cobalt hover:bg-cobalt-dark'
-                    }`}
-                >
-                    {active ? 'Тренировка' : 'Отдых'}
-                </button>
+                <div className="flex items-center gap-2 self-start">
+                    <button
+                        type="button"
+                        onClick={onRefresh}
+                        className="text-sm px-3 py-1.5 rounded-full border border-silver bg-white text-ink hover:border-cobalt hover:text-cobalt font-semibold transition flex items-center gap-1.5"
+                        title="Сгенерировать другие блюда на этот день"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Обновить
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onToggle}
+                        className={`text-sm px-4 py-1.5 rounded-full border font-semibold transition ${
+                            active
+                                ? 'bg-lime text-lime-900 border-lime hover:bg-lime/90'
+                                : 'bg-cobalt text-white border-cobalt hover:bg-cobalt-dark'
+                        }`}
+                    >
+                        {active ? 'Тренировка' : 'Отдых'}
+                    </button>
+                </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {plan.meals.map((meal) => (
@@ -473,6 +495,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         currentMacros,
         autoSelectCarbs,
         autoSelectProtein,
+        refreshDay,
     } = usePlan(initial);
 
     const weeklyBaskets = useMemo(
@@ -667,6 +690,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         plan={dayPlan}
                         active={trainingDates.includes(date)}
                         onToggle={() => toggleTrainingDate(date)}
+                        onRefresh={() => refreshDay(date)}
                     />
                 ))}
             </div>

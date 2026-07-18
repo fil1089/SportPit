@@ -658,7 +658,8 @@ export function buildDayPlan(
     weight: number,
     carbSources: ProductRef[],
     proteinSources: ProductRef[],
-    trainingDates: string[]
+    trainingDates: string[],
+    seedModifier = 0
 ): DayPlan {
     const training = isTrainingDay(date, trainingDates);
 
@@ -670,7 +671,9 @@ export function buildDayPlan(
 
     const carbTarget = Math.round((carbMacro.min + carbMacro.max) / 2);
     const proteinTarget = Math.round((proteinMacro.min + proteinMacro.max) / 2);
-    const carbSource = safePickRotation(carbSources, DEFAULT_CARB_SOURCES, date);
+    
+    const baseSeed = seedModifier ? `${date}-${seedModifier}` : date;
+    const carbSource = safePickRotation(carbSources, DEFAULT_CARB_SOURCES, baseSeed);
     const carbPortionG = carbPortion(carbTarget, carbSource);
 
 
@@ -712,7 +715,7 @@ export function buildDayPlan(
     // Тренировочный Приём 1 (Белок + Углеводы) — ТОЛЬКО постные (fat < 5г/100г)
     const leanAnimal = animal.filter((s) => (s.fatPer100g ?? 0) < 5);
     const pool1 = bestPool(leanAnimal, animal, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) < 5));
-    const animalSource1 = pickRotationExcluding(pool1, [], date);
+    const animalSource1 = pickRotationExcluding(pool1, [], baseSeed);
 
     // Жировые приёмы — предпочитаем жирные белки (бёдра, говядина, яйца, творог 9%)
     const fattyAnimal = animal.filter((s) => (s.fatPer100g ?? 0) >= 5);
@@ -720,7 +723,7 @@ export function buildDayPlan(
     
     const excludeForAnimal2 = [animalSource1];
     if (isCheese(animalSource1)) excludeForAnimal2.push(...proteinSources.filter(isCheese));
-    const animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, date + '2');
+    const animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, baseSeed + '2');
 
     // Растительный белок — только с достаточной плотностью
     // Если пользователь не выбрал нормальных растительных белков (тофу, соя),
@@ -734,7 +737,7 @@ export function buildDayPlan(
     if (isCheese(animalSource1) || isCheese(animalSource2)) {
         excludeForPlant.push(...proteinSources.filter(isCheese));
     }
-    const plantSource = pickRotationExcluding(pool3, excludeForPlant, date + '3');
+    const plantSource = pickRotationExcluding(pool3, excludeForPlant, baseSeed + '3');
 
     // Target: ~60% animal, ~40% plant protein
     const isPlantFallbackToAnimal = plantSource.proteinType === 'animal';
@@ -773,7 +776,7 @@ export function buildDayPlan(
                     'Овощной салат без масла',
                     'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
                 ],
-                dishIdea: generateDishIdea(carbSource, [animalSource1, plantSource], 'carb', date),
+                dishIdea: generateDishIdea(carbSource, [animalSource1, plantSource], 'carb', baseSeed),
                 notes: 'Никаких жиров: ни масла, ни сыра, ни жирных соусов.',
             },
             {
@@ -784,7 +787,7 @@ export function buildDayPlan(
                     formatProtein(plantSource, plantPortion),
                     'или 1 порция растительного протеина на воде',
                 ],
-                dishIdea: generateDishIdea(null, [plantSource], 'snack', date),
+                dishIdea: generateDishIdea(null, [plantSource], 'snack', baseSeed),
             },
             {
                 name: 'Приём 2',
@@ -796,7 +799,7 @@ export function buildDayPlan(
                     'Овощной салат с 1 ст.л. оливкового масла',
                     'Опционально: 30 г орехов или семечек',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource2, plantSource], 'fat', date),
+                dishIdea: generateDishIdea(null, [animalSource2, plantSource], 'fat', baseSeed),
                 notes: 'Никаких углеводов: ни круп, ни хлеба, ни фруктов.',
             },
         ]
@@ -810,7 +813,7 @@ export function buildDayPlan(
                     ...(plantPortion > 0 ? [formatProtein(plantSource, Math.round(plantPortion * 0.6))] : []),
                     'Овощной салат с оливковым маслом',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource1, ...(plantPortion > 0 ? [plantSource] : [])], 'fat', date),
+                dishIdea: generateDishIdea(null, [animalSource1, ...(plantPortion > 0 ? [plantSource] : [])], 'fat', baseSeed),
                 notes: 'Углеводы только из овощей/зелени/орехов, до 50–80 г в день.',
             },
             {
@@ -824,7 +827,7 @@ export function buildDayPlan(
                     'Большой овощной салат с оливковым маслом',
                     'Орехи или семечки 30 г',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource2, ...(plantPortion > 0 ? [plantSource] : [])], 'fat', date),
+                dishIdea: generateDishIdea(null, [animalSource2, ...(plantPortion > 0 ? [plantSource] : [])], 'fat', baseSeed),
             },
         ];
 
@@ -844,7 +847,8 @@ export function generateWeekPlan(
     carbSources: ProductRef[],
     proteinSources: ProductRef[],
     trainingDates: string[],
-    weeks = 6
+    weeks = 6,
+    seedModifiers: Record<string, number> = {}
 ): { date: string; plan: DayPlan }[] {
     const start = parseLocalDate(startDate);
     const days: { date: string; plan: DayPlan }[] = [];
@@ -853,7 +857,7 @@ export function generateWeekPlan(
         const date = new Date(start);
         date.setDate(start.getDate() + i);
         const iso = formatISOLocal(date);
-        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates);
+        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0);
         days.push({ date: iso, plan });
     }
 
