@@ -480,17 +480,6 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         [carbProducts, proteinProducts, weekPlan]
     );
 
-    // Разделяем белки на постные (fatPer100g < 5) и жирные для двух панелей выбора
-    const leanProteins = useMemo(
-        () => plan.products.protein.filter((p) => (p.fatPer100g ?? 0) < 5),
-        [plan.products.protein]
-    );
-    const fattyProteins = useMemo(
-        () => plan.products.protein.filter((p) => (p.fatPer100g ?? 0) >= 5),
-        [plan.products.protein]
-    );
-
-
     const { saving, error, lastSaved } = useAutoSave(data);
 
     return (
@@ -578,7 +567,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                     </div>
                 </div>
 
-                <div className="mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <MultiSelect
                         label="Источники углеводов"
                         options={plan.products.carbs}
@@ -586,21 +575,12 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         onToggle={(value) => toggleProduct(value, carbSources, setCarbSources)}
                         onAutoSelect={autoSelectCarbs}
                     />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <MultiSelect
-                        label="Постные белки (для углеводных приёмов)"
-                        options={leanProteins}
+                        label="Источники белка"
+                        options={plan.products.protein}
                         selected={proteinSources}
                         onToggle={(value) => toggleProduct(value, proteinSources, setProteinSources)}
                         onAutoSelect={autoSelectProtein}
-                    />
-                    <MultiSelect
-                        label="Жирные белки (для жировых приёмов)"
-                        options={fattyProteins}
-                        selected={proteinSources}
-                        onToggle={(value) => toggleProduct(value, proteinSources, setProteinSources)}
                     />
                 </div>
 
