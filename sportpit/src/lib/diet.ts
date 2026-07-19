@@ -354,9 +354,10 @@ export function calcMacrosFromItems(items: string[], products: ProductRef[] = [.
             fat += (27 * portion) / 100;
             continue;
         }
-        // Орехи/семечки 50г
+        // Орехи/семечки (парсим количество, по умолчанию 30г)
         if (item.includes('Орехи') || item.includes('семечки')) {
-            const portion = 50;
+            const match = item.match(/(\d+)\s*г/);
+            const portion = match ? Number(match[1]) : 30;
             addProtein((18 * portion) / 100, 'plant');
             fat += (50 * portion) / 100;
             carbs += (10 * portion) / 100;
@@ -700,6 +701,7 @@ export function buildDayPlan(
     function isViablePrimary(s: ProductRef): boolean {
         if (s.portionUnit === 'pcs') return true;
         if (s.proteinPerPortion !== undefined) return true;
+        if (['peanuts', 'almonds', 'sunflower_seeds', 'pumpkin_seeds'].includes(s.value)) return false;
         return (s.proteinPer100g ?? 0) >= 8;
     }
 
@@ -726,44 +728,28 @@ export function buildDayPlan(
     const globalViableAnimal = DEFAULT_PROTEIN_SOURCES.filter(s => s.proteinType === 'animal' && isViablePrimary(s));
 
     // Тренировочный Приём 1 (Белок + Углеводы) — ТОЛЬКО постные (fat < 5г/100г)
-    const leanAnimal = animal.filter((s) => (s.fatPer100g ?? 0) < 5);
-    const pool1 = bestPool(leanAnimal, animal, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) < 5));
+    // Если пользователь веган, у него нет animal. Разрешаем использовать растительные.
+    const hasAnimal = animal.length > 0;
+    const basePool1 = hasAnimal ? animal : plant;
+    const leanPool = basePool1.filter((s) => (s.fatPer100g ?? 0) < 5);
+    const pool1 = bestPool(leanPool, basePool1, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) < 5));
     const animalSource1 = pickRotationExcluding(pool1, [], baseSeed);
 
     // Жировые приёмы — предпочитаем жирные белки (бёдра, говядина, яйца, творог 9%)
-    const fattyAnimal = animal.filter((s) => (s.fatPer100g ?? 0) >= 5);
-    const pool2 = bestPool(fattyAnimal, animal, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) >= 5));
+    const basePool2 = hasAnimal ? animal : plant;
+    const fattyPool = basePool2.filter((s) => (s.fatPer100g ?? 0) >= 5);
+    const pool2 = bestPool(fattyPool, basePool2, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) >= 5));
     
     const excludeForAnimal2 = [animalSource1];
     if (isCheese(animalSource1)) excludeForAnimal2.push(...proteinSources.filter(isCheese));
     const animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, baseSeed + '2');
 
-    // Растительный белок — только с достаточной плотностью
-    // Если пользователь не выбрал нормальных растительных белков (тофу, соя),
-    // не заставляем его есть тофу. Добираем белок из ЕГО списка животных продуктов.
-    const allPlant = proteinSources.filter((s) => s.proteinType === 'plant');
-    const userViableAnimal = animal.filter(isViablePrimary);
-    const plantFallback = userViableAnimal.length ? userViableAnimal : globalViableAnimal;
-    const pool3 = bestPool(plant, allPlant, plantFallback);
-    
-    const excludeForPlant = [animalSource1, animalSource2];
-    if (isCheese(animalSource1) || isCheese(animalSource2)) {
-        excludeForPlant.push(...proteinSources.filter(isCheese));
-    }
-    const plantSource = pickRotationExcluding(pool3, excludeForPlant, baseSeed + '3');
-
-    // Target: ~60% animal, ~40% plant protein
-    const isPlantFallbackToAnimal = plantSource.proteinType === 'animal';
-    
-    // В дни отдыха, если нет растительного белка (fallback на мясо), мы не делаем мясной гарнир к мясу.
-    // Просто увеличиваем основные порции животного белка. В тренировочные дни оставляем для 3-го приема (перекуса).
-    const animalTarget = (!training && isPlantFallbackToAnimal) ? proteinTarget : proteinTarget * 0.6;
-    const plantTarget = (!training && isPlantFallbackToAnimal) ? 0 : proteinTarget * 0.4;
-    
-    const animalPortion1 = proteinPortion(animalTarget * 0.55, animalSource1);
-    const animalPortion2 = proteinPortion(animalTarget * 0.45, animalSource2);
-    const plantPortion = plantTarget > 0 ? proteinPortion(plantTarget, plantSource) : 0;
-
+    // Если тренировочный день, перекус - это 1 порция сывороточного протеина (~25г белка).
+    // Остаток белка делим на Приём 1 и Приём 2.
+    // Если выходной день, весь белок делим на Приём 1 и Приём 2.
+    const remainingProteinTarget = training ? Math.max(0, proteinTarget - 25) : proteinTarget;
+    const animalPortion1 = proteinPortion(remainingProteinTarget * 0.55, animalSource1);
+    const animalPortion2 = proteinPortion(remainingProteinTarget * 0.45, animalSource2);
 
     function formatProtein(source: ProductRef, portion: number): string {
         const rounded = Math.round(portion);
@@ -783,13 +769,12 @@ export function buildDayPlan(
                 time: 'После тренировки (~11:30)',
                 template: 'Белок + Углеводы',
                 items: [
-                    `1 порция сывороточного протеина на воде`,
                     formatProtein(animalSource1, animalPortion1),
                     `${carbSource.label} ${carbPortionG} г ` + (carbSource.value === 'potato' ? '(сырой вес/очищенный)' : '(сухой вес)'),
                     'Овощной салат без масла',
                     'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
                 ],
-                dishIdea: generateDishIdea(carbSource, [animalSource1, plantSource], 'carb', baseSeed),
+                dishIdea: generateDishIdea(carbSource, [animalSource1], 'carb', baseSeed),
                 notes: 'Никаких жиров: ни масла, ни сыра, ни жирных соусов.',
             },
             {
@@ -797,10 +782,10 @@ export function buildDayPlan(
                 time: '~13:30',
                 template: 'Белок',
                 items: [
-                    formatProtein(plantSource, plantPortion),
-                    'или 1 порция растительного протеина на воде',
+                    'Сывороточный протеин 1 порция',
+                    '(на воде, или изолят)',
                 ],
-                dishIdea: generateDishIdea(null, [plantSource], 'snack', baseSeed),
+                dishIdea: 'Протеиновый шейк на воде',
             },
             {
                 name: 'Приём 2',
@@ -810,9 +795,9 @@ export function buildDayPlan(
                     formatProtein(animalSource2, animalPortion2),
                     ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
                     'Овощной салат с 1 ст.л. оливкового масла',
-                    'Опционально: 30 г орехов или семечек',
+                    'Орехи или семечки 30 г',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource2, plantSource], 'fat', baseSeed),
+                dishIdea: generateDishIdea(null, [animalSource2], 'fat', baseSeed),
                 notes: 'Никаких углеводов: ни круп, ни хлеба, ни фруктов.',
             },
         ]
@@ -823,10 +808,9 @@ export function buildDayPlan(
                 template: 'Белок + Жиры',
                 items: [
                     formatProtein(animalSource1, animalPortion1),
-                    ...(plantPortion > 0 ? [formatProtein(plantSource, Math.round(plantPortion * 0.6))] : []),
                     'Овощной салат с оливковым маслом',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource1, ...(plantPortion > 0 ? [plantSource] : [])], 'fat', baseSeed),
+                dishIdea: generateDishIdea(null, [animalSource1], 'fat', baseSeed),
                 notes: 'Углеводы только из овощей/зелени/орехов, до 50–80 г в день.',
             },
             {
@@ -836,11 +820,10 @@ export function buildDayPlan(
                 items: [
                     formatProtein(animalSource2, animalPortion2),
                     ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
-                    ...(plantPortion > 0 ? [formatProtein(plantSource, Math.round(plantPortion * 0.4))] : []),
                     'Большой овощной салат с оливковым маслом',
                     'Орехи или семечки 30 г',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource2, ...(plantPortion > 0 ? [plantSource] : [])], 'fat', baseSeed),
+                dishIdea: generateDishIdea(null, [animalSource2], 'fat', baseSeed),
             },
         ];
 
