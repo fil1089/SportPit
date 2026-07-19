@@ -666,13 +666,16 @@ function splitByProteinType(sources: ProductRef[], allowHighCarbPlant: boolean):
     };
 }
 
+export type MealOverrideItem = { productValue: string; amount: number };
+
 export function buildDayPlan(
     date: string,
     weight: number,
     carbSources: ProductRef[],
     proteinSources: ProductRef[],
     trainingDates: string[],
-    seedModifier = 0
+    seedModifier = 0,
+    overrides?: Record<number, MealOverrideItem[]>
 ): DayPlan {
     const training = isTrainingDay(date, trainingDates);
 
@@ -682,8 +685,28 @@ export function buildDayPlan(
         ? calcCarbs(weight)
         : { min: Math.round(weight * 0.8), max: Math.round(weight * 1.2) };
 
-    const carbTarget = Math.round((carbMacro.min + carbMacro.max) / 2);
-    const proteinTarget = Math.round((proteinMacro.min + proteinMacro.max) / 2);
+    let carbTarget = Math.round((carbMacro.min + carbMacro.max) / 2);
+    let proteinTarget = Math.round((proteinMacro.min + proteinMacro.max) / 2);
+
+    const allProducts = [...carbSources, ...proteinSources];
+    
+    // Считаем макросы из ручных добавок и вычитаем их из целей
+    let overrideProtein = 0;
+    let overrideCarbs = 0;
+    if (overrides) {
+        Object.values(overrides).forEach(items => {
+            items.forEach(item => {
+                const p = allProducts.find(prod => prod.value === item.productValue);
+                if (p) {
+                    if (p.proteinPer100g) overrideProtein += (p.proteinPer100g * item.amount) / 100;
+                    if (p.carbsPer100g) overrideCarbs += (p.carbsPer100g * item.amount) / 100;
+                }
+            });
+        });
+    }
+
+    carbTarget = Math.max(0, carbTarget - overrideCarbs);
+    proteinTarget = Math.max(0, proteinTarget - overrideProtein);
     
     const baseSeed = seedModifier ? `${date}-${seedModifier}` : date;
     const carbSource = safePickRotation(carbSources, DEFAULT_CARB_SOURCES, baseSeed);
@@ -826,7 +849,23 @@ export function buildDayPlan(
             },
         ];
 
-    const allProducts = [...carbSources, ...proteinSources];
+    if (overrides) {
+        meals.forEach((meal, i) => {
+            const added = overrides[i];
+            if (added && added.length) {
+                meal.overrides = added;
+                const addedText = added.map(item => {
+                    const p = allProducts.find(prod => prod.value === item.productValue);
+                    if (!p) return '';
+                    // Специальный префикс, чтобы было понятно, что это ручная добавка
+                    return `✨ ${formatProtein(p, item.amount)}`;
+                }).filter(Boolean);
+                // Вставляем добавленные продукты в начало списка
+                meal.items.unshift(...addedText);
+            }
+        });
+    }
+
     const mealsWithMacros = meals.map((meal) => ({ ...meal, macros: calcMacrosFromItems(meal.items, allProducts) }));
 
     return {
@@ -843,7 +882,8 @@ export function generateWeekPlan(
     proteinSources: ProductRef[],
     trainingDates: string[],
     weeks = 6,
-    seedModifiers: Record<string, number> = {}
+    seedModifiers: Record<string, number> = {},
+    mealOverrides: Record<string, Record<number, MealOverrideItem[]>> = {}
 ): { date: string; plan: DayPlan }[] {
     const start = parseLocalDate(startDate);
     const days: { date: string; plan: DayPlan }[] = [];
@@ -852,7 +892,7 @@ export function generateWeekPlan(
         const date = new Date(start);
         date.setDate(start.getDate() + i);
         const iso = formatISOLocal(date);
-        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0);
+        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso]);
         days.push({ date: iso, plan });
     }
 

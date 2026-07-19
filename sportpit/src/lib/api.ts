@@ -75,6 +75,7 @@ export interface DietData {
     plan?: PlanSchema;
     gender?: 'male' | 'female';
     seedModifiers?: Record<string, number>;
+    mealOverrides?: Record<string, Record<number, Array<{ productValue: string, amount: number }>>>;
 }
 
 export type CarbSource = string;

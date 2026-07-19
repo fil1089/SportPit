@@ -55,6 +55,7 @@ function usePlan(initial: DietData | null) {
     const [trainingDates, setTrainingDates] = useState<string[]>(initial?.trainingDates ?? plan.initial.trainingDates);
     const [gender, setGender] = useState<'male' | 'female'>(initial?.gender ?? plan.initial.gender ?? 'male');
     const [seedModifiers, setSeedModifiers] = useState<Record<string, number>>(initial?.seedModifiers ?? {});
+    const [mealOverrides, setMealOverrides] = useState<Record<string, Record<number, Array<{ productValue: string, amount: number }>>>>(initial?.mealOverrides ?? {});
     const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -71,6 +72,7 @@ function usePlan(initial: DietData | null) {
             setTrainingDates(initial.trainingDates ?? resolved.initial.trainingDates);
             setGender(initial.gender ?? resolved.initial.gender ?? 'male');
             setSeedModifiers(initial.seedModifiers ?? {});
+            setMealOverrides(initial.mealOverrides ?? {});
         }
     }, [initial]);
 
@@ -85,8 +87,8 @@ function usePlan(initial: DietData | null) {
     );
 
     const weekPlan = useMemo(() => {
-        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers);
-    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers]);
+        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides);
+    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides]);
 
     const currentMacros = useMemo(() => {
         const protein = calcProtein(weight);
@@ -105,8 +107,9 @@ function usePlan(initial: DietData | null) {
             plan,
             gender,
             seedModifiers,
+            mealOverrides,
         }),
-        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers]
+        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides]
     );
 
     const refreshDay = (date: string) => {
@@ -192,6 +195,35 @@ function usePlan(initial: DietData | null) {
         });
     };
 
+    const handleAddOverrideItem = (date: string, mealIndex: number, productValue: string, amount: number) => {
+        setMealOverrides(prev => {
+            const dateOverrides = prev[date] || {};
+            const mealItems = dateOverrides[mealIndex] || [];
+            return {
+                ...prev,
+                [date]: {
+                    ...dateOverrides,
+                    [mealIndex]: [...mealItems, { productValue, amount }]
+                }
+            };
+        });
+    };
+
+    const handleRemoveOverrideItem = (date: string, mealIndex: number, overrideIndex: number) => {
+        setMealOverrides(prev => {
+            const dateOverrides = prev[date] || {};
+            const mealItems = dateOverrides[mealIndex] || [];
+            const newMealItems = mealItems.filter((_, i) => i !== overrideIndex);
+            return {
+                ...prev,
+                [date]: {
+                    ...dateOverrides,
+                    [mealIndex]: newMealItems
+                }
+            };
+        });
+    };
+
     return {
         plan,
         weight,
@@ -221,6 +253,9 @@ function usePlan(initial: DietData | null) {
         refreshDay,
         handleAddCustomProduct,
         handleRemoveCustomProduct,
+        mealOverrides,
+        handleAddOverrideItem,
+        handleRemoveOverrideItem,
     };
 }
 
@@ -450,19 +485,87 @@ function WeekBasketCarousel({ baskets }: { baskets: WeeklyBasket[] }) {
     );
 }
 
+function AddOverrideForm({
+    allProducts,
+    onAdd,
+    onCancel
+}: {
+    allProducts: ProductRef[];
+    onAdd: (productValue: string, amount: number) => void;
+    onCancel: () => void;
+}) {
+    const [selected, setSelected] = useState(allProducts[0]?.value || '');
+    const [amount, setAmount] = useState('50');
+
+    return (
+        <div className="mt-3 bg-white p-3 rounded-xl border border-silver shadow-sm">
+            <div className="text-xs font-bold text-steel mb-2">Добавить ингредиент</div>
+            <select
+                value={selected}
+                onChange={(e) => setSelected(e.target.value)}
+                className="w-full bg-cream border border-silver rounded-lg px-2 py-1.5 text-sm text-ink outline-none focus:border-cobalt mb-2"
+            >
+                {allProducts.map(p => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+            </select>
+            <div className="flex items-center gap-2 mb-3">
+                <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-20 bg-cream border border-silver rounded-lg px-2 py-1.5 text-sm text-ink outline-none focus:border-cobalt"
+                    min="1"
+                    step="1"
+                />
+                <span className="text-sm text-steel">грамм (шт. / порций)</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <button
+                    type="button"
+                    onClick={() => {
+                        const num = Number(amount);
+                        if (selected && num > 0) {
+                            onAdd(selected, num);
+                        }
+                    }}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-cobalt text-white hover:bg-cobalt-dark font-semibold transition"
+                >
+                    Добавить
+                </button>
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-silver/30 text-steel hover:bg-silver/50 transition font-medium"
+                >
+                    Отмена
+                </button>
+            </div>
+        </div>
+    );
+}
+
 function DayCard({
     date,
     plan,
+    allProducts,
     active,
     onToggle,
     onRefresh,
+    onAddOverride,
+    onRemoveOverride,
 }: {
     date: string;
     plan: DayPlan;
+    allProducts: ProductRef[];
     active: boolean;
     onToggle: () => void;
     onRefresh: () => void;
+    onAddOverride: (mealIndex: number, productValue: string, amount: number) => void;
+    onRemoveOverride: (mealIndex: number, overrideIndex: number) => void;
 }) {
+    const [addingToMeal, setAddingToMeal] = useState<number | null>(null);
+
     return (
         <div className="bg-white rounded-3xl shadow-lg shadow-cobalt/5 border border-silver p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
@@ -501,22 +604,63 @@ function DayCard({
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {plan.meals.map((meal) => (
-                    <div key={meal.name} className="bg-cream rounded-2xl border border-silver p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs font-bold uppercase tracking-wide text-steel">{meal.name}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-white text-ink border border-silver">{meal.time}</span>
+                {plan.meals.map((meal, mealIndex) => {
+                    // Рассчитываем, какие из элементов списка являются ручными добавками (они всегда в начале массива items)
+                    const overridesCount = meal.overrides?.length || 0;
+                    
+                    return (
+                        <div key={meal.name} className="bg-cream rounded-2xl border border-silver p-4 flex flex-col">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-bold uppercase tracking-wide text-steel">{meal.name}</span>
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-white text-ink border border-silver">{meal.time}</span>
+                            </div>
+                            <div className="text-sm font-bold text-cobalt mb-2">{meal.template}</div>
+                            <ul className="text-sm text-ink space-y-1 list-disc list-inside flex-1">
+                                {meal.items.map((item, i) => {
+                                    const isOverride = i < overridesCount;
+                                    return (
+                                        <li key={i} className={isOverride ? 'text-coral font-medium flex justify-between group' : ''}>
+                                            <span className={isOverride ? 'flex-1' : ''}>{item}</span>
+                                            {isOverride && (
+                                                <button
+                                                    onClick={() => onRemoveOverride(mealIndex, i)}
+                                                    className="opacity-0 group-hover:opacity-100 text-steel hover:text-coral px-1 transition"
+                                                    title="Удалить"
+                                                >
+                                                    ×
+                                                </button>
+                                            )}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                            
+                            <div className="mt-3">
+                                {addingToMeal === mealIndex ? (
+                                    <AddOverrideForm 
+                                        allProducts={allProducts} 
+                                        onAdd={(val, amount) => {
+                                            onAddOverride(mealIndex, val, amount);
+                                            setAddingToMeal(null);
+                                        }}
+                                        onCancel={() => setAddingToMeal(null)}
+                                    />
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setAddingToMeal(mealIndex)}
+                                        className="text-xs font-medium text-cobalt hover:text-cobalt-dark hover:underline transition"
+                                    >
+                                        + Добавить ингредиент
+                                    </button>
+                                )}
+                            </div>
+
+                            {meal.macros && <div className="mt-3"><MacroBadge macros={meal.macros} /></div>}
+                            {meal.notes && <p className="mt-3 text-xs text-steel bg-white/60 p-2 rounded-lg">{meal.notes}</p>}
                         </div>
-                        <div className="text-sm font-bold text-cobalt mb-2">{meal.template}</div>
-                        <ul className="text-sm text-ink space-y-1 list-disc list-inside">
-                            {meal.items.map((item, i) => (
-                                <li key={i}>{item}</li>
-                            ))}
-                        </ul>
-                        {meal.macros && <MacroBadge macros={meal.macros} />}
-                        {meal.notes && <p className="mt-3 text-xs text-steel bg-white/60 p-2 rounded-lg">{meal.notes}</p>}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
@@ -768,9 +912,12 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         key={date}
                         date={date}
                         plan={dayPlan}
+                        allProducts={[...plan.products.carbs, ...plan.products.protein]}
                         active={trainingDates.includes(date)}
                         onToggle={() => toggleTrainingDate(date)}
                         onRefresh={() => refreshDay(date)}
+                        onAddOverride={(mealIndex, productValue, amount) => handleAddOverrideItem(date, mealIndex, productValue, amount)}
+                        onRemoveOverride={(mealIndex, overrideIndex) => handleRemoveOverrideItem(date, mealIndex, overrideIndex)}
                     />
                 ))}
             </div>

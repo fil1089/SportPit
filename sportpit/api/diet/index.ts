@@ -85,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         if (req.method === 'POST') {
             const body = req.body || {};
-            const { weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers } = body;
+            const { weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides } = body;
 
             if (typeof weight !== 'number' || weight < 30 || weight > 300) {
                 return res.status(400).json({ error: 'Некорректный вес' });
@@ -112,6 +112,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 plan: plan && typeof plan === 'object' ? plan : undefined,
                 gender: gender === 'female' ? 'female' : 'male',
                 seedModifiers: seedModifiers && typeof seedModifiers === 'object' ? seedModifiers : undefined,
+                mealOverrides: mealOverrides && typeof mealOverrides === 'object' ? mealOverrides : undefined,
             };
 
             const rows = await sql`
