@@ -25,7 +25,7 @@ export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
     { value: 'tuna', label: 'Тунец в собственном соку', proteinPer100g: 23, fatPer100g: 1, defaultPortion: 320, proteinType: 'animal' },
     { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250, proteinType: 'animal' },
     { value: 'salmon_trout', label: 'Сёмга/форель', proteinPer100g: 20, fatPer100g: 14, defaultPortion: 220, proteinType: 'animal' },
-    { value: 'cod', label: 'Треска/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300, proteinType: 'animal' },
+    { value: 'cod', label: 'Треска/минтай/хек', proteinPer100g: 17, fatPer100g: 0.7, defaultPortion: 300, proteinType: 'animal' },
     { value: 'eggs', label: 'Яйца', proteinPer100g: 13, fatPer100g: 11, proteinPerPortion: 6.5, defaultPortion: 4, proteinType: 'animal', portionUnit: 'pcs' },
     { value: 'cottage_cheese_0_5', label: 'Творог 0–5%', proteinPer100g: 18, fatPer100g: 4, defaultPortion: 200, proteinType: 'animal' },
     { value: 'cottage_cheese_9', label: 'Творог 9%', proteinPer100g: 14, fatPer100g: 9, defaultPortion: 200, proteinType: 'animal' },
@@ -724,7 +724,7 @@ export function buildDayPlan(
     function isViablePrimary(s: ProductRef): boolean {
         if (s.portionUnit === 'pcs') return true;
         if (s.proteinPerPortion !== undefined) return true;
-        if (['peanuts', 'almonds', 'sunflower_seeds', 'pumpkin_seeds'].includes(s.value)) return false;
+        if (['peanuts', 'almonds', 'sunflower_seeds', 'pumpkin_seeds', 'walnuts'].includes(s.value)) return false;
         return (s.proteinPer100g ?? 0) >= 8;
     }
 
