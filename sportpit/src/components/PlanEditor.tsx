@@ -641,11 +641,6 @@ function DayCardSide({
                 <div className="flex-1">
                     <div className="flex items-center gap-3">
                         <div className="font-bold text-lg text-ink">{formatDate(date)}</div>
-                        {isMultiUser && onFlip && (
-                            <button type="button" onClick={onFlip} className="px-3 py-1 bg-coral/10 text-coral font-bold rounded-lg border border-coral/20 hover:bg-coral hover:text-white transition shadow-sm text-sm">
-                                {name || 'Второй человек'} ⟳
-                            </button>
-                        )}
                     </div>
                     <div className="text-sm text-steel">
                         Итого: {plan.macros.calories} ккал · Б {plan.macros.protein} · Ж {plan.macros.fat} · У {plan.macros.carbs}
@@ -655,6 +650,16 @@ function DayCardSide({
                     </div>
                 </div>
                 <div className="flex items-center gap-2 self-start">
+                    {isMultiUser && onFlip && (
+                        <button
+                            type="button"
+                            onClick={onFlip}
+                            className="text-sm px-4 py-1.5 rounded-full border border-silver bg-white text-ink hover:border-cobalt hover:text-cobalt font-semibold transition"
+                            title="Переключить порции"
+                        >
+                            {name || 'Второй человек'}
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={onRefresh}
