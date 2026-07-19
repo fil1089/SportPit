@@ -286,7 +286,7 @@ export function resolvePlan(plan?: PlanSchema): PlanSchema {
         products: { carbs, protein },
         macros: plan.macros || DEFAULT_MACROS,
         rules: plan.rules?.length ? plan.rules : DEFAULT_RULES,
-        supplements: plan.supplements?.length ? plan.supplements : DEFAULT_SUPPLEMENTS,
+        supplements: plan.supplements?.length ? plan.supplements : getSupplements(plan.initial?.gender || 'male'),
         weekBasket: buildWeekBasket(carbs, protein),
     };
 }
