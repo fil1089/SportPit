@@ -628,12 +628,12 @@ function DayCard({
                                 {meal.items.map((item, i) => {
                                     const isOverride = i < overridesCount;
                                     return (
-                                        <li key={i} className={isOverride ? 'text-coral font-medium flex justify-between group' : ''}>
+                                        <li key={i} className={isOverride ? 'text-cobalt font-medium flex justify-between group' : ''}>
                                             <span className={isOverride ? 'flex-1' : ''}>{item}</span>
                                             {isOverride && (
                                                 <button
                                                     onClick={() => onRemoveOverride(mealIndex, i)}
-                                                    className="opacity-0 group-hover:opacity-100 text-steel hover:text-coral px-1 transition"
+                                                    className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt px-1 transition"
                                                     title="Удалить"
                                                 >
                                                     ×
