@@ -10,6 +10,7 @@ import {
     buildWeeklyBaskets,
     calcProtein,
     calcCarbs,
+    calcMacrosFromItems,
 } from '../lib/diet.js';
 import { useAutoSave } from '../hooks/useAutoSave.js';
 
@@ -627,9 +628,17 @@ function DayCard({
                             <ul className="text-sm text-ink space-y-1 list-disc list-inside flex-1">
                                 {meal.items.map((item, i) => {
                                     const isOverride = i < overridesCount;
+                                    const itemMacros = calcMacrosFromItems([item], [...carbProducts, ...proteinProducts]);
+                                    const hasMacros = itemMacros.protein > 0 || itemMacros.fat > 0 || itemMacros.carbs > 0;
+                                    
                                     return (
                                         <li key={i} className={isOverride ? 'text-cobalt font-medium group' : ''}>
                                             <span>{item}</span>
+                                            {hasMacros && (
+                                                <span className="text-[11px] text-steel/80 ml-1.5 font-normal whitespace-nowrap">
+                                                    (Б {itemMacros.protein} · Ж {itemMacros.fat} · У {itemMacros.carbs})
+                                                </span>
+                                            )}
                                             {isOverride && (
                                                 <button
                                                     onClick={() => onRemoveOverride(mealIndex, i)}
