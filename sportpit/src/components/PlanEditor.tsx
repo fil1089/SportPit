@@ -57,6 +57,15 @@ function usePlan(initial: DietData | null) {
     const [gender, setGender] = useState<'male' | 'female'>(initial?.gender ?? plan.initial.gender ?? 'male');
     const [seedModifiers, setSeedModifiers] = useState<Record<string, number>>(initial?.seedModifiers ?? {});
     const [mealOverrides, setMealOverrides] = useState<Record<string, Record<number, Array<{ productValue: string, amount: number }>>>>(initial?.mealOverrides ?? {});
+    
+    // Multi-user state
+    const [name1, setName1] = useState<string>(initial?.name1 ?? '');
+    const [isSecondPersonEnabled, setIsSecondPersonEnabled] = useState<boolean>(initial?.isSecondPersonEnabled ?? false);
+    const [name2, setName2] = useState<string>(initial?.name2 ?? '');
+    const [weight2, setWeight2] = useState<number>(initial?.weight2 ?? 60);
+    const [weight2Input, setWeight2Input] = useState<string>(String(initial?.weight2 ?? 60));
+    const [gender2, setGender2] = useState<'male' | 'female'>(initial?.gender2 ?? 'female');
+
     const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -74,6 +83,12 @@ function usePlan(initial: DietData | null) {
             setGender(initial.gender ?? resolved.initial.gender ?? 'male');
             setSeedModifiers(initial.seedModifiers ?? {});
             setMealOverrides(initial.mealOverrides ?? {});
+            setName1(initial.name1 ?? '');
+            setIsSecondPersonEnabled(initial.isSecondPersonEnabled ?? false);
+            setName2(initial.name2 ?? '');
+            setWeight2(initial.weight2 ?? 60);
+            setWeight2Input(String(initial.weight2 ?? 60));
+            setGender2(initial.gender2 ?? 'female');
         }
     }, [initial]);
 
@@ -91,12 +106,25 @@ function usePlan(initial: DietData | null) {
         return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides);
     }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides]);
 
+    const weekPlan2 = useMemo(() => {
+        if (!isSecondPersonEnabled) return [];
+        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides);
+    }, [isSecondPersonEnabled, startDate, weight2, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides]);
+
     const currentMacros = useMemo(() => {
         const protein = calcProtein(weight);
         const carbsTraining = calcCarbs(weight);
         const carbsRest = { min: Math.round(weight * 0.8), max: Math.round(weight * 1.2) };
         return { protein, carbsTraining, carbsRest };
     }, [weight]);
+
+    const currentMacros2 = useMemo(() => {
+        if (!isSecondPersonEnabled) return currentMacros;
+        const protein = calcProtein(weight2);
+        const carbsTraining = calcCarbs(weight2);
+        const carbsRest = { min: Math.round(weight2 * 0.8), max: Math.round(weight2 * 1.2) };
+        return { protein, carbsTraining, carbsRest };
+    }, [isSecondPersonEnabled, weight2, currentMacros]);
 
     const data: DietData | null = useMemo(
         () => ({
@@ -109,8 +137,13 @@ function usePlan(initial: DietData | null) {
             gender,
             seedModifiers,
             mealOverrides,
+            name1,
+            isSecondPersonEnabled,
+            name2,
+            weight2,
+            gender2,
         }),
-        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides]
+        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides, name1, isSecondPersonEnabled, name2, weight2, gender2]
     );
 
     const refreshDay = (date: string) => {
@@ -271,11 +304,19 @@ function usePlan(initial: DietData | null) {
         autoSelectCarbs,
         autoSelectProtein,
         refreshDay,
-        handleAddCustomProduct,
-        handleRemoveCustomProduct,
+        handleSaveProduct,
+        handleRemoveProduct,
         mealOverrides,
         handleAddOverrideItem,
         handleRemoveOverrideItem,
+        name1, setName1,
+        isSecondPersonEnabled, setIsSecondPersonEnabled,
+        name2, setName2,
+        weight2, setWeight2,
+        weight2Input, setWeight2Input,
+        gender2, setGender2,
+        weekPlan2,
+        currentMacros2,
     };
 }
 
@@ -565,7 +606,7 @@ function AddOverrideForm({
     );
 }
 
-function DayCard({
+function DayCardSide({
     date,
     plan,
     carbProducts,
@@ -575,6 +616,9 @@ function DayCard({
     onRefresh,
     onAddOverride,
     onRemoveOverride,
+    name,
+    isMultiUser,
+    onFlip,
 }: {
     date: string;
     plan: DayPlan;
@@ -585,14 +629,24 @@ function DayCard({
     onRefresh: () => void;
     onAddOverride: (mealIndex: number, productValue: string, amount: number) => void;
     onRemoveOverride: (mealIndex: number, overrideIndex: number) => void;
+    name?: string;
+    isMultiUser?: boolean;
+    onFlip?: () => void;
 }) {
     const [addingToMeal, setAddingToMeal] = useState<number | null>(null);
 
     return (
-        <div className="bg-white rounded-3xl shadow-lg shadow-cobalt/5 border border-silver p-5 sm:p-6">
+        <div className="bg-white rounded-3xl shadow-lg shadow-cobalt/5 border border-silver p-5 sm:p-6 w-full backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-                <div>
-                    <div className="font-bold text-lg text-ink">{formatDate(date)}</div>
+                <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                        <div className="font-bold text-lg text-ink">{formatDate(date)}</div>
+                        {isMultiUser && onFlip && (
+                            <button type="button" onClick={onFlip} className="px-3 py-1 bg-coral/10 text-coral font-bold rounded-lg border border-coral/20 hover:bg-coral hover:text-white transition shadow-sm text-sm">
+                                {name || 'Второй человек'} ⟳
+                            </button>
+                        )}
+                    </div>
                     <div className="text-sm text-steel">
                         Итого: {plan.macros.calories} ккал · Б {plan.macros.protein} · Ж {plan.macros.fat} · У {plan.macros.carbs}
                     </div>
@@ -703,6 +757,108 @@ function DayCard({
     );
 }
 
+function DayCard({
+    date,
+    plan1,
+    plan2,
+    carbProducts,
+    proteinProducts,
+    active,
+    onToggle,
+    onRefresh,
+    onAddOverride,
+    onRemoveOverride,
+    name1,
+    name2,
+    isMultiUser,
+}: {
+    date: string;
+    plan1: DayPlan;
+    plan2?: DayPlan;
+    carbProducts: ProductRef[];
+    proteinProducts: ProductRef[];
+    active: boolean;
+    onToggle: () => void;
+    onRefresh: () => void;
+    onAddOverride: (mealIndex: number, productValue: string, amount: number) => void;
+    onRemoveOverride: (mealIndex: number, overrideIndex: number) => void;
+    name1?: string;
+    name2?: string;
+    isMultiUser?: boolean;
+}) {
+    const [flipped, setFlipped] = useState(false);
+
+    if (!isMultiUser || !plan2) {
+        return (
+            <DayCardSide
+                date={date}
+                plan={plan1}
+                carbProducts={carbProducts}
+                proteinProducts={proteinProducts}
+                active={active}
+                onToggle={onToggle}
+                onRefresh={onRefresh}
+                onAddOverride={onAddOverride}
+                onRemoveOverride={onRemoveOverride}
+            />
+        );
+    }
+
+    return (
+        <div className="relative w-full" style={{ perspective: '2000px' }}>
+            <div 
+                className="w-full transition-transform duration-700 relative" 
+                style={{ 
+                    transformStyle: 'preserve-3d', 
+                    transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)' 
+                }}
+            >
+                {/* Front Side (Person 1) */}
+                <div style={{ backfaceVisibility: 'hidden' }}>
+                    <DayCardSide
+                        date={date}
+                        plan={plan1}
+                        carbProducts={carbProducts}
+                        proteinProducts={proteinProducts}
+                        active={active}
+                        onToggle={onToggle}
+                        onRefresh={onRefresh}
+                        onAddOverride={onAddOverride}
+                        onRemoveOverride={onRemoveOverride}
+                        name={name2}
+                        isMultiUser={true}
+                        onFlip={() => setFlipped(true)}
+                    />
+                </div>
+
+                {/* Back Side (Person 2) */}
+                <div 
+                    className="absolute top-0 left-0 w-full h-full" 
+                    style={{ 
+                        backfaceVisibility: 'hidden', 
+                        transform: 'rotateY(180deg)' 
+                    }}
+                >
+                    <DayCardSide
+                        date={date}
+                        plan={plan2}
+                        carbProducts={carbProducts}
+                        proteinProducts={proteinProducts}
+                        active={active}
+                        onToggle={onToggle}
+                        onRefresh={onRefresh}
+                        onAddOverride={onAddOverride}
+                        onRemoveOverride={onRemoveOverride}
+                        name={name1}
+                        isMultiUser={true}
+                        onFlip={() => setFlipped(false)}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export function PlanEditor({ initial }: PlanEditorProps) {
     const {
         plan,
@@ -730,10 +886,18 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         autoSelectCarbs,
         autoSelectProtein,
         refreshDay,
-        handleAddCustomProduct,
-        handleRemoveCustomProduct,
+        handleSaveProduct,
+        handleRemoveProduct,
         handleAddOverrideItem,
         handleRemoveOverrideItem,
+        name1, setName1,
+        isSecondPersonEnabled, setIsSecondPersonEnabled,
+        name2, setName2,
+        weight2, setWeight2,
+        weight2Input, setWeight2Input,
+        gender2, setGender2,
+        weekPlan2,
+        currentMacros2,
     } = usePlan(initial);
 
     const weeklyBaskets = useMemo(
@@ -804,48 +968,104 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-                    <div>
-                        <label className="block text-sm font-semibold text-ink mb-2">Вес, кг</label>
-                        <input
-                            type="number"
-                            min={30}
-                            max={300}
-                            value={weightInput}
-                            onChange={(e) => handleWeightChange(e.target.value)}
-                            className="w-full px-4 py-3 bg-cream border border-silver rounded-xl focus:outline-none focus:ring-2 focus:ring-cobalt text-ink"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-semibold text-ink mb-2">Начало плана</label>
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full px-4 py-3 bg-cream border border-silver rounded-xl focus:outline-none focus:ring-2 focus:ring-cobalt text-ink"
-                        />
-                        <p className="text-xs text-steel mt-1.5">Расписание начинается с этой даты</p>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-semibold text-ink mb-2">Пол</label>
-                        <div className="flex bg-cream p-1 rounded-xl border border-silver">
-                            <button
-                                type="button"
-                                onClick={() => handleGenderChange('male')}
-                                className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${gender === 'male' ? 'bg-white shadow-sm border border-silver/50 text-ink' : 'text-steel hover:text-ink'}`}
-                            >
-                                Мужской
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => handleGenderChange('female')}
-                                className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${gender === 'female' ? 'bg-white shadow-sm border border-silver/50 text-ink' : 'text-steel hover:text-ink'}`}
-                            >
-                                Женский
-                            </button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    {/* Person 1 */}
+                    <div className="bg-white border border-silver rounded-2xl p-5">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-bold text-ink">Первый человек</h4>
+                            <input
+                                type="text"
+                                value={name1}
+                                onChange={(e) => setName1(e.target.value)}
+                                placeholder="Имя (напр. Иван)"
+                                className="px-3 py-1.5 bg-cream border border-silver rounded-lg text-sm w-32 focus:outline-none focus:border-cobalt"
+                            />
                         </div>
-                        <p className="text-xs text-steel mt-1.5">Влияет на БАДы и расчеты</p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-steel mb-1">Вес, кг</label>
+                                <input
+                                    type="number" min={30} max={300}
+                                    value={weightInput}
+                                    onChange={(e) => handleWeightChange(e.target.value)}
+                                    className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm focus:outline-none focus:border-cobalt text-ink"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-steel mb-1">Пол</label>
+                                <select 
+                                    value={gender} 
+                                    onChange={e => handleGenderChange(e.target.value as 'male' | 'female')}
+                                    className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm focus:outline-none focus:border-cobalt text-ink"
+                                >
+                                    <option value="male">Мужской</option>
+                                    <option value="female">Женский</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Person 2 */}
+                    <div className={`border rounded-2xl p-5 transition ${isSecondPersonEnabled ? 'bg-white border-silver' : 'bg-cream border-dashed border-silver flex items-center justify-center'}`}>
+                        {!isSecondPersonEnabled ? (
+                            <button type="button" onClick={() => setIsSecondPersonEnabled(true)} className="text-cobalt font-medium hover:underline flex items-center gap-2">
+                                + Добавить второго человека
+                            </button>
+                        ) : (
+                            <div>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="font-bold text-ink">Второй человек</h4>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={name2}
+                                            onChange={(e) => setName2(e.target.value)}
+                                            placeholder="Имя (напр. Анна)"
+                                            className="px-3 py-1.5 bg-cream border border-silver rounded-lg text-sm w-32 focus:outline-none focus:border-cobalt"
+                                        />
+                                        <button type="button" onClick={() => setIsSecondPersonEnabled(false)} className="text-coral hover:text-coral-dark p-1" title="Удалить">×</button>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-steel mb-1">Вес, кг</label>
+                                        <input
+                                            type="number" min={30} max={300}
+                                            value={weight2Input}
+                                            onChange={(e) => {
+                                                setWeight2Input(e.target.value);
+                                                const v = parseInt(e.target.value, 10);
+                                                if (!isNaN(v) && v > 20 && v < 400) setWeight2(v);
+                                            }}
+                                            className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm focus:outline-none focus:border-cobalt text-ink"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-steel mb-1">Пол</label>
+                                        <select 
+                                            value={gender2} 
+                                            onChange={e => setGender2(e.target.value as 'male' | 'female')}
+                                            className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm focus:outline-none focus:border-cobalt text-ink"
+                                        >
+                                            <option value="male">Мужской</option>
+                                            <option value="female">Женский</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-2">Начало плана</label>
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full max-w-xs px-4 py-3 bg-cream border border-silver rounded-xl focus:outline-none focus:ring-2 focus:ring-cobalt text-ink"
+                    />
+                    <p className="text-xs text-steel mt-1.5">Расписание начинается с этой даты. Применяется к обоим планам.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -950,11 +1170,12 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         </span>
                     )}
                 </div>
-                {weekPlan.map(({ date, plan: dayPlan }) => (
+                {weekPlan.map(({ date, plan: dayPlan }, i) => (
                     <DayCard
                         key={date}
                         date={date}
-                        plan={dayPlan}
+                        plan1={dayPlan}
+                        plan2={weekPlan2[i]?.plan}
                         carbProducts={plan.products.carbs}
                         proteinProducts={plan.products.protein}
                         active={trainingDates.includes(date)}
@@ -962,6 +1183,9 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         onRefresh={() => refreshDay(date)}
                         onAddOverride={(mealIndex, productValue, amount) => handleAddOverrideItem(date, mealIndex, productValue, amount)}
                         onRemoveOverride={(mealIndex, overrideIndex) => handleRemoveOverrideItem(date, mealIndex, overrideIndex)}
+                        name1={name1 || 'Человек 1'}
+                        name2={name2 || 'Второй человек'}
+                        isMultiUser={isSecondPersonEnabled}
                     />
                 ))}
             </div>

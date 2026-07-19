@@ -35,6 +35,13 @@ export interface PlanInitial {
     proteinSources: string[];
     trainingDates: string[];
     gender?: 'male' | 'female';
+    seedModifiers?: Record<string, number>;
+    mealOverrides?: Record<string, Record<number, any>>; // simplified to avoid circular dependency
+    name1?: string;
+    isSecondPersonEnabled?: boolean;
+    name2?: string;
+    weight2?: number;
+    gender2?: 'male' | 'female';
 }
 
 export interface MacroTargets {
@@ -76,7 +83,12 @@ export interface DietData {
     plan?: PlanSchema;
     gender?: 'male' | 'female';
     seedModifiers?: Record<string, number>;
-    mealOverrides?: Record<string, Record<number, Array<{ productValue: string, amount: number }>>>;
+    mealOverrides?: Record<string, Record<number, MealOverrideItem[]>>;
+    name1?: string;
+    isSecondPersonEnabled?: boolean;
+    name2?: string;
+    weight2?: number;
+    gender2?: 'male' | 'female';
 }
 
 export type CarbSource = string;
