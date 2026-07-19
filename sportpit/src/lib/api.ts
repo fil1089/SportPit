@@ -13,7 +13,6 @@ export interface DietRecord {
 }
 
 export type ProteinType = 'animal' | 'plant';
-export type FatLevel = 'lean' | 'fatty';
 
 export interface ProductRef {
     value: string;
@@ -24,7 +23,6 @@ export interface ProductRef {
     proteinPerPortion?: number;
     defaultPortion: number;
     proteinType?: ProteinType;
-    fatLevel?: FatLevel;
     portionUnit?: 'g' | 'pcs';
 }
 
@@ -34,6 +32,7 @@ export interface PlanInitial {
     carbSources: string[];
     proteinSources: string[];
     trainingDates: string[];
+    gender?: 'male' | 'female';
 }
 
 export interface MacroTargets {
@@ -73,6 +72,7 @@ export interface DietData {
     proteinSources: string[];
     startDate: string;
     plan?: PlanSchema;
+    gender?: 'male' | 'female';
 }
 
 export type CarbSource = string;

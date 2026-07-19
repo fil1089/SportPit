@@ -1,0 +1,11 @@
+{
+  "authType": "authToken",
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://euromodels.xyz",
+    "ANTHROPIC_MODEL": "accounts/euromodels/models/claude-sonnet-5",
+    "ANTHROPIC_AUTH_TOKEN": "em_live_bc48cd70b49c7262e2374dbdda0a318a",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "accounts/euromodels/models/claude-opus-4.8",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "accounts/euromodels/models/claude-sonnet-5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "accounts/euromodels/models/glm-5.2"
+  }
+}

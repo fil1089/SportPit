@@ -64,13 +64,21 @@ export const DEFAULT_RULES: string[] = [
     'Протеин — только на воде, только в Приёме 1 тренировочных дней.',
 ];
 
-export const DEFAULT_SUPPLEMENTS: PlanSchema['supplements'] = [
-    { name: 'Креатин моногидрат', dose: '5 г/день', when: 'В любое время, каждый день', why: 'Рост силы и объёма мышц' },
-    { name: 'Бета-аланин', dose: 'По инструкции на упаковке', when: 'Перед тренировкой или равномерно', why: 'Больше повторений, выносливость' },
-    { name: 'Витамин D3 + K2', dose: 'По инструкции', when: 'С жирной пищей', why: 'Гормоны, иммунитет, восстановление' },
-    { name: 'Магний', dose: 'По инструкции', when: 'Вечером', why: 'Нервная система, сон, восстановление' },
-    { name: 'Цинк', dose: 'По инструкции', when: 'С едой', why: 'Тестостерон, иммунитет' },
-];
+export const getSupplements = (gender: 'male' | 'female' = 'male'): PlanSchema['supplements'] => {
+    const base = [
+        { name: 'Креатин моногидрат', dose: '5 г/день', when: 'В любое время, каждый день', why: 'Рост силы и объёма мышц' },
+        { name: 'Бета-аланин', dose: 'По инструкции на упаковке', when: 'Перед тренировкой или равномерно', why: 'Больше повторений, выносливость' },
+        { name: 'Витамин D3 + K2', dose: 'По инструкции', when: 'С жирной пищей', why: 'Гормоны, иммунитет, восстановление' },
+        { name: 'Магний', dose: gender === 'female' ? '~300 мг' : '~400 мг', when: 'Вечером', why: 'Нервная система, сон, восстановление' },
+        { name: 'Цинк', dose: 'По инструкции', when: 'С едой', why: 'Иммунитет, гормональный баланс' },
+    ];
+    
+    if (gender === 'female') {
+        base.push({ name: 'Мио-инозитол (B8)', dose: '2000-4000 мг', when: 'С едой', why: 'Гормональный баланс, чувствительность к инсулину' });
+    }
+    
+    return base;
+};
 
 export const DEFAULT_WEEK_BASKET: Record<string, string> = {
     'Яйца': '~30 шт.',
@@ -113,10 +121,11 @@ export const DEFAULT_PLAN: PlanSchema = {
             '2026-08-25',
             '2026-08-29',
         ],
+        gender: 'male',
     },
     rules: DEFAULT_RULES,
     macros: DEFAULT_MACROS,
-    supplements: DEFAULT_SUPPLEMENTS,
+    supplements: getSupplements('male'),
     products: {
         carbs: DEFAULT_CARB_SOURCES,
         protein: DEFAULT_PROTEIN_SOURCES,

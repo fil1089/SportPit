@@ -53,6 +53,7 @@ function usePlan(initial: DietData | null) {
     const [carbSources, setCarbSources] = useState<string[]>(initial?.carbSources ?? plan.initial.carbSources);
     const [proteinSources, setProteinSources] = useState<string[]>(initial?.proteinSources ?? plan.initial.proteinSources);
     const [trainingDates, setTrainingDates] = useState<string[]>(initial?.trainingDates ?? plan.initial.trainingDates);
+    const [gender, setGender] = useState<'male' | 'female'>(initial?.gender ?? plan.initial.gender ?? 'male');
     const [seedModifiers, setSeedModifiers] = useState<Record<string, number>>({});
     const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -68,6 +69,7 @@ function usePlan(initial: DietData | null) {
             setCarbSources(filterSources(initial.carbSources, resolved.products.carbs, resolved.initial.carbSources));
             setProteinSources(filterSources(initial.proteinSources, resolved.products.protein, resolved.initial.proteinSources));
             setTrainingDates(initial.trainingDates ?? resolved.initial.trainingDates);
+            setGender(initial.gender ?? resolved.initial.gender ?? 'male');
             setSeedModifiers({});
         }
     }, [initial]);
@@ -101,8 +103,9 @@ function usePlan(initial: DietData | null) {
             proteinSources,
             startDate,
             plan,
+            gender,
         }),
-        [weight, trainingDates, carbSources, proteinSources, startDate, plan]
+        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender]
     );
 
     const refreshDay = (date: string) => {
@@ -149,10 +152,20 @@ function usePlan(initial: DietData | null) {
             setCarbSources(parsed.initial.carbSources);
             setProteinSources(parsed.initial.proteinSources);
             setTrainingDates(parsed.initial.trainingDates);
+            setGender(parsed.initial.gender ?? 'male');
         } catch (err: any) {
             setUploadError(err.message || 'Не удалось загрузить план');
         }
     };
+
+    useEffect(() => {
+        if (!initial) {
+            // Only update supplements if we aren't exactly parsing a fresh initial plan
+            import('../lib/diet.js').then(({ getSupplements }) => {
+                setPlan(prev => ({ ...prev, supplements: getSupplements(gender), initial: { ...prev.initial, gender } }));
+            });
+        }
+    }, [gender]);
 
     return {
         plan,
@@ -167,6 +180,8 @@ function usePlan(initial: DietData | null) {
         setProteinSources,
         trainingDates,
         toggleTrainingDate,
+        gender,
+        setGender,
         weekPlan,
         carbProducts,
         proteinProducts,
@@ -484,6 +499,8 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         setProteinSources,
         trainingDates,
         toggleTrainingDate,
+        gender,
+        setGender,
         weekPlan,
         carbProducts,
         proteinProducts,
@@ -586,7 +603,27 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                             onChange={(e) => setStartDate(e.target.value)}
                             className="w-full px-4 py-3 bg-cream border border-silver rounded-xl focus:outline-none focus:ring-2 focus:ring-cobalt text-ink"
                         />
-                        <p className="text-xs text-steel mt-1.5">Расписание и календарь начинаются строго с этой даты</p>
+                        <p className="text-xs text-steel mt-1.5">Расписание начинается с этой даты</p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-ink mb-2">Пол</label>
+                        <div className="flex bg-cream p-1 rounded-xl border border-silver">
+                            <button
+                                type="button"
+                                onClick={() => setGender('male')}
+                                className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${gender === 'male' ? 'bg-white shadow-sm border border-silver/50 text-ink' : 'text-steel hover:text-ink'}`}
+                            >
+                                Мужской
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setGender('female')}
+                                className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${gender === 'female' ? 'bg-white shadow-sm border border-silver/50 text-ink' : 'text-steel hover:text-ink'}`}
+                            >
+                                Женский
+                            </button>
+                        </div>
+                        <p className="text-xs text-steel mt-1.5">Влияет на БАДы и расчеты</p>
                     </div>
                 </div>
 
