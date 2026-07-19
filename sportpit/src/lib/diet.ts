@@ -362,15 +362,18 @@ export function calcMacrosFromItems(items: string[], products: ProductRef[] = [.
             carbs += (10 * portion) / 100;
             continue;
         }
-        // Оливковое/сливочное масло ~ 10г
-        if (item.includes('масла')) {
-            const portion = 10;
-            fat += portion;
-            continue;
-        }
         // Овощной салат ~ 200г, ~5г углеводов
         if (item.includes('Овощной салат')) {
             carbs += 5;
+            // Если в салате есть масло (и это не "без масла"), добавляем жиры
+            if (item.includes('масла') && !item.includes('без масла')) {
+                fat += 10;
+            }
+            continue;
+        }
+        // Оливковое/сливочное масло ~ 10г (если это отдельный пункт)
+        if (item.includes('масла') && !item.includes('без масла')) {
+            fat += 10;
             continue;
         }
         // Парсим строки вида "Продукт 150 г"
