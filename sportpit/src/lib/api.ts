@@ -83,7 +83,7 @@ export interface DietData {
     plan?: PlanSchema;
     gender?: 'male' | 'female';
     seedModifiers?: Record<string, number>;
-    mealOverrides?: Record<string, Record<number, MealOverrideItem[]>>;
+    mealOverrides?: Record<string, Record<number, any>>;
     name1?: string;
     isSecondPersonEnabled?: boolean;
     name2?: string;

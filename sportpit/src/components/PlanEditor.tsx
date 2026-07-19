@@ -893,11 +893,10 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         name1, setName1,
         isSecondPersonEnabled, setIsSecondPersonEnabled,
         name2, setName2,
-        weight2, setWeight2,
+        setWeight2,
         weight2Input, setWeight2Input,
         gender2, setGender2,
         weekPlan2,
-        currentMacros2,
     } = usePlan(initial);
 
     const weeklyBaskets = useMemo(
@@ -1075,7 +1074,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         selected={carbSources}
                         onToggle={(value) => toggleProduct(value, carbSources, setCarbSources)}
                         onAutoSelect={autoSelectCarbs}
-                        onRemoveCustom={(v) => handleRemoveCustomProduct('carbs', v)}
+                        onRemoveCustom={(v) => handleRemoveProduct('carbs', v)}
                     />
                     <MultiSelect
                         label="Источники белка"
@@ -1083,7 +1082,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         selected={proteinSources}
                         onToggle={(value) => toggleProduct(value, proteinSources, setProteinSources)}
                         onAutoSelect={autoSelectProtein}
-                        onRemoveCustom={(v) => handleRemoveCustomProduct('protein', v)}
+                        onRemoveCustom={(v) => handleRemoveProduct('protein', v)}
                     />
                 </div>
                 
