@@ -37,7 +37,6 @@ export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
     // Растительный белок
     { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant' },
     { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant' },
-    { value: 'soybeans', label: 'Соевые бобы', proteinPer100g: 36, carbsPer100g: 30, fatPer100g: 15, defaultPortion: 80, proteinType: 'plant' },
     { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant' },
     { value: 'almonds', label: 'Миндаль', proteinPer100g: 18.5, fatPer100g: 54, defaultPortion: 50, proteinType: 'plant' },
     { value: 'sunflower_seeds', label: 'Семечки подсолнечные', proteinPer100g: 20, fatPer100g: 52, defaultPortion: 50, proteinType: 'plant' },
@@ -484,7 +483,7 @@ const CARB_DISHES: DishEntry[] = [
     { idea: 'Отварной рис + варёное филе индейки', type: 'carb', carbBases: ['rice'], proteinBases: ['turkey'] },
     { idea: 'Отварной рис + тунец в собственном соку', type: 'carb', carbBases: ['rice'], proteinBases: ['tuna'] },
     { idea: 'Отварной рис + тушёные грибы', type: 'carb', carbBases: ['rice'], proteinBases: ['mushrooms'] },
-    { idea: 'Отварной рис + тофу и соевые бобы', type: 'carb', carbBases: ['rice'], proteinBases: ['tofu', 'soybeans'] },
+    { idea: 'Отварной рис + жареный тофу', type: 'carb', carbBases: ['rice'], proteinBases: ['tofu'] },
     { idea: 'Отварной рис + отварная треска/хек', type: 'carb', carbBases: ['rice'], proteinBases: ['cod'] },
     // Макароны
     { idea: 'Макароны с тунцом в собственном соку', type: 'carb', carbBases: ['pasta'], proteinBases: ['tuna'] },
