@@ -116,6 +116,32 @@ function usePlan(initial: DietData | null) {
         setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
     };
 
+    const handleAddCustomProduct = (type: 'carbs' | 'protein', product: ProductRef) => {
+        setPlan(prev => {
+            const next = { ...prev };
+            next.products = { ...next.products, [type]: [...next.products[type], product] };
+            return next;
+        });
+        if (type === 'carbs') {
+            setCarbSources(prev => [...prev, product.value]);
+        } else {
+            setProteinSources(prev => [...prev, product.value]);
+        }
+    };
+
+    const handleRemoveCustomProduct = (type: 'carbs' | 'protein', value: string) => {
+        setPlan(prev => {
+            const next = { ...prev };
+            next.products = { ...next.products, [type]: next.products[type].filter(p => p.value !== value) };
+            return next;
+        });
+        if (type === 'carbs') {
+            setCarbSources(prev => prev.filter(v => v !== value));
+        } else {
+            setProteinSources(prev => prev.filter(v => v !== value));
+        }
+    };
+
     const toggleTrainingDate = (date: string) => {
         setTrainingDates((prev) =>
             prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date].sort()
@@ -192,6 +218,8 @@ function usePlan(initial: DietData | null) {
         autoSelectCarbs,
         autoSelectProtein,
         refreshDay,
+        handleAddCustomProduct,
+        handleRemoveCustomProduct,
     };
 }
 
@@ -213,12 +241,14 @@ function MultiSelect({
     selected,
     onToggle,
     onAutoSelect,
+    onRemoveCustom,
 }: {
     label: string;
     options: ProductRef[];
     selected: string[];
     onToggle: (value: string) => void;
     onAutoSelect?: () => void;
+    onRemoveCustom?: (value: string) => void;
 }) {
     return (
         <div>
@@ -238,18 +268,25 @@ function MultiSelect({
                 {options.map((opt) => {
                     const active = selected.includes(opt.value);
                     return (
-                        <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => onToggle(opt.value)}
-                            className={`px-3.5 py-1.5 rounded-full text-sm border transition font-medium ${
-                                active
-                                    ? 'bg-cobalt text-white border-cobalt shadow-md shadow-cobalt/20'
-                                    : 'bg-white text-ink border-silver hover:border-cobalt hover:text-cobalt'
-                            }`}
-                        >
-                            {opt.label}
-                        </button>
+                        <div key={opt.value} className={`flex items-center rounded-full border transition font-medium ${active ? 'bg-cobalt text-white border-cobalt shadow-md shadow-cobalt/20' : 'bg-white text-ink border-silver hover:border-cobalt hover:text-cobalt'}`}>
+                            <button
+                                type="button"
+                                onClick={() => onToggle(opt.value)}
+                                className="px-3.5 py-1.5 text-sm outline-none"
+                            >
+                                {opt.label}
+                            </button>
+                            {opt.custom && onRemoveCustom && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); onRemoveCustom(opt.value); }}
+                                    className="px-2 py-1.5 text-coral hover:text-coral-dark outline-none"
+                                    title="Удалить свой продукт"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
                     );
                 })}
             </div>
@@ -511,6 +548,8 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         autoSelectCarbs,
         autoSelectProtein,
         refreshDay,
+        handleAddCustomProduct,
+        handleRemoveCustomProduct,
     } = usePlan(initial);
 
     const weeklyBaskets = useMemo(
@@ -632,6 +671,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         selected={carbSources}
                         onToggle={(value) => toggleProduct(value, carbSources, setCarbSources)}
                         onAutoSelect={autoSelectCarbs}
+                        onRemoveCustom={(v) => handleRemoveCustomProduct('carbs', v)}
                     />
                     <MultiSelect
                         label="Источники белка"
@@ -639,8 +679,12 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         selected={proteinSources}
                         onToggle={(value) => toggleProduct(value, proteinSources, setProteinSources)}
                         onAutoSelect={autoSelectProtein}
+                        onRemoveCustom={(v) => handleRemoveCustomProduct('protein', v)}
                     />
                 </div>
+                
+                <AddCustomProductForm onAdd={handleAddCustomProduct} />
+                <div className="mb-6"></div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <MacroCard label="Углеводы в трен. день" min={currentMacros.carbsTraining.min} max={currentMacros.carbsTraining.max} />
@@ -730,5 +774,104 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                 ))}
             </div>
         </div>
+    );
+}
+
+function AddCustomProductForm({ onAdd }: { onAdd: (type: 'carbs' | 'protein', product: ProductRef) => void }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [type, setType] = useState<'carbs' | 'protein'>('protein');
+    const [label, setLabel] = useState('');
+    const [protein, setProtein] = useState('');
+    const [fat, setFat] = useState('');
+    const [carbs, setCarbs] = useState('');
+    const [proteinType, setProteinType] = useState<'animal' | 'plant'>('animal');
+
+    if (!isOpen) {
+        return (
+            <button
+                type="button"
+                onClick={() => setIsOpen(true)}
+                className="w-full py-3 mt-2 border-2 border-dashed border-silver text-steel rounded-xl font-medium hover:border-cobalt hover:text-cobalt transition"
+            >
+                + Добавить свой продукт
+            </button>
+        );
+    }
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!label.trim()) return;
+        
+        const product: ProductRef = {
+            value: `custom_${Date.now()}`,
+            label: label.trim(),
+            defaultPortion: type === 'carbs' ? 50 : 100,
+            custom: true,
+        };
+
+        if (protein) product.proteinPer100g = Number(protein.replace(',', '.'));
+        if (fat) product.fatPer100g = Number(fat.replace(',', '.'));
+        if (carbs) product.carbsPer100g = Number(carbs.replace(',', '.'));
+        if (type === 'protein') product.proteinType = proteinType;
+
+        onAdd(type, product);
+        
+        setIsOpen(false);
+        setLabel('');
+        setProtein('');
+        setFat('');
+        setCarbs('');
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="mt-4 p-4 border border-silver bg-cream rounded-2xl">
+            <div className="flex items-center justify-between mb-4">
+                <h4 className="font-bold text-ink">Новый продукт</h4>
+                <button type="button" onClick={() => setIsOpen(false)} className="text-steel hover:text-coral text-sm">Отмена</button>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label className="block text-xs font-semibold text-steel mb-1">Тип продукта</label>
+                    <select value={type} onChange={e => setType(e.target.value as 'carbs' | 'protein')} className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt">
+                        <option value="protein">Источник белка</option>
+                        <option value="carbs">Источник углеводов</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-xs font-semibold text-steel mb-1">Название</label>
+                    <input required value={label} onChange={e => setLabel(e.target.value)} placeholder="Например: Чечевица" className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label className="block text-xs font-semibold text-steel mb-1">Белки (на 100г)</label>
+                    <input type="number" step="0.1" min="0" value={protein} onChange={e => setProtein(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
+                </div>
+                <div>
+                    <label className="block text-xs font-semibold text-steel mb-1">Жиры (на 100г)</label>
+                    <input type="number" step="0.1" min="0" value={fat} onChange={e => setFat(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
+                </div>
+                <div>
+                    <label className="block text-xs font-semibold text-steel mb-1">Углеводы (на 100г)</label>
+                    <input type="number" step="0.1" min="0" value={carbs} onChange={e => setCarbs(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
+                </div>
+            </div>
+
+            {type === 'protein' && (
+                <div className="mb-4">
+                    <label className="block text-xs font-semibold text-steel mb-1">Тип белка</label>
+                    <div className="flex gap-2">
+                        <label className="flex items-center gap-2 text-sm text-ink"><input type="radio" name="ptype" value="animal" checked={proteinType === 'animal'} onChange={() => setProteinType('animal')} /> Животный</label>
+                        <label className="flex items-center gap-2 text-sm text-ink"><input type="radio" name="ptype" value="plant" checked={proteinType === 'plant'} onChange={() => setProteinType('plant')} /> Растительный</label>
+                    </div>
+                </div>
+            )}
+
+            <button type="submit" className="w-full py-2.5 bg-cobalt text-white rounded-lg font-semibold shadow-md shadow-cobalt/20 hover:bg-cobalt-dark transition">
+                Добавить в список
+            </button>
+        </form>
     );
 }

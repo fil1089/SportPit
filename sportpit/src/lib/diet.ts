@@ -137,7 +137,11 @@ function mergeProducts(saved: ProductRef[] | undefined, defaults: ProductRef[]):
     const savedMap = new Map((saved || []).map((p) => [p.value, p]));
     // Overwrite defaults with saved data for products that still exist in defaults.
     // Products removed from defaults (e.g. deprecated sources) are dropped.
-    return defaults.map((p) => ({ ...p, ...(savedMap.get(p.value) || {}) }));
+    const merged = defaults.map((p) => ({ ...p, ...(savedMap.get(p.value) || {}) }));
+    
+    // Add custom products that are not in defaults
+    const customProducts = (saved || []).filter(p => p.custom && !defaults.some(d => d.value === p.value));
+    return [...merged, ...customProducts];
 }
 
 const BASKET_LABELS: Record<string, string> = {
