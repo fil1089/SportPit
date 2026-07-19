@@ -830,7 +830,7 @@ function DayCard({
                         onRefresh={onRefresh}
                         onAddOverride={onAddOverride}
                         onRemoveOverride={onRemoveOverride}
-                        name={name2}
+                        name={name1}
                         isMultiUser={true}
                         onFlip={() => setFlipped(true)}
                     />
@@ -854,7 +854,7 @@ function DayCard({
                         onRefresh={onRefresh}
                         onAddOverride={onAddOverride}
                         onRemoveOverride={onRemoveOverride}
-                        name={name1}
+                        name={name2}
                         isMultiUser={true}
                         onFlip={() => setFlipped(false)}
                     />
