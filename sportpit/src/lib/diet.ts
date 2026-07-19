@@ -435,6 +435,7 @@ export interface Meal {
     dishIdea?: string;
     notes?: string;
     macros?: Macros;
+    overrides?: MealOverrideItem[];
 }
 
 export interface DayMacros {

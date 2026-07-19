@@ -695,6 +695,8 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         refreshDay,
         handleAddCustomProduct,
         handleRemoveCustomProduct,
+        handleAddOverrideItem,
+        handleRemoveOverrideItem,
     } = usePlan(initial);
 
     const weeklyBaskets = useMemo(
