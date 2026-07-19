@@ -158,14 +158,12 @@ function usePlan(initial: DietData | null) {
         }
     };
 
-    useEffect(() => {
-        if (!initial) {
-            // Only update supplements if we aren't exactly parsing a fresh initial plan
-            import('../lib/diet.js').then(({ getSupplements }) => {
-                setPlan(prev => ({ ...prev, supplements: getSupplements(gender), initial: { ...prev.initial, gender } }));
-            });
-        }
-    }, [gender]);
+    const handleGenderChange = (g: 'male' | 'female') => {
+        setGender(g);
+        import('../lib/diet.js').then(({ getSupplements }) => {
+            setPlan(prev => ({ ...prev, supplements: getSupplements(g), initial: { ...prev.initial, gender: g } }));
+        });
+    };
 
     return {
         plan,
@@ -181,7 +179,7 @@ function usePlan(initial: DietData | null) {
         trainingDates,
         toggleTrainingDate,
         gender,
-        setGender,
+        handleGenderChange,
         weekPlan,
         carbProducts,
         proteinProducts,
@@ -500,7 +498,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         trainingDates,
         toggleTrainingDate,
         gender,
-        setGender,
+        handleGenderChange,
         weekPlan,
         carbProducts,
         proteinProducts,
@@ -610,14 +608,14 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         <div className="flex bg-cream p-1 rounded-xl border border-silver">
                             <button
                                 type="button"
-                                onClick={() => setGender('male')}
+                                onClick={() => handleGenderChange('male')}
                                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${gender === 'male' ? 'bg-white shadow-sm border border-silver/50 text-ink' : 'text-steel hover:text-ink'}`}
                             >
                                 Мужской
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setGender('female')}
+                                onClick={() => handleGenderChange('female')}
                                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${gender === 'female' ? 'bg-white shadow-sm border border-silver/50 text-ink' : 'text-steel hover:text-ink'}`}
                             >
                                 Женский
