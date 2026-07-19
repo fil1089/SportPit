@@ -858,8 +858,7 @@ export function buildDayPlan(
                 const addedText = added.map(item => {
                     const p = allProducts.find(prod => prod.value === item.productValue);
                     if (!p) return '';
-                    // Специальный префикс, чтобы было понятно, что это ручная добавка
-                    return `✨ ${formatProtein(p, item.amount)}`;
+                    return formatProtein(p, item.amount);
                 }).filter(Boolean);
                 // Вставляем добавленные продукты в начало списка
                 meal.items.unshift(...addedText);

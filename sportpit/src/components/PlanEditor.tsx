@@ -548,7 +548,8 @@ function AddOverrideForm({
 function DayCard({
     date,
     plan,
-    allProducts,
+    carbProducts,
+    proteinProducts,
     active,
     onToggle,
     onRefresh,
@@ -557,7 +558,8 @@ function DayCard({
 }: {
     date: string;
     plan: DayPlan;
-    allProducts: ProductRef[];
+    carbProducts: ProductRef[];
+    proteinProducts: ProductRef[];
     active: boolean;
     onToggle: () => void;
     onRefresh: () => void;
@@ -608,6 +610,13 @@ function DayCard({
                     // Рассчитываем, какие из элементов списка являются ручными добавками (они всегда в начале массива items)
                     const overridesCount = meal.overrides?.length || 0;
                     
+                    // Фильтруем доступные продукты по шаблону
+                    // Углеводы можно добавлять только если в шаблоне есть слово "Углеводы"
+                    let availableProducts = [...proteinProducts];
+                    if (meal.template.includes('Углеводы')) {
+                        availableProducts = [...availableProducts, ...carbProducts];
+                    }
+                    
                     return (
                         <div key={meal.name} className="bg-cream rounded-2xl border border-silver p-4 flex flex-col">
                             <div className="flex items-center gap-2 mb-2">
@@ -638,7 +647,7 @@ function DayCard({
                             <div className="mt-3">
                                 {addingToMeal === mealIndex ? (
                                     <AddOverrideForm 
-                                        allProducts={allProducts} 
+                                        allProducts={availableProducts} 
                                         onAdd={(val, amount) => {
                                             onAddOverride(mealIndex, val, amount);
                                             setAddingToMeal(null);
@@ -914,7 +923,8 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         key={date}
                         date={date}
                         plan={dayPlan}
-                        allProducts={[...plan.products.carbs, ...plan.products.protein]}
+                        carbProducts={plan.products.carbs}
+                        proteinProducts={plan.products.protein}
                         active={trainingDates.includes(date)}
                         onToggle={() => toggleTrainingDate(date)}
                         onRefresh={() => refreshDay(date)}
