@@ -84,12 +84,12 @@ export function SystemPage() {
                             <p className="text-steel mb-4">Нутриенты разделяются по дням и по приёмам пищи:</p>
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div className="p-4 rounded-2xl bg-cobalt/5 border border-cobalt/15">
-                                    <p className="text-cobalt font-bold mb-2">💪 День тренировки</p>
+                                    <p className="text-cobalt font-bold mb-2">День тренировки</p>
                                     <p className="text-steel text-sm">Приём 1 после тренировки: <strong className="text-ink">белок + углеводы</strong>, минимум жира. Мышцы как губка впитывают гликоген.</p>
                                     <p className="text-steel text-sm mt-1">Приём 2 вечером: <strong className="text-ink">белок + жиры</strong> без углеводов. Гормоны, тестостерон.</p>
                                 </div>
                                 <div className="p-4 rounded-2xl bg-lime/10 border border-lime/30">
-                                    <p className="text-lime-700 font-bold mb-2">🚶 День отдыха</p>
+                                    <p className="text-lime-700 font-bold mb-2">День отдыха</p>
                                     <p className="text-steel text-sm">Оба приёма: <strong className="text-ink">белок + жиры</strong>. Инсулин низкий весь день.</p>
                                     <p className="text-steel text-sm mt-1">10 000 шагов в таких условиях сжигают накопленный жир.</p>
                                 </div>
