@@ -74,6 +74,7 @@ export interface DietData {
     startDate: string;
     plan?: PlanSchema;
     gender?: 'male' | 'female';
+    seedModifiers?: Record<string, number>;
 }
 
 export type CarbSource = string;

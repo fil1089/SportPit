@@ -54,7 +54,7 @@ function usePlan(initial: DietData | null) {
     const [proteinSources, setProteinSources] = useState<string[]>(initial?.proteinSources ?? plan.initial.proteinSources);
     const [trainingDates, setTrainingDates] = useState<string[]>(initial?.trainingDates ?? plan.initial.trainingDates);
     const [gender, setGender] = useState<'male' | 'female'>(initial?.gender ?? plan.initial.gender ?? 'male');
-    const [seedModifiers, setSeedModifiers] = useState<Record<string, number>>({});
+    const [seedModifiers, setSeedModifiers] = useState<Record<string, number>>(initial?.seedModifiers ?? {});
     const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -70,7 +70,7 @@ function usePlan(initial: DietData | null) {
             setProteinSources(filterSources(initial.proteinSources, resolved.products.protein, resolved.initial.proteinSources));
             setTrainingDates(initial.trainingDates ?? resolved.initial.trainingDates);
             setGender(initial.gender ?? resolved.initial.gender ?? 'male');
-            setSeedModifiers({});
+            setSeedModifiers(initial.seedModifiers ?? {});
         }
     }, [initial]);
 
@@ -104,8 +104,9 @@ function usePlan(initial: DietData | null) {
             startDate,
             plan,
             gender,
+            seedModifiers,
         }),
-        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender]
+        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers]
     );
 
     const refreshDay = (date: string) => {
