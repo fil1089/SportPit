@@ -78,12 +78,12 @@ function usePlan(initial: DietData | null) {
     }, [initial]);
 
     const carbProducts = useMemo(
-        () => carbSources.map((v) => plan.products.carbs.find((p) => p.value === v)).filter(Boolean) as ProductRef[],
+        () => carbSources.map((v) => plan.products.carbs.find((p) => p.value === v && !p.deleted)).filter(Boolean) as ProductRef[],
         [carbSources, plan.products.carbs]
     );
 
     const proteinProducts = useMemo(
-        () => proteinSources.map((v) => plan.products.protein.find((p) => p.value === v)).filter(Boolean) as ProductRef[],
+        () => proteinSources.map((v) => plan.products.protein.find((p) => p.value === v && !p.deleted)).filter(Boolean) as ProductRef[],
         [proteinSources, plan.products.protein]
     );
 
@@ -121,23 +121,42 @@ function usePlan(initial: DietData | null) {
         setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
     };
 
-    const handleAddCustomProduct = (type: 'carbs' | 'protein', product: ProductRef) => {
+    const handleSaveProduct = (type: 'carbs' | 'protein', product: ProductRef) => {
         setPlan(prev => {
             const next = { ...prev };
-            next.products = { ...next.products, [type]: [...next.products[type], product] };
+            const existingIndex = next.products[type].findIndex(p => p.value === product.value);
+            if (existingIndex >= 0) {
+                // Update
+                const newArr = [...next.products[type]];
+                newArr[existingIndex] = product;
+                next.products = { ...next.products, [type]: newArr };
+            } else {
+                // Add
+                next.products = { ...next.products, [type]: [...next.products[type], product] };
+                if (type === 'carbs') {
+                    setCarbSources(p => [...p, product.value]);
+                } else {
+                    setProteinSources(p => [...p, product.value]);
+                }
+            }
             return next;
         });
-        if (type === 'carbs') {
-            setCarbSources(prev => [...prev, product.value]);
-        } else {
-            setProteinSources(prev => [...prev, product.value]);
-        }
     };
 
-    const handleRemoveCustomProduct = (type: 'carbs' | 'protein', value: string) => {
+    const handleRemoveProduct = (type: 'carbs' | 'protein', value: string) => {
         setPlan(prev => {
             const next = { ...prev };
-            next.products = { ...next.products, [type]: next.products[type].filter(p => p.value !== value) };
+            const p = next.products[type].find(x => x.value === value);
+            if (p?.custom) {
+                // Remove entirely
+                next.products = { ...next.products, [type]: next.products[type].filter(x => x.value !== value) };
+            } else {
+                // Mark as deleted
+                next.products = {
+                    ...next.products,
+                    [type]: next.products[type].map(x => x.value === value ? { ...x, deleted: true } : x)
+                };
+            }
             return next;
         });
         if (type === 'carbs') {
@@ -159,8 +178,8 @@ function usePlan(initial: DietData | null) {
     };
 
     const autoSelectProtein = () => {
-        const defaultSelection = ['chicken_breast', 'turkey', 'chicken_thigh', 'eggs', 'cottage_cheese_5', 'greek_yogurt_2', 'tofu', 'tempeh'];
-        setProteinSources(defaultSelection.filter(v => plan.products.protein.some(p => p.value === v)));
+        const defaultSelection = ['chicken_breast', 'turkey', 'chicken_thigh', 'eggs', 'cottage_cheese_5', 'greek_yogurt_2'];
+        setProteinSources(defaultSelection.filter(v => plan.products.protein.some(p => p.value === v && !p.deleted)));
     };
 
     const handleWeightChange = (val: string) => {
@@ -848,7 +867,11 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                     />
                 </div>
                 
-                <AddCustomProductForm onAdd={handleAddCustomProduct} />
+                <ProductManager 
+                    products={plan.products} 
+                    onSave={handleSaveProduct} 
+                    onRemove={handleRemoveProduct} 
+                />
                 <div className="mb-6"></div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -946,9 +969,20 @@ export function PlanEditor({ initial }: PlanEditorProps) {
     );
 }
 
-function AddCustomProductForm({ onAdd }: { onAdd: (type: 'carbs' | 'protein', product: ProductRef) => void }) {
+function ProductManager({
+    products,
+    onSave,
+    onRemove
+}: {
+    products: { carbs: ProductRef[], protein: ProductRef[] };
+    onSave: (type: 'carbs' | 'protein', product: ProductRef) => void;
+    onRemove: (type: 'carbs' | 'protein', value: string) => void;
+}) {
     const [isOpen, setIsOpen] = useState(false);
-    const [type, setType] = useState<'carbs' | 'protein'>('protein');
+    const [activeTab, setActiveTab] = useState<'protein' | 'carbs'>('protein');
+    const [editingProduct, setEditingProduct] = useState<ProductRef | null>(null);
+
+    // Form state
     const [label, setLabel] = useState('');
     const [protein, setProtein] = useState('');
     const [fat, setFat] = useState('');
@@ -962,85 +996,140 @@ function AddCustomProductForm({ onAdd }: { onAdd: (type: 'carbs' | 'protein', pr
                 onClick={() => setIsOpen(true)}
                 className="w-full py-3 mt-2 border-2 border-dashed border-silver text-steel rounded-xl font-medium hover:border-cobalt hover:text-cobalt transition"
             >
-                + Добавить свой продукт
+                ⚙ Управление продуктами
             </button>
         );
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!label.trim()) return;
-        
-        const product: ProductRef = {
-            value: `custom_${Date.now()}`,
-            label: label.trim(),
-            defaultPortion: type === 'carbs' ? 50 : 100,
-            custom: true,
-        };
+    const handleEdit = (p: ProductRef) => {
+        setEditingProduct(p);
+        setLabel(p.label);
+        setProtein(p.proteinPer100g ? String(p.proteinPer100g) : '');
+        setFat(p.fatPer100g ? String(p.fatPer100g) : '');
+        setCarbs(p.carbsPer100g ? String(p.carbsPer100g) : '');
+        if (p.proteinType) setProteinType(p.proteinType);
+    };
 
-        if (protein) product.proteinPer100g = Number(protein.replace(',', '.'));
-        if (fat) product.fatPer100g = Number(fat.replace(',', '.'));
-        if (carbs) product.carbsPer100g = Number(carbs.replace(',', '.'));
-        if (type === 'protein') product.proteinType = proteinType;
-
-        onAdd(type, product);
-        
-        setIsOpen(false);
+    const handleAddNew = () => {
+        setEditingProduct(null);
         setLabel('');
         setProtein('');
         setFat('');
         setCarbs('');
     };
 
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!label.trim()) return;
+        
+        const product: ProductRef = {
+            ...(editingProduct || {}),
+            value: editingProduct ? editingProduct.value : `custom_${Date.now()}`,
+            label: label.trim(),
+            defaultPortion: editingProduct?.defaultPortion ?? (activeTab === 'carbs' ? 50 : 100),
+            custom: editingProduct ? editingProduct.custom : true,
+        };
+
+        if (protein) product.proteinPer100g = Number(protein.replace(',', '.'));
+        if (fat) product.fatPer100g = Number(fat.replace(',', '.'));
+        if (carbs) product.carbsPer100g = Number(carbs.replace(',', '.'));
+        if (activeTab === 'protein') product.proteinType = proteinType;
+
+        onSave(activeTab, product);
+        
+        handleAddNew();
+    };
+
+    const displayList = products[activeTab].filter(p => !p.deleted);
+
     return (
-        <form onSubmit={handleSubmit} className="mt-4 p-4 border border-silver bg-cream rounded-2xl">
+        <div className="mt-4 p-5 border border-silver bg-cream rounded-2xl">
             <div className="flex items-center justify-between mb-4">
-                <h4 className="font-bold text-ink">Новый продукт</h4>
-                <button type="button" onClick={() => setIsOpen(false)} className="text-steel hover:text-coral text-sm">Отмена</button>
+                <h4 className="font-bold text-ink text-lg">База продуктов</h4>
+                <button type="button" onClick={() => { setIsOpen(false); handleAddNew(); }} className="text-steel hover:text-coral font-medium">Закрыть</button>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label className="block text-xs font-semibold text-steel mb-1">Тип продукта</label>
-                    <select value={type} onChange={e => setType(e.target.value as 'carbs' | 'protein')} className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt">
-                        <option value="protein">Источник белка</option>
-                        <option value="carbs">Источник углеводов</option>
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-xs font-semibold text-steel mb-1">Название</label>
-                    <input required value={label} onChange={e => setLabel(e.target.value)} placeholder="Например: Чечевица" className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
-                </div>
+            <div className="flex gap-2 mb-4">
+                <button 
+                    type="button" 
+                    onClick={() => { setActiveTab('protein'); handleAddNew(); }}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition ${activeTab === 'protein' ? 'bg-cobalt text-white' : 'bg-white text-steel border border-silver hover:border-cobalt hover:text-cobalt'}`}
+                >
+                    Источники белка
+                </button>
+                <button 
+                    type="button" 
+                    onClick={() => { setActiveTab('carbs'); handleAddNew(); }}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition ${activeTab === 'carbs' ? 'bg-cobalt text-white' : 'bg-white text-steel border border-silver hover:border-cobalt hover:text-cobalt'}`}
+                >
+                    Источники углеводов
+                </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label className="block text-xs font-semibold text-steel mb-1">Белки (на 100г)</label>
-                    <input type="number" step="0.1" min="0" value={protein} onChange={e => setProtein(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
-                </div>
-                <div>
-                    <label className="block text-xs font-semibold text-steel mb-1">Жиры (на 100г)</label>
-                    <input type="number" step="0.1" min="0" value={fat} onChange={e => setFat(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
-                </div>
-                <div>
-                    <label className="block text-xs font-semibold text-steel mb-1">Углеводы (на 100г)</label>
-                    <input type="number" step="0.1" min="0" value={carbs} onChange={e => setCarbs(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-white border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
-                </div>
-            </div>
-
-            {type === 'protein' && (
-                <div className="mb-4">
-                    <label className="block text-xs font-semibold text-steel mb-1">Тип белка</label>
-                    <div className="flex gap-2">
-                        <label className="flex items-center gap-2 text-sm text-ink"><input type="radio" name="ptype" value="animal" checked={proteinType === 'animal'} onChange={() => setProteinType('animal')} /> Животный</label>
-                        <label className="flex items-center gap-2 text-sm text-ink"><input type="radio" name="ptype" value="plant" checked={proteinType === 'plant'} onChange={() => setProteinType('plant')} /> Растительный</label>
+                    <h5 className="font-semibold text-ink text-sm mb-3">Список продуктов</h5>
+                    <div className="max-h-64 overflow-y-auto pr-2 space-y-2">
+                        {displayList.map(p => (
+                            <div key={p.value} className="flex items-center justify-between bg-white p-3 rounded-xl border border-silver group">
+                                <div>
+                                    <div className="font-medium text-sm text-ink">{p.label}</div>
+                                    <div className="text-xs text-steel">Б {p.proteinPer100g || 0} · Ж {p.fatPer100g || 0} · У {p.carbsPer100g || 0}</div>
+                                </div>
+                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button type="button" onClick={() => handleEdit(p)} className="text-cobalt hover:underline text-xs font-medium">Изменить</button>
+                                    <button type="button" onClick={() => onRemove(activeTab, p.value)} className="text-coral hover:underline text-xs font-medium">Удалить</button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            )}
 
-            <button type="submit" className="w-full py-2.5 bg-cobalt text-white rounded-lg font-semibold shadow-md shadow-cobalt/20 hover:bg-cobalt-dark transition">
-                Добавить в список
-            </button>
-        </form>
+                <div className="bg-white p-4 rounded-xl border border-silver h-fit">
+                    <div className="flex items-center justify-between mb-4">
+                        <h5 className="font-semibold text-ink text-sm">{editingProduct ? 'Редактировать продукт' : 'Добавить продукт'}</h5>
+                        {editingProduct && (
+                            <button type="button" onClick={handleAddNew} className="text-xs text-cobalt hover:underline font-medium">+ Новый</button>
+                        )}
+                    </div>
+                    
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-semibold text-steel mb-1">Название</label>
+                            <input required value={label} onChange={e => setLabel(e.target.value)} placeholder="Например: Чечевица" className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
+                        </div>
+
+                        {activeTab === 'protein' && (
+                            <div>
+                                <label className="block text-xs font-semibold text-steel mb-1">Тип белка</label>
+                                <select value={proteinType} onChange={e => setProteinType(e.target.value as 'animal' | 'plant')} className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm outline-none focus:border-cobalt">
+                                    <option value="animal">Животный</option>
+                                    <option value="plant">Растительный</option>
+                                </select>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-3 gap-3">
+                            <div>
+                                <label className="block text-xs font-semibold text-steel mb-1">Белки (на 100г)</label>
+                                <input type="number" step="0.1" min="0" value={protein} onChange={e => setProtein(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-steel mb-1">Жиры (на 100г)</label>
+                                <input type="number" step="0.1" min="0" value={fat} onChange={e => setFat(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-steel mb-1">Углеводы</label>
+                                <input type="number" step="0.1" min="0" value={carbs} onChange={e => setCarbs(e.target.value)} placeholder="0" className="w-full px-3 py-2 bg-cream border border-silver rounded-lg text-sm outline-none focus:border-cobalt" />
+                            </div>
+                        </div>
+
+                        <button type="submit" className="w-full py-2.5 bg-cobalt text-white rounded-lg font-medium hover:bg-cobalt/90 transition text-sm">
+                            {editingProduct ? 'Сохранить изменения' : 'Добавить продукт'}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     );
 }

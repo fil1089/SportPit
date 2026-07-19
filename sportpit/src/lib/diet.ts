@@ -35,8 +35,6 @@ export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
     { value: 'whey_protein', label: 'Сывороточный протеин', proteinPerPortion: 18, defaultPortion: 1, proteinType: 'animal' },
     { value: 'kefir_25', label: 'Кефир 2.5%', proteinPer100g: 3, fatPer100g: 2.5, defaultPortion: 250, proteinType: 'animal' },
     // Растительный белок
-    { value: 'tofu', label: 'Тофу', proteinPer100g: 8, fatPer100g: 4, defaultPortion: 250, proteinType: 'plant' },
-    { value: 'tempeh', label: 'Темпе', proteinPer100g: 19, fatPer100g: 11, defaultPortion: 120, proteinType: 'plant' },
     { value: 'peanuts', label: 'Арахис', proteinPer100g: 26, fatPer100g: 49, defaultPortion: 50, proteinType: 'plant' },
     { value: 'almonds', label: 'Миндаль', proteinPer100g: 18.5, fatPer100g: 54, defaultPortion: 50, proteinType: 'plant' },
     { value: 'sunflower_seeds', label: 'Семечки подсолнечные', proteinPer100g: 20, fatPer100g: 52, defaultPortion: 50, proteinType: 'plant' },
@@ -136,7 +134,6 @@ export const DEFAULT_PLAN: PlanSchema = {
 function mergeProducts(saved: ProductRef[] | undefined, defaults: ProductRef[]): ProductRef[] {
     const savedMap = new Map((saved || []).map((p) => [p.value, p]));
     // Overwrite defaults with saved data for products that still exist in defaults.
-    // Products removed from defaults (e.g. deprecated sources) are dropped.
     const merged = defaults.map((p) => ({ ...p, ...(savedMap.get(p.value) || {}) }));
     
     // Add custom products that are not in defaults
