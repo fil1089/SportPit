@@ -811,6 +811,26 @@ export function buildDayPlan(
         return `${source.label} ${rounded} г`;
     }
 
+    function getExtraFatItem(
+        id: string,
+        defaultValue: string,
+        defaultAmount: number,
+        mealIndex: number
+    ): MealItemStructured {
+        let product = allProducts.find(p => p.value === defaultValue) || DEFAULT_PROTEIN_SOURCES.find(p => p.value === defaultValue)!;
+        if (baseReplacements?.[mealIndex]?.[id]) {
+            const repValue = baseReplacements[mealIndex][id];
+            const matched = allProducts.find(p => p.value === repValue);
+            if (matched) product = matched;
+        }
+        return {
+            id,
+            category: 'protein', // Поскольку жиры (орехи, сыр) у нас в списке источников белка
+            productValue: product.value,
+            text: `${product.label} ${defaultAmount} г`
+        };
+    }
+
     const meals: Meal[] = training
         ? [
             {
@@ -842,9 +862,9 @@ export function buildDayPlan(
                 template: 'Белок + Жиры',
                 items: [
                     { id: 'protein', category: 'protein', productValue: animalSource2.value, text: formatProtein(animalSource2, animalPortion2) },
-                    ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
+                    ...(!isCheese(animalSource2) ? [getExtraFatItem('extra_cheese', 'cheese', 50, 2)] : []),
                     'Овощной салат с 1 ст.л. оливкового масла',
-                    'Орехи или семечки 30 г',
+                    getExtraFatItem('extra_nuts', 'walnuts', 30, 2),
                 ],
                 dishIdea: generateDishIdea(null, [animalSource2], 'fat', baseSeed),
                 notes: 'Никаких углеводов: ни круп, ни хлеба, ни фруктов.',
@@ -868,9 +888,9 @@ export function buildDayPlan(
                 template: 'Белок + Жиры',
                 items: [
                     { id: 'protein', category: 'protein', productValue: animalSource2.value, text: formatProtein(animalSource2, animalPortion2) },
-                    ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
+                    ...(!isCheese(animalSource2) ? [getExtraFatItem('extra_cheese', 'cheese', 50, 1)] : []),
                     'Большой овощной салат с оливковым маслом',
-                    'Орехи или семечки 30 г',
+                    getExtraFatItem('extra_nuts', 'walnuts', 30, 1),
                 ],
                 dishIdea: generateDishIdea(null, [animalSource2], 'fat', baseSeed),
             },
