@@ -658,6 +658,7 @@ function DayCardSide({
     onFlip?: () => void;
 }) {
     const [addingToMeal, setAddingToMeal] = useState<number | null>(null);
+    const [editingBaseItem, setEditingBaseItem] = useState<{ mealIndex: number; itemId: string } | null>(null);
 
     return (
         <div className="bg-white rounded-3xl shadow-lg shadow-cobalt/5 border border-silver p-5 sm:p-6 w-full backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
@@ -737,30 +738,50 @@ function DayCardSide({
                                     const itemMacros = calcMacrosFromItems([itemText], [...carbProducts, ...proteinProducts]);
                                     const hasMacros = itemMacros.protein > 0 || itemMacros.fat > 0 || itemMacros.carbs > 0;
                                     
+                                    const isEditing = editingBaseItem?.mealIndex === mealIndex && editingBaseItem?.itemId === itemId;
+                                    
                                     return (
                                         <li key={i} className={`relative group ${isOverride ? 'text-cobalt font-medium' : ''}`}>
-                                            <span>{itemText}</span>
-                                            {hasMacros && (
-                                                <span className="text-[11px] text-steel/80 ml-1.5 font-normal whitespace-nowrap">
-                                                    (Б {itemMacros.protein} · Ж {itemMacros.fat} · У {itemMacros.carbs})
-                                                </span>
-                                            )}
-                                            {isOverride && (
-                                                <button
-                                                    onClick={() => onRemoveOverride(mealIndex, i)}
-                                                    className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt ml-2 px-1 transition absolute -right-4"
-                                                    title="Удалить"
-                                                >
-                                                    ×
-                                                </button>
-                                            )}
-                                            {isStructured && onReplaceBaseItem && (
+                                            {!isEditing ? (
+                                                <>
+                                                    <span>{itemText}</span>
+                                                    {hasMacros && (
+                                                        <span className="text-[11px] text-steel/80 ml-1.5 font-normal whitespace-nowrap">
+                                                            (Б {itemMacros.protein} · Ж {itemMacros.fat} · У {itemMacros.carbs})
+                                                        </span>
+                                                    )}
+                                                    {isOverride && (
+                                                        <button
+                                                            onClick={() => onRemoveOverride(mealIndex, i)}
+                                                            className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt ml-2 px-1 transition absolute -right-4"
+                                                            title="Удалить"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    )}
+                                                    {isStructured && onReplaceBaseItem && (
+                                                        <button
+                                                            onClick={() => setEditingBaseItem({ mealIndex, itemId: itemId! })}
+                                                            className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt ml-2 px-1 transition absolute -right-6"
+                                                            title="Заменить продукт"
+                                                        >
+                                                            ✎
+                                                        </button>
+                                                    )}
+                                                </>
+                                            ) : (
                                                 <div className="mt-1 mb-2">
                                                     <select
+                                                        autoFocus
                                                         className="text-xs py-0.5 px-2 bg-cream border border-silver rounded hover:border-cobalt outline-none text-ink w-full max-w-[200px]"
-                                                        value={item.productValue}
-                                                        onChange={(e) => onReplaceBaseItem(mealIndex, itemId!, e.target.value)}
+                                                        value={(item as any).productValue}
+                                                        onChange={(e) => {
+                                                            onReplaceBaseItem!(mealIndex, itemId!, e.target.value);
+                                                            setEditingBaseItem(null);
+                                                        }}
+                                                        onBlur={() => setEditingBaseItem(null)}
                                                     >
+                                                        <option disabled value="">Выберите продукт</option>
                                                         {itemCategory === 'protein' && [...proteinProducts].map(p => (
                                                             <option key={p.value} value={p.value}>{p.label}</option>
                                                         ))}
