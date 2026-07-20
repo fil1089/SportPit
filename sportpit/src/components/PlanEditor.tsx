@@ -57,6 +57,7 @@ function usePlan(initial: DietData | null) {
     const [gender, setGender] = useState<'male' | 'female'>(initial?.gender ?? plan.initial.gender ?? 'male');
     const [seedModifiers, setSeedModifiers] = useState<Record<string, number>>(initial?.seedModifiers ?? {});
     const [mealOverrides, setMealOverrides] = useState<Record<string, Record<number, Array<{ productValue: string, amount: number }>>>>(initial?.mealOverrides ?? {});
+    const [baseReplacements, setBaseReplacements] = useState<Record<string, Record<number, Record<string, string>>>>(initial?.baseReplacements ?? {});
     
     // Multi-user state
     const [name1, setName1] = useState<string>(initial?.name1 ?? '');
@@ -83,6 +84,7 @@ function usePlan(initial: DietData | null) {
             setGender(initial.gender ?? resolved.initial.gender ?? 'male');
             setSeedModifiers(initial.seedModifiers ?? {});
             setMealOverrides(initial.mealOverrides ?? {});
+            setBaseReplacements(initial.baseReplacements ?? {});
             setName1(initial.name1 ?? '');
             setIsSecondPersonEnabled(initial.isSecondPersonEnabled ?? false);
             setName2(initial.name2 ?? '');
@@ -103,13 +105,13 @@ function usePlan(initial: DietData | null) {
     );
 
     const weekPlan = useMemo(() => {
-        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides);
-    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides]);
+        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements);
+    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements]);
 
     const weekPlan2 = useMemo(() => {
         if (!isSecondPersonEnabled) return [];
-        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides);
-    }, [isSecondPersonEnabled, startDate, weight2, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides]);
+        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements);
+    }, [isSecondPersonEnabled, startDate, weight2, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements]);
 
     const currentMacros = useMemo(() => {
         const protein = calcProtein(weight);
@@ -137,13 +139,14 @@ function usePlan(initial: DietData | null) {
             gender,
             seedModifiers,
             mealOverrides,
+            baseReplacements,
             name1,
             isSecondPersonEnabled,
             name2,
             weight2,
             gender2,
         }),
-        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides, name1, isSecondPersonEnabled, name2, weight2, gender2]
+        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides, baseReplacements, name1, isSecondPersonEnabled, name2, weight2, gender2]
     );
 
     const refreshDay = (date: string) => {
@@ -277,6 +280,23 @@ function usePlan(initial: DietData | null) {
         });
     };
 
+    const handleReplaceBaseItem = (date: string, mealIndex: number, itemId: string, newProductValue: string) => {
+        setBaseReplacements(prev => {
+            const dateReps = prev[date] || {};
+            const mealReps = dateReps[mealIndex] || {};
+            return {
+                ...prev,
+                [date]: {
+                    ...dateReps,
+                    [mealIndex]: {
+                        ...mealReps,
+                        [itemId]: newProductValue
+                    }
+                }
+            };
+        });
+    };
+
     return {
         plan,
         weight,
@@ -309,6 +329,8 @@ function usePlan(initial: DietData | null) {
         mealOverrides,
         handleAddOverrideItem,
         handleRemoveOverrideItem,
+        baseReplacements,
+        handleReplaceBaseItem,
         name1, setName1,
         isSecondPersonEnabled, setIsSecondPersonEnabled,
         name2, setName2,
@@ -616,6 +638,7 @@ function DayCardSide({
     onRefresh,
     onAddOverride,
     onRemoveOverride,
+    onReplaceBaseItem,
     name,
     isMultiUser,
     onFlip,
@@ -629,6 +652,7 @@ function DayCardSide({
     onRefresh: () => void;
     onAddOverride: (mealIndex: number, productValue: string, amount: number) => void;
     onRemoveOverride: (mealIndex: number, overrideIndex: number) => void;
+    onReplaceBaseItem?: (mealIndex: number, itemId: string, newProductValue: string) => void;
     name?: string;
     isMultiUser?: boolean;
     onFlip?: () => void;
@@ -706,12 +730,16 @@ function DayCardSide({
                             <ul className="text-sm text-ink space-y-1 list-disc list-inside flex-1">
                                 {meal.items.map((item, i) => {
                                     const isOverride = i < overridesCount;
-                                    const itemMacros = calcMacrosFromItems([item], [...carbProducts, ...proteinProducts]);
+                                    const isStructured = typeof item !== 'string';
+                                    const itemText = isStructured ? item.text : item;
+                                    const itemId = isStructured ? item.id : undefined;
+                                    const itemCategory = isStructured ? item.category : undefined;
+                                    const itemMacros = calcMacrosFromItems([itemText], [...carbProducts, ...proteinProducts]);
                                     const hasMacros = itemMacros.protein > 0 || itemMacros.fat > 0 || itemMacros.carbs > 0;
                                     
                                     return (
-                                        <li key={i} className={isOverride ? 'text-cobalt font-medium group' : ''}>
-                                            <span>{item}</span>
+                                        <li key={i} className={`relative group ${isOverride ? 'text-cobalt font-medium' : ''}`}>
+                                            <span>{itemText}</span>
                                             {hasMacros && (
                                                 <span className="text-[11px] text-steel/80 ml-1.5 font-normal whitespace-nowrap">
                                                     (Б {itemMacros.protein} · Ж {itemMacros.fat} · У {itemMacros.carbs})
@@ -720,11 +748,27 @@ function DayCardSide({
                                             {isOverride && (
                                                 <button
                                                     onClick={() => onRemoveOverride(mealIndex, i)}
-                                                    className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt ml-2 px-1 transition"
+                                                    className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt ml-2 px-1 transition absolute -right-4"
                                                     title="Удалить"
                                                 >
                                                     ×
                                                 </button>
+                                            )}
+                                            {isStructured && onReplaceBaseItem && (
+                                                <div className="mt-1 mb-2">
+                                                    <select
+                                                        className="text-xs py-0.5 px-2 bg-cream border border-silver rounded hover:border-cobalt outline-none text-ink w-full max-w-[200px]"
+                                                        value={item.productValue}
+                                                        onChange={(e) => onReplaceBaseItem(mealIndex, itemId!, e.target.value)}
+                                                    >
+                                                        {itemCategory === 'protein' && [...proteinProducts].map(p => (
+                                                            <option key={p.value} value={p.value}>{p.label}</option>
+                                                        ))}
+                                                        {itemCategory === 'carbs' && [...carbProducts].map(p => (
+                                                            <option key={p.value} value={p.value}>{p.label}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
                                             )}
                                         </li>
                                     );
@@ -773,6 +817,7 @@ function DayCard({
     onRefresh,
     onAddOverride,
     onRemoveOverride,
+    onReplaceBaseItem,
     name1,
     name2,
     isMultiUser,
@@ -787,6 +832,7 @@ function DayCard({
     onRefresh: () => void;
     onAddOverride: (mealIndex: number, productValue: string, amount: number) => void;
     onRemoveOverride: (mealIndex: number, overrideIndex: number) => void;
+    onReplaceBaseItem?: (mealIndex: number, itemId: string, newProductValue: string) => void;
     name1?: string;
     name2?: string;
     isMultiUser?: boolean;
@@ -805,6 +851,7 @@ function DayCard({
                 onRefresh={onRefresh}
                 onAddOverride={onAddOverride}
                 onRemoveOverride={onRemoveOverride}
+                onReplaceBaseItem={onReplaceBaseItem}
             />
         );
     }
@@ -830,7 +877,8 @@ function DayCard({
                         onRefresh={onRefresh}
                         onAddOverride={onAddOverride}
                         onRemoveOverride={onRemoveOverride}
-                        name={name1}
+                        onReplaceBaseItem={onReplaceBaseItem}
+                        name={name1 || 'Человек 1'}
                         isMultiUser={true}
                         onFlip={() => setFlipped(true)}
                     />
@@ -854,7 +902,8 @@ function DayCard({
                         onRefresh={onRefresh}
                         onAddOverride={onAddOverride}
                         onRemoveOverride={onRemoveOverride}
-                        name={name2}
+                        onReplaceBaseItem={onReplaceBaseItem}
+                        name={name2 || 'Второй человек'}
                         isMultiUser={true}
                         onFlip={() => setFlipped(false)}
                     />
@@ -895,6 +944,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         handleRemoveProduct,
         handleAddOverrideItem,
         handleRemoveOverrideItem,
+        handleReplaceBaseItem,
         name1, setName1,
         isSecondPersonEnabled, setIsSecondPersonEnabled,
         name2, setName2,
@@ -1187,6 +1237,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         onRefresh={() => refreshDay(date)}
                         onAddOverride={(mealIndex, productValue, amount) => handleAddOverrideItem(date, mealIndex, productValue, amount)}
                         onRemoveOverride={(mealIndex, overrideIndex) => handleRemoveOverrideItem(date, mealIndex, overrideIndex)}
+                        onReplaceBaseItem={(mealIndex, itemId, newProductValue) => handleReplaceBaseItem(date, mealIndex, itemId, newProductValue)}
                         name1={name1 || 'Человек 1'}
                         name2={name2 || 'Второй человек'}
                         isMultiUser={isSecondPersonEnabled}

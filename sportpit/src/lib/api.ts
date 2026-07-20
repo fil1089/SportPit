@@ -84,6 +84,7 @@ export interface DietData {
     gender?: 'male' | 'female';
     seedModifiers?: Record<string, number>;
     mealOverrides?: Record<string, Record<number, any>>;
+    baseReplacements?: Record<string, Record<number, Record<string, string>>>;
     name1?: string;
     isSecondPersonEnabled?: boolean;
     name2?: string;

@@ -57,6 +57,7 @@ export interface DietData {
     gender?: 'male' | 'female';
     seedModifiers?: Record<string, number>;
     mealOverrides?: Record<string, Record<number, any>>;
+    baseReplacements?: Record<string, Record<number, Record<string, string>>>;
     name1?: string;
     isSecondPersonEnabled?: boolean;
     name2?: string;
@@ -95,7 +96,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             const body = req.body || {};
             const { 
                 weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides,
-                name1, isSecondPersonEnabled, name2, weight2, gender2
+                baseReplacements, name1, isSecondPersonEnabled, name2, weight2, gender2
             } = body;
 
             if (typeof weight !== 'number' || weight < 30 || weight > 300) {
@@ -124,6 +125,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 gender: gender === 'female' ? 'female' : 'male',
                 seedModifiers: seedModifiers && typeof seedModifiers === 'object' ? seedModifiers : undefined,
                 mealOverrides: mealOverrides && typeof mealOverrides === 'object' ? mealOverrides : undefined,
+                baseReplacements: baseReplacements && typeof baseReplacements === 'object' ? baseReplacements : undefined,
                 name1: typeof name1 === 'string' ? name1 : undefined,
                 isSecondPersonEnabled: typeof isSecondPersonEnabled === 'boolean' ? isSecondPersonEnabled : undefined,
                 name2: typeof name2 === 'string' ? name2 : undefined,

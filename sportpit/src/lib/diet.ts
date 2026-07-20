@@ -149,10 +149,11 @@ function basketLabel(product: ProductRef): string {
     return BASKET_LABELS[product.value] || product.label;
 }
 
-function extractAmounts(items: string[], products: ProductRef[]): Map<string, number> {
+function extractAmounts(items: MealItem[], products: ProductRef[]): Map<string, number> {
     const amounts = new Map<string, number>();
 
-    for (const item of items) {
+    for (const rawItem of items) {
+        const item = typeof rawItem === 'string' ? rawItem : rawItem.text;
         // Яйца 3-4 шт. -> считаем 4 шт. (максимум из диапазона)
         const eggsMatch = item.match(/Яйца\s*(\d+)(?:[–-](\d+))?\s*шт/i);
         if (eggsMatch) {
@@ -315,7 +316,7 @@ export function proteinPortion(protein: number, source: ProductRef): number {
     return Math.round((protein / source.proteinPer100g) * 100);
 }
 
-export function calcMacrosFromItems(items: string[], products: ProductRef[] = [...DEFAULT_CARB_SOURCES, ...DEFAULT_PROTEIN_SOURCES]): Macros & { animalProtein: number; plantProtein: number } {
+export function calcMacrosFromItems(items: MealItem[], products: ProductRef[] = [...DEFAULT_CARB_SOURCES, ...DEFAULT_PROTEIN_SOURCES]): Macros & { animalProtein: number; plantProtein: number } {
     let protein = 0;
     let fat = 0;
     let carbs = 0;
@@ -328,7 +329,8 @@ export function calcMacrosFromItems(items: string[], products: ProductRef[] = [.
         if (type === 'plant') plantProtein += amount;
     }
 
-    for (const item of items) {
+    for (const rawItem of items) {
+        const item = typeof rawItem === 'string' ? rawItem : rawItem.text;
         // Протеин порошок: 18г белка, 7.2г углеводов на порцию
         if (item.includes('протеин')) {
             addProtein(18, 'animal');
@@ -428,11 +430,20 @@ export interface Macros {
     calories: number;
 }
 
+export interface MealItemStructured {
+    id: string; // e.g. 'animal1', 'carb1', 'animal2'
+    text: string;
+    productValue: string;
+    category: 'protein' | 'carbs' | 'fats';
+}
+
+export type MealItem = string | MealItemStructured;
+
 export interface Meal {
     name: string;
     time: string;
     template: string;
-    items: string[];
+    items: MealItem[];
     dishIdea?: string;
     notes?: string;
     macros?: Macros;
@@ -677,7 +688,8 @@ export function buildDayPlan(
     proteinSources: ProductRef[],
     trainingDates: string[],
     seedModifier = 0,
-    overrides?: Record<number, MealOverrideItem[]>
+    overrides?: Record<number, MealOverrideItem[]>,
+    baseReplacements?: Record<number, Record<string, string>>
 ): DayPlan {
     const training = isTrainingDay(date, trainingDates);
 
@@ -711,7 +723,11 @@ export function buildDayPlan(
     proteinTarget = Math.max(0, proteinTarget - overrideProtein);
     
     const baseSeed = seedModifier ? `${date}-${seedModifier}` : date;
-    const carbSource = safePickRotation(carbSources, DEFAULT_CARB_SOURCES, baseSeed);
+    let carbSource = safePickRotation(carbSources, DEFAULT_CARB_SOURCES, baseSeed);
+    if (baseReplacements?.[0]?.['carb']) {
+        const found = allProducts.find(p => p.value === baseReplacements[0]['carb']);
+        if (found) carbSource = found;
+    }
     const carbPortionG = carbPortion(carbTarget, carbSource);
 
 
@@ -757,7 +773,11 @@ export function buildDayPlan(
     const basePool1 = hasAnimal ? animal : plant;
     const leanPool = basePool1.filter((s) => (s.fatPer100g ?? 0) < 5);
     const pool1 = bestPool(leanPool, basePool1, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) < 5));
-    const animalSource1 = pickRotationExcluding(pool1, [], baseSeed);
+    let animalSource1 = pickRotationExcluding(pool1, [], baseSeed);
+    if (baseReplacements?.[0]?.['protein']) {
+        const found = allProducts.find(p => p.value === baseReplacements[0]['protein']);
+        if (found) animalSource1 = found;
+    }
 
     // Жировые приёмы — предпочитаем жирные белки (бёдра, говядина, яйца, творог 9%)
     const basePool2 = hasAnimal ? animal : plant;
@@ -766,7 +786,12 @@ export function buildDayPlan(
     
     const excludeForAnimal2 = [animalSource1];
     if (isCheese(animalSource1)) excludeForAnimal2.push(...proteinSources.filter(isCheese));
-    const animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, baseSeed + '2');
+    let animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, baseSeed + '2');
+    const meal2Index = training ? 2 : 1;
+    if (baseReplacements?.[meal2Index]?.['protein']) {
+        const found = allProducts.find(p => p.value === baseReplacements[meal2Index]['protein']);
+        if (found) animalSource2 = found;
+    }
 
     // Если тренировочный день, перекус - это 1 порция сывороточного протеина (~25г белка).
     // Остаток белка делим на Приём 1 и Приём 2.
@@ -793,8 +818,8 @@ export function buildDayPlan(
                 time: 'После тренировки (~11:30)',
                 template: 'Белок + Углеводы',
                 items: [
-                    formatProtein(animalSource1, animalPortion1),
-                    `${carbSource.label} ${carbPortionG} г ` + (carbSource.value === 'potato' ? '(сырой вес/очищенный)' : '(сухой вес)'),
+                    { id: 'protein', category: 'protein', productValue: animalSource1.value, text: formatProtein(animalSource1, animalPortion1) },
+                    { id: 'carb', category: 'carbs', productValue: carbSource.value, text: `${carbSource.label} ${carbPortionG} г ` + (carbSource.value === 'potato' ? '(сырой вес/очищенный)' : '(сухой вес)') },
                     'Овощной салат без масла',
                     'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
                 ],
@@ -816,7 +841,7 @@ export function buildDayPlan(
                 time: '~17:00',
                 template: 'Белок + Жиры',
                 items: [
-                    formatProtein(animalSource2, animalPortion2),
+                    { id: 'protein', category: 'protein', productValue: animalSource2.value, text: formatProtein(animalSource2, animalPortion2) },
                     ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
                     'Овощной салат с 1 ст.л. оливкового масла',
                     'Орехи или семечки 30 г',
@@ -831,7 +856,7 @@ export function buildDayPlan(
                 time: '09:00–11:00',
                 template: 'Белок + Жиры',
                 items: [
-                    formatProtein(animalSource1, animalPortion1),
+                    { id: 'protein', category: 'protein', productValue: animalSource1.value, text: formatProtein(animalSource1, animalPortion1) },
                     'Овощной салат с оливковым маслом',
                 ],
                 dishIdea: generateDishIdea(null, [animalSource1], 'fat', baseSeed),
@@ -842,7 +867,7 @@ export function buildDayPlan(
                 time: '14:00–17:00',
                 template: 'Белок + Жиры',
                 items: [
-                    formatProtein(animalSource2, animalPortion2),
+                    { id: 'protein', category: 'protein', productValue: animalSource2.value, text: formatProtein(animalSource2, animalPortion2) },
                     ...(!isCheese(animalSource2) ? ['Сыр 50 г'] : []),
                     'Большой овощной салат с оливковым маслом',
                     'Орехи или семечки 30 г',
@@ -884,7 +909,8 @@ export function generateWeekPlan(
     trainingDates: string[],
     weeks = 6,
     seedModifiers: Record<string, number> = {},
-    mealOverrides: Record<string, Record<number, MealOverrideItem[]>> = {}
+    mealOverrides: Record<string, Record<number, MealOverrideItem[]>> = {},
+    baseReplacements: Record<string, Record<number, Record<string, string>>> = {}
 ): { date: string; plan: DayPlan }[] {
     const start = parseLocalDate(startDate);
     const days: { date: string; plan: DayPlan }[] = [];
@@ -893,7 +919,7 @@ export function generateWeekPlan(
         const date = new Date(start);
         date.setDate(start.getDate() + i);
         const iso = formatISOLocal(date);
-        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso]);
+        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso], baseReplacements[iso]);
         days.push({ date: iso, plan });
     }
 
