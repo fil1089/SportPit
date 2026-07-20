@@ -743,17 +743,17 @@ function DayCardSide({
                                     return (
                                         <li key={i} className={`group ${isOverride ? 'text-cobalt font-medium' : ''}`}>
                                             {!isEditing ? (
-                                                <div className="flex items-center flex-wrap gap-1">
+                                                <>
                                                     <span>{itemText}</span>
                                                     {hasMacros && (
-                                                        <span className="text-[11px] text-steel/80 font-normal whitespace-nowrap">
+                                                        <span className="text-[11px] text-steel/80 ml-1.5 font-normal whitespace-nowrap">
                                                             (Б {itemMacros.protein} · Ж {itemMacros.fat} · У {itemMacros.carbs})
                                                         </span>
                                                     )}
                                                     {isOverride && (
                                                         <button
                                                             onClick={() => onRemoveOverride(mealIndex, i)}
-                                                            className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt px-1 transition"
+                                                            className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt ml-2 px-1 transition"
                                                             title="Удалить"
                                                         >
                                                             ×
@@ -762,13 +762,13 @@ function DayCardSide({
                                                     {isStructured && onReplaceBaseItem && (
                                                         <button
                                                             onClick={() => setEditingBaseItem({ mealIndex, itemId: itemId! })}
-                                                            className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt px-1 transition"
+                                                            className="opacity-0 group-hover:opacity-100 text-steel hover:text-cobalt ml-2 px-1 transition"
                                                             title="Заменить продукт"
                                                         >
                                                             ✎
                                                         </button>
                                                     )}
-                                                </div>
+                                                </>
                                             ) : (
                                                 <div className="mt-1 mb-2">
                                                     <select
