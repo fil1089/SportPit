@@ -163,13 +163,13 @@ export function TrackerPage() {
                     const checked = !!dailyChecks[item.id];
                     const isCustom = item.id.startsWith('custom_');
                     return (
-                        <div key={item.id} className={`p-4 rounded-xl border transition-colors flex items-start gap-4 ${checked ? 'bg-mint/10 border-mint/30' : 'bg-surface border-border/50'}`}>
+                        <div key={item.id} className="p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-start gap-4">
                             <button
                                 onClick={() => toggleCheck(item.id)}
-                                className={`w-6 h-6 shrink-0 rounded flex items-center justify-center border transition-colors mt-1 ${checked ? 'bg-mint border-mint text-surface' : 'bg-surface border-steel'}`}
+                                className={`w-7 h-7 shrink-0 rounded-xl flex items-center justify-center border-2 transition-all mt-0.5 ${checked ? 'bg-green-500 border-green-500 text-white shadow-md shadow-green-500/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}
                             >
                                 {checked && (
-                                    <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="3 7.5 6 10.5 11 3.5"></polyline>
                                     </svg>
                                 )}
@@ -178,7 +178,7 @@ export function TrackerPage() {
                                 <div className="font-bold text-slate-800">{item.name}</div>
                                 <div className="text-sm text-slate-500 font-medium mt-1">Дозировка: {item.dose}</div>
                                 <div className="text-sm text-slate-400 mt-0.5">Время: {item.when}</div>
-                                {item.duration && <div className="text-sm text-cobalt font-semibold mt-1">Курс: {item.duration}</div>}
+                                {item.duration && <div className="text-sm text-blue-600 font-semibold mt-1">Курс: {item.duration}</div>}
                             </div>
                             {isCustom && (
                                 <button onClick={() => removeCustomMed(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors p-1" title="Удалить">
@@ -287,8 +287,10 @@ export function TrackerPage() {
 
                     <section className="bg-white/60 backdrop-blur-xl border border-white/80 p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                         <h2 className="text-2xl font-bold mb-2 flex items-center gap-3 text-slate-800">
-                            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-cobalt" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-blue-600" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M10.5 20.5 4 14l5-5 6.5 6.5-5 5Z"></path>
+                                <path d="M10.5 20.5 14 17l5-5-6.5-6.5-5 5Z"></path>
+                                <path d="m14 7-3 3"></path>
                             </svg>
                             Персональные препараты
                         </h2>
@@ -299,34 +301,34 @@ export function TrackerPage() {
                         <div className="flex flex-col gap-3 p-5 bg-slate-50 rounded-2xl border border-slate-100">
                             <input
                                 type="text"
-                                placeholder="Название лекарства..."
+                                placeholder="Название (например, Кардиомагнил)"
                                 value={newMed.name}
                                 onChange={(e) => setNewMed({...newMed, name: e.target.value})}
-                                className="w-full bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt/20 focus:border-cobalt transition-shadow shadow-sm"
+                                className="w-full bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow shadow-sm"
                             />
-                            <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <input
                                     type="text"
-                                    placeholder="Дозировка..."
+                                    placeholder="Дозировка"
                                     value={newMed.dose}
                                     onChange={(e) => setNewMed({...newMed, dose: e.target.value})}
-                                    className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt/20 focus:border-cobalt transition-shadow shadow-sm flex-1"
+                                    className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow shadow-sm"
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Время приема..."
+                                    placeholder="Время приема"
                                     value={newMed.when}
                                     onChange={(e) => setNewMed({...newMed, when: e.target.value})}
-                                    className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt/20 focus:border-cobalt transition-shadow shadow-sm flex-1"
+                                    className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow shadow-sm"
                                 />
-                                <button
-                                    onClick={addCustomMed}
-                                    disabled={!newMed.name}
-                                    className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-md transition-all disabled:opacity-50 disabled:hover:translate-y-0 hover:-translate-y-0.5"
-                                >
-                                    Добавить
-                                </button>
                             </div>
+                            <button
+                                onClick={addCustomMed}
+                                disabled={!newMed.name}
+                                className="mt-1 w-full bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-md transition-all disabled:opacity-50 disabled:hover:translate-y-0 hover:-translate-y-0.5"
+                            >
+                                Добавить препарат
+                            </button>
                         </div>
                     </section>
                 </div>
