@@ -164,13 +164,13 @@ export function TrackerPage() {
                                 )}
                             </button>
                             <div className="flex-1">
-                                <div className="font-bold text-text-primary">{item.name}</div>
-                                <div className="text-sm text-coral font-medium mt-1">Дозировка: {item.dose}</div>
-                                <div className="text-sm text-text-secondary mt-0.5">Время: {item.when}</div>
-                                {item.duration && <div className="text-sm text-mint mt-1">Курс: {item.duration}</div>}
+                                <div className="font-bold text-slate-800">{item.name}</div>
+                                <div className="text-sm text-slate-500 font-medium mt-1">Дозировка: {item.dose}</div>
+                                <div className="text-sm text-slate-400 mt-0.5">Время: {item.when}</div>
+                                {item.duration && <div className="text-sm text-cobalt font-semibold mt-1">Курс: {item.duration}</div>}
                             </div>
                             {isCustom && (
-                                <button onClick={() => removeCustomMed(item.id)} className="text-steel hover:text-coral transition-colors p-1" title="Удалить">
+                                <button onClick={() => removeCustomMed(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors p-1" title="Удалить">
                                     <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -185,17 +185,23 @@ export function TrackerPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <div className="max-w-5xl mx-auto px-4 py-10 relative">
+            <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-cobalt/5 to-transparent -z-10 rounded-3xl blur-3xl pointer-events-none"></div>
+
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6 bg-white/60 backdrop-blur-xl p-8 rounded-[2rem] border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <div>
-                    <h1 className="text-3xl font-black text-text-primary mb-2">Трекер добавок</h1>
-                    <p className="text-text-secondary">Система доктора Егорова. Отмечайте прием добавок каждый день.</p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-cobalt/10 text-cobalt rounded-full text-sm font-bold mb-4">
+                        <span className="w-2 h-2 rounded-full bg-cobalt animate-pulse"></span>
+                        Трекер Здоровья
+                    </div>
+                    <h1 className="text-4xl sm:text-5xl font-black text-slate-800 tracking-tight mb-3">Витамины и БАДы</h1>
+                    <p className="text-slate-500 text-lg max-w-xl">Отмечайте ежедневный прием по протоколу доктора Егорова. Ваш прогресс сохраняется в облаке.</p>
                 </div>
                 <button 
                     onClick={subscribeToPush}
-                    className="flex items-center gap-2 bg-cobalt text-white px-5 py-2.5 rounded-full font-bold shadow-lg shadow-cobalt/30 hover:scale-105 transition-transform text-sm"
+                    className="group flex items-center gap-3 bg-gradient-to-br from-cobalt to-blue-600 text-white px-6 py-4 rounded-2xl font-bold shadow-[0_8px_25px_-5px_rgba(37,99,235,0.4)] hover:shadow-[0_15px_35px_-5px_rgba(37,99,235,0.5)] hover:-translate-y-1 transition-all duration-300"
                 >
-                    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 group-hover:rotate-12 transition-transform" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
@@ -203,136 +209,134 @@ export function TrackerPage() {
                 </button>
             </div>
 
-            <div className="mb-10">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="w-8 h-8 rounded bg-coral/20 text-coral flex items-center justify-center">1</span>
-                    Базовый фундамент
-                </h2>
-                {renderList(BASE_SUPPLEMENTS)}
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <div className="space-y-8">
+                    <section>
+                        <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-slate-800">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-sm text-sm">1</span>
+                            Базовый фундамент
+                        </h2>
+                        {renderList(BASE_SUPPLEMENTS)}
+                    </section>
 
-            <div className="mb-10">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="w-8 h-8 rounded bg-coral/20 text-coral flex items-center justify-center">2</span>
-                    Метаболический коктейль
-                </h2>
-                {!metabolicStartDate ? (
-                    <div className="bg-surface p-6 rounded-xl border border-border/50 text-center">
-                        <p className="mb-4 text-text-secondary">Курс обновления клеток и митохондрий. Строго не менее 3 месяцев непрерывного приема, затем перерыв 1-2 месяца.</p>
-                        <button onClick={startMetabolic} className="btn-primary px-8 py-3 rounded-full font-bold shadow-lg shadow-coral/30 hover:scale-105 transition-transform">
-                            Начать курс
-                        </button>
-                    </div>
-                ) : (
-                    <>
-                        <div className="bg-mint/10 p-4 rounded-xl border border-mint/20 mb-4 flex justify-between items-center">
-                            <div>
-                                <div className="text-mint font-bold text-sm uppercase tracking-wider mb-1">Курс активен</div>
-                                <div className="text-text-primary font-medium">Дней пройдено: <span className="font-bold text-lg">{calcDaysPassed(metabolicStartDate)}</span> из 90</div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-xs text-text-secondary">Начат: {metabolicStartDate}</div>
-                            </div>
+                    <section>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-sm text-sm">2</span>
+                                Метаболический коктейль
+                            </h2>
+                            {!metabolicStartDate ? (
+                                <button onClick={startMetabolic} className="text-sm font-bold text-cobalt bg-cobalt/10 px-4 py-2 rounded-xl hover:bg-cobalt/20 transition-colors">
+                                    Начать курс
+                                </button>
+                            ) : (
+                                <span className="text-sm font-medium bg-mint/10 text-mint px-4 py-2 rounded-xl border border-mint/20 shadow-sm">
+                                    День {calcDaysPassed(metabolicStartDate)} из 90
+                                </span>
+                            )}
                         </div>
-                        {renderList(METABOLIC_COURSE)}
-                    </>
-                )}
-            </div>
-
-            <div className="mb-10">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="w-8 h-8 rounded bg-coral/20 text-coral flex items-center justify-center">3</span>
-                    Для женщин (Железо)
-                </h2>
-                {!ironStartDate ? (
-                    <div className="bg-surface p-6 rounded-xl border border-border/50 text-center">
-                        <button onClick={startIron} className="btn-primary px-8 py-3 rounded-full font-bold shadow-lg shadow-coral/30 hover:scale-105 transition-transform">
-                            Начать курс железа
-                        </button>
-                    </div>
-                ) : (
-                    <>
-                        <div className="bg-mint/10 p-4 rounded-xl border border-mint/20 mb-4 flex justify-between items-center">
-                            <div>
-                                <div className="text-mint font-bold text-sm uppercase tracking-wider mb-1">Курс активен</div>
-                                <div className="text-text-primary font-medium">Дней пройдено: <span className="font-bold text-lg">{calcDaysPassed(ironStartDate)}</span> (минимум 60)</div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-xs text-text-secondary">Начат: {ironStartDate}</div>
-                            </div>
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-orange-100 p-5 rounded-2xl mb-6 text-sm text-amber-900 shadow-sm">
+                            <strong className="block mb-1 text-amber-950 text-base">Курс обновления клеток и митохондрий.</strong> 
+                            Строго не менее 3 месяцев непрерывного приема, затем перерыв 1-2 месяца.
                         </div>
-                        {renderList(WOMEN_COURSE)}
-                    </>
-                )}
-            </div>
+                        {renderList(METABOLIC_COCKTAIL)}
+                    </section>
+                </div>
 
-            <div className="mb-10">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="w-8 h-8 rounded bg-coral/20 text-coral flex items-center justify-center">4</span>
-                    Ситуативно (Только в дни тренировок)
-                </h2>
-                {renderList(TRAINING_SITUATION)}
-            </div>
+                <div className="space-y-8">
+                    <section>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-rose-100 to-rose-200 text-rose-600 shadow-sm text-sm">3</span>
+                                Железодефицит (для жен)
+                            </h2>
+                            {!ironStartDate ? (
+                                <button onClick={startIron} className="text-sm font-bold text-rose-500 bg-rose-50 px-4 py-2 rounded-xl border border-rose-100 hover:bg-rose-100 transition-colors">
+                                    Начать курс
+                                </button>
+                            ) : (
+                                <span className="text-sm font-medium bg-rose-100 text-rose-600 px-4 py-2 rounded-xl shadow-sm border border-rose-200">
+                                    День {calcDaysPassed(ironStartDate)}
+                                </span>
+                            )}
+                        </div>
+                        <div className="bg-rose-50 border border-rose-100 p-5 rounded-2xl mb-6 text-sm text-rose-900 shadow-sm">
+                            Принимать строго отдельно от чая, кофе, молочки и магния. Оптимально — утром натощак с витамином С или через час после еды. <strong>Курс 2–4 месяца.</strong>
+                        </div>
+                        {renderList(WOMEN_IRON_PROTOCOL)}
+                    </section>
 
-            <div className="mb-10">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="w-8 h-8 rounded bg-coral/20 text-coral flex items-center justify-center">5</span>
-                    Лекарства (Персональные назначения)
-                </h2>
-                <div className="bg-surface p-4 rounded-xl border border-border/50 mb-4">
-                    <p className="text-sm text-text-secondary mb-4">Добавьте сюда личные препараты (например, для жены), они сохранятся только на этом устройстве.</p>
-                    {customMeds.length > 0 && renderList(customMeds)}
-                    
-                    <div className="mt-4 flex flex-col gap-2 p-3 bg-silver/20 rounded-lg">
-                        <input
-                            type="text"
-                            placeholder="Название лекарства..."
-                            value={newMed.name}
-                            onChange={(e) => setNewMed({...newMed, name: e.target.value})}
-                            className="bg-white px-3 py-2 rounded-md border border-silver text-sm outline-none"
-                        />
-                        <div className="flex gap-2">
+                    <section>
+                        <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-slate-800">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-sm text-sm">4</span>
+                            Ситуативные (в дни тренировок)
+                        </h2>
+                        {renderList(SITUATIONAL_SUPPLEMENTS)}
+                    </section>
+
+                    <section className="bg-white/60 backdrop-blur-xl border border-white/80 p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                        <h2 className="text-2xl font-bold mb-2 flex items-center gap-3 text-slate-800">
+                            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-cobalt" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Персональные препараты
+                        </h2>
+                        <p className="text-sm text-slate-500 mb-6">Добавьте сюда личные лекарства. Они моментально синхронизируются на все устройства.</p>
+                        
+                        {customMeds.length > 0 && <div className="mb-6">{renderList(customMeds)}</div>}
+                        
+                        <div className="flex flex-col gap-3 p-5 bg-slate-50 rounded-2xl border border-slate-100">
                             <input
                                 type="text"
-                                placeholder="Дозировка..."
-                                value={newMed.dose}
-                                onChange={(e) => setNewMed({...newMed, dose: e.target.value})}
-                                className="bg-white px-3 py-2 rounded-md border border-silver text-sm outline-none flex-1"
+                                placeholder="Название лекарства..."
+                                value={newMed.name}
+                                onChange={(e) => setNewMed({...newMed, name: e.target.value})}
+                                className="w-full bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt/20 focus:border-cobalt transition-shadow shadow-sm"
                             />
-                            <input
-                                type="text"
-                                placeholder="Время..."
-                                value={newMed.when}
-                                onChange={(e) => setNewMed({...newMed, when: e.target.value})}
-                                className="bg-white px-3 py-2 rounded-md border border-silver text-sm outline-none flex-1"
-                            />
-                            <button
-                                onClick={addCustomMed}
-                                disabled={!newMed.name}
-                                className="bg-cobalt text-white px-4 py-2 rounded-md font-bold text-sm disabled:opacity-50"
-                            >
-                                Добавить
-                            </button>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <input
+                                    type="text"
+                                    placeholder="Дозировка..."
+                                    value={newMed.dose}
+                                    onChange={(e) => setNewMed({...newMed, dose: e.target.value})}
+                                    className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt/20 focus:border-cobalt transition-shadow shadow-sm flex-1"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Время приема..."
+                                    value={newMed.when}
+                                    onChange={(e) => setNewMed({...newMed, when: e.target.value})}
+                                    className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt/20 focus:border-cobalt transition-shadow shadow-sm flex-1"
+                                />
+                                <button
+                                    onClick={addCustomMed}
+                                    disabled={!newMed.name}
+                                    className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-md transition-all disabled:opacity-50 disabled:hover:translate-y-0 hover:-translate-y-0.5"
+                                >
+                                    Добавить
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
 
             {/* Settings */}
-            <div className="mt-12 p-6 bg-surface border border-border/50 rounded-2xl">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <div className="p-8 bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2rem] shadow-2xl text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 relative z-10">
                     <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-cobalt" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
-                    Настройки уведомлений
+                    Настройки расписания уведомлений
                 </h2>
-                <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="flex-1">
-                        <label className="block text-sm font-medium text-text-secondary mb-1">Утренние добавки</label>
+                <div className="flex flex-col sm:flex-row gap-8 relative z-10">
+                    <div className="flex-1 bg-white/10 p-5 rounded-2xl backdrop-blur-md border border-white/10">
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Утренние добавки</label>
                         <input 
                             type="time" 
-                            className="w-full p-2 border border-border rounded-lg bg-background text-text-primary focus:outline-none focus:border-cobalt"
+                            className="w-full p-3 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-cobalt focus:border-transparent transition-shadow"
                             value={notifyTimes.morning}
                             onChange={(e) => {
                                 const newTimes = {...notifyTimes, morning: e.target.value};
@@ -341,11 +345,11 @@ export function TrackerPage() {
                             }}
                         />
                     </div>
-                    <div className="flex-1">
-                        <label className="block text-sm font-medium text-text-secondary mb-1">Вечерние добавки</label>
+                    <div className="flex-1 bg-white/10 p-5 rounded-2xl backdrop-blur-md border border-white/10">
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Вечерние добавки</label>
                         <input 
                             type="time" 
-                            className="w-full p-2 border border-border rounded-lg bg-background text-text-primary focus:outline-none focus:border-cobalt"
+                            className="w-full p-3 border border-white/20 rounded-xl bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-cobalt focus:border-transparent transition-shadow"
                             value={notifyTimes.evening}
                             onChange={(e) => {
                                 const newTimes = {...notifyTimes, evening: e.target.value};
