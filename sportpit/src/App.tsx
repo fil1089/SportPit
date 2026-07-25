@@ -7,6 +7,7 @@ import { Header } from './components/Header.js';
 import { PlanEditor } from './components/PlanEditor.js';
 import { GuidePage } from './components/GuidePage.js';
 import { SystemPage } from './components/SystemPage.js';
+import { TrackerPage } from './components/TrackerPage.js';
 
 async function wrapVoid(fn: (email: string, password: string) => Promise<unknown>, email: string, password: string): Promise<void> {
     await fn(email, password);
@@ -17,7 +18,7 @@ function App() {
     const [initialDiet, setInitialDiet] = useState<DietData | null>(null);
     const [dietLoading, setDietLoading] = useState(true);
     const [dietError, setDietError] = useState<string | null>(null);
-    const [page, setPage] = useState<'plan' | 'guide' | 'system'>('plan');
+    const [page, setPage] = useState<'plan' | 'guide' | 'system' | 'tracker'>('plan');
 
     useEffect(() => {
         if (!user) {
@@ -61,7 +62,10 @@ function App() {
                                 {dietError}
                             </div>
                         )}
-                        {page === 'plan' ? <PlanEditor initial={initialDiet} /> : page === 'guide' ? <GuidePage /> : <SystemPage />}
+                        {page === 'plan' ? <PlanEditor initial={initialDiet} /> : 
+                         page === 'guide' ? <GuidePage /> : 
+                         page === 'tracker' ? <TrackerPage /> : 
+                         <SystemPage />}
                     </>
                 )}
             </main>

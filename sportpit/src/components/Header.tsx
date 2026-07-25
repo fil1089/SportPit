@@ -1,8 +1,8 @@
 interface HeaderProps {
     email: string | null;
     onSignOut: () => void;
-    page: 'plan' | 'guide' | 'system';
-    onPageChange: (page: 'plan' | 'guide' | 'system') => void;
+    page: 'plan' | 'guide' | 'system' | 'tracker';
+    onPageChange: (page: 'plan' | 'guide' | 'system' | 'tracker') => void;
 }
 
 export function Header({ email, onSignOut, page, onPageChange }: HeaderProps) {
@@ -21,11 +21,11 @@ export function Header({ email, onSignOut, page, onPageChange }: HeaderProps) {
 
                 {email && (
                     <div className="flex items-center gap-2 sm:gap-4">
-                        <nav className="flex bg-silver/50 rounded-2xl p-1">
+                        <nav className="flex bg-silver/50 rounded-2xl p-1 overflow-x-auto max-w-[60vw] sm:max-w-none">
                             <button
                                 type="button"
                                 onClick={() => onPageChange('plan')}
-                                className={`px-3 sm:px-4 py-1.5 rounded-xl text-sm font-semibold transition ${
+                                className={`px-3 sm:px-4 py-1.5 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
                                     page === 'plan' ? 'bg-white text-cobalt shadow-sm' : 'text-steel hover:text-ink'
                                 }`}
                             >
@@ -33,8 +33,17 @@ export function Header({ email, onSignOut, page, onPageChange }: HeaderProps) {
                             </button>
                             <button
                                 type="button"
+                                onClick={() => onPageChange('tracker')}
+                                className={`px-3 sm:px-4 py-1.5 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
+                                    page === 'tracker' ? 'bg-white text-cobalt shadow-sm' : 'text-steel hover:text-ink'
+                                }`}
+                            >
+                                Трекер
+                            </button>
+                            <button
+                                type="button"
                                 onClick={() => onPageChange('guide')}
-                                className={`px-3 sm:px-4 py-1.5 rounded-xl text-sm font-semibold transition ${
+                                className={`px-3 sm:px-4 py-1.5 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
                                     page === 'guide' ? 'bg-white text-cobalt shadow-sm' : 'text-steel hover:text-ink'
                                 }`}
                             >
@@ -43,11 +52,11 @@ export function Header({ email, onSignOut, page, onPageChange }: HeaderProps) {
                             <button
                                 type="button"
                                 onClick={() => onPageChange('system')}
-                                className={`px-3 sm:px-4 py-1.5 rounded-xl text-sm font-semibold transition ${
+                                className={`px-3 sm:px-4 py-1.5 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
                                     page === 'system' ? 'bg-white text-cobalt shadow-sm' : 'text-steel hover:text-ink'
                                 }`}
                             >
-                                О системе
+                                Система
                             </button>
                         </nav>
                         <span className="text-sm text-steel hidden sm:inline">{email}</span>
