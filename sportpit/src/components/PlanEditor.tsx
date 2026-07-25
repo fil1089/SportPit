@@ -63,10 +63,11 @@ function usePlan(initial: DietData | null) {
     const [name1, setName1] = useState<string>(initial?.name1 ?? '');
     const [isSecondPersonEnabled, setIsSecondPersonEnabled] = useState<boolean>(initial?.isSecondPersonEnabled ?? false);
     const [name2, setName2] = useState<string>(initial?.name2 ?? '');
-    const [weight2, setWeight2] = useState<number>(initial?.weight2 ?? 60);
     const [weight2Input, setWeight2Input] = useState<string>(String(initial?.weight2 ?? 60));
     const [gender2, setGender2] = useState<'male' | 'female'>(initial?.gender2 ?? 'female');
     const [splitFirstMeal, setSplitFirstMeal] = useState<boolean>(initial?.splitFirstMeal ?? plan.initial.splitFirstMeal ?? false);
+    const [ironDeficiency, setIronDeficiency] = useState<boolean>(initial?.ironDeficiency ?? plan.initial.ironDeficiency ?? false);
+    const [ironDeficiency2, setIronDeficiency2] = useState<boolean>(initial?.ironDeficiency2 ?? plan.initial.ironDeficiency2 ?? false);
 
     const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -93,6 +94,8 @@ function usePlan(initial: DietData | null) {
             setWeight2Input(String(initial.weight2 ?? 60));
             setGender2(initial.gender2 ?? 'female');
             setSplitFirstMeal(initial.splitFirstMeal ?? resolved.initial.splitFirstMeal ?? false);
+            setIronDeficiency(initial.ironDeficiency ?? resolved.initial.ironDeficiency ?? false);
+            setIronDeficiency2(initial.ironDeficiency2 ?? resolved.initial.ironDeficiency2 ?? false);
         }
     }, [initial]);
 
@@ -107,13 +110,13 @@ function usePlan(initial: DietData | null) {
     );
 
     const weekPlan = useMemo(() => {
-        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal);
-    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal]);
+        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency);
+    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency]);
 
     const weekPlan2 = useMemo(() => {
         if (!isSecondPersonEnabled) return [];
-        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal);
-    }, [isSecondPersonEnabled, startDate, weight2, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal]);
+        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency2);
+    }, [isSecondPersonEnabled, startDate, weight2, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency2]);
 
     const currentMacros = useMemo(() => {
         const protein = calcProtein(weight);
@@ -148,8 +151,10 @@ function usePlan(initial: DietData | null) {
             weight2,
             gender2,
             splitFirstMeal,
+            ironDeficiency,
+            ironDeficiency2,
         }),
-        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides, baseReplacements, name1, isSecondPersonEnabled, name2, weight2, gender2, splitFirstMeal]
+        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides, baseReplacements, name1, isSecondPersonEnabled, name2, weight2, gender2, splitFirstMeal, ironDeficiency, ironDeficiency2]
     );
 
     const refreshDay = (date: string) => {
@@ -341,6 +346,8 @@ function usePlan(initial: DietData | null) {
         weight2Input, setWeight2Input,
         gender2, setGender2,
         splitFirstMeal, setSplitFirstMeal,
+        ironDeficiency, setIronDeficiency,
+        ironDeficiency2, setIronDeficiency2,
         weekPlan2,
         currentMacros2,
     };
@@ -977,6 +984,8 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         weight2Input, setWeight2Input,
         gender2, setGender2,
         splitFirstMeal, setSplitFirstMeal,
+        ironDeficiency, setIronDeficiency,
+        ironDeficiency2, setIronDeficiency2,
         weekPlan2,
     } = usePlan(initial);
 
@@ -1083,6 +1092,15 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                                 </select>
                             </div>
                         </div>
+                        <label className="flex items-center gap-2 cursor-pointer mt-4">
+                            <input
+                                type="checkbox"
+                                checked={ironDeficiency}
+                                onChange={(e) => setIronDeficiency(e.target.checked)}
+                                className="w-4 h-4 accent-cobalt cursor-pointer"
+                            />
+                            <span className="text-sm font-semibold text-ink">Дефицит железа (продукты 2 раза в неделю)</span>
+                        </label>
                     </div>
 
                     {/* Person 2 */}
@@ -1132,6 +1150,15 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                                         </select>
                                     </div>
                                 </div>
+                                <label className="flex items-center gap-2 cursor-pointer mt-4">
+                                    <input
+                                        type="checkbox"
+                                        checked={ironDeficiency2}
+                                        onChange={(e) => setIronDeficiency2(e.target.checked)}
+                                        className="w-4 h-4 accent-cobalt cursor-pointer"
+                                    />
+                                    <span className="text-sm font-semibold text-ink">Дефицит железа (продукты 2 раза в неделю)</span>
+                                </label>
                             </div>
                         )}
                     </div>

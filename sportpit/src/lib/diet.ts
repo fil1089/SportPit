@@ -21,6 +21,7 @@ export const DEFAULT_PROTEIN_SOURCES: ProductRef[] = [
     { value: 'chicken_thigh', label: 'Куриные бёдра', proteinPer100g: 20, fatPer100g: 8, defaultPortion: 250, proteinType: 'animal' },
     { value: 'beef_minced', label: 'Говяжий фарш', proteinPer100g: 19, fatPer100g: 20, defaultPortion: 300, proteinType: 'animal' },
     { value: 'beef', label: 'Говядина', proteinPer100g: 26, fatPer100g: 16, defaultPortion: 200, proteinType: 'animal' },
+    { value: 'beef_liver', label: 'Говяжья печень', proteinPer100g: 19, fatPer100g: 3.7, defaultPortion: 200, proteinType: 'animal' },
     { value: 'pork_tenderloin', label: 'Свиная вырезка', proteinPer100g: 22, fatPer100g: 7, defaultPortion: 200, proteinType: 'animal' },
     { value: 'tuna', label: 'Тунец в собственном соку', proteinPer100g: 23, fatPer100g: 1, defaultPortion: 320, proteinType: 'animal' },
     { value: 'mackerel_herring', label: 'Скумбрия/сельдь', proteinPer100g: 18, fatPer100g: 9, defaultPortion: 250, proteinType: 'animal' },
@@ -105,7 +106,7 @@ export const DEFAULT_PLAN: PlanSchema = {
         weight: 65,
         startDate: '2026-07-19',
         carbSources: ['buckwheat', 'bulgur', 'pasta'],
-        proteinSources: ['chicken_breast', 'turkey', 'beef_minced', 'tuna', 'mackerel_herring', 'chicken_thigh', 'cottage_cheese_0_5', 'eggs', 'cheese'],
+        proteinSources: ['chicken_breast', 'turkey', 'beef_minced', 'beef_liver', 'tuna', 'mackerel_herring', 'chicken_thigh', 'cottage_cheese_0_5', 'eggs', 'cheese'],
         trainingDates: [
             '2026-07-20',
             '2026-07-24',
@@ -515,6 +516,7 @@ const CARB_DISHES: DishEntry[] = [
     { idea: 'Отварной булгур + тунец в собственном соку', type: 'carb', carbBases: ['bulgur'], proteinBases: ['tuna'] },
     { idea: 'Отварной булгур с треской/хеком и грибами', type: 'carb', carbBases: ['bulgur'], proteinBases: ['cod', 'mushrooms'] },
     { idea: 'Отварной булгур + филе индейки', type: 'carb', carbBases: ['bulgur'], proteinBases: ['turkey'] },
+    { idea: 'Отварной булгур + говяжья печень с луком', type: 'carb', carbBases: ['bulgur'], proteinBases: ['beef_liver'] },
     // Киноа
     { idea: 'Отварное киноа + куриная грудка', type: 'carb', carbBases: ['quinoa'], proteinBases: ['chicken_breast'] },
     { idea: 'Отварное киноа + тунец в собственном соку', type: 'carb', carbBases: ['quinoa'], proteinBases: ['tuna'] },
@@ -690,7 +692,8 @@ export function buildDayPlan(
     seedModifier = 0,
     overrides?: Record<number, MealOverrideItem[]>,
     baseReplacements?: Record<number, Record<string, string>>,
-    splitFirstMeal = false
+    splitFirstMeal = false,
+    forceIron = false
 ): DayPlan {
     const training = isTrainingDay(date, trainingDates);
 
@@ -775,7 +778,16 @@ export function buildDayPlan(
     const basePool1 = hasAnimal ? animal : plant;
     const leanPool = basePool1.filter((s) => (s.fatPer100g ?? 0) < 5);
     const pool1 = bestPool(leanPool, basePool1, globalViableAnimal.filter(s => (s.fatPer100g ?? 0) < 5));
+    
+    // Если нужен источник железа, пытаемся найти его в пуле 1
     let animalSource1 = pickRotationExcluding(pool1, [], baseSeed);
+    if (forceIron) {
+        const ironRich1 = pool1.filter(p => ['beef', 'beef_liver', 'beef_minced', 'lentils'].includes(p.value));
+        if (ironRich1.length) {
+            animalSource1 = safePickRotation(ironRich1, pool1, baseSeed);
+        }
+    }
+
     if (baseReplacements?.[0]?.['protein']) {
         const found = allProducts.find(p => p.value === baseReplacements[0]['protein']);
         if (found) animalSource1 = found;
@@ -789,6 +801,15 @@ export function buildDayPlan(
     const excludeForAnimal2 = [animalSource1];
     if (isCheese(animalSource1)) excludeForAnimal2.push(...proteinSources.filter(isCheese));
     let animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, baseSeed + '2');
+    
+    // Если железо не удалось добавить в приём 1 (например, говядина слишком жирная для приёма 1), добавим в приём 2
+    if (forceIron && !['beef', 'beef_liver', 'beef_minced', 'lentils'].includes(animalSource1.value)) {
+        const ironRich2 = pool2.filter(p => ['beef', 'beef_liver', 'beef_minced', 'lentils'].includes(p.value));
+        if (ironRich2.length) {
+            animalSource2 = safePickRotation(ironRich2, pool2, baseSeed + '2');
+        }
+    }
+
     const meal2Index = training ? (splitFirstMeal ? 3 : 2) : (splitFirstMeal ? 2 : 1);
     if (baseReplacements?.[meal2Index]?.['protein']) {
         const found = allProducts.find(p => p.value === baseReplacements[meal2Index]['protein']);
@@ -975,7 +996,8 @@ export function generateWeekPlan(
     seedModifiers: Record<string, number> = {},
     mealOverrides: Record<string, Record<number, MealOverrideItem[]>> = {},
     baseReplacements: Record<string, Record<number, Record<string, string>>> = {},
-    splitFirstMeal = false
+    splitFirstMeal = false,
+    ironDeficiency = false
 ): { date: string; plan: DayPlan }[] {
     const start = parseLocalDate(startDate);
     const days: { date: string; plan: DayPlan }[] = [];
@@ -984,7 +1006,11 @@ export function generateWeekPlan(
         const date = new Date(start);
         date.setDate(start.getDate() + i);
         const iso = formatISOLocal(date);
-        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso], baseReplacements[iso], splitFirstMeal);
+        
+        // Железо 2 раза в неделю: 3-й и 6-й день каждой 7-дневной недели
+        const forceIron = ironDeficiency && (i % 7 === 2 || i % 7 === 5);
+        
+        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso], baseReplacements[iso], splitFirstMeal, forceIron);
         days.push({ date: iso, plan });
     }
 

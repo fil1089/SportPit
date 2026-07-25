@@ -43,6 +43,8 @@ export interface PlanInitial {
     weight2?: number;
     gender2?: 'male' | 'female';
     splitFirstMeal?: boolean;
+    ironDeficiency?: boolean;
+    ironDeficiency2?: boolean;
 }
 
 export interface MacroTargets {
@@ -92,6 +94,8 @@ export interface DietData {
     weight2?: number;
     gender2?: 'male' | 'female';
     splitFirstMeal?: boolean;
+    ironDeficiency?: boolean;
+    ironDeficiency2?: boolean;
 }
 
 export type CarbSource = string;
