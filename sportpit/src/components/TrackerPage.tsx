@@ -133,7 +133,7 @@ export function TrackerPage() {
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY as string)
+                applicationServerKey: urlBase64ToUint8Array("BB7FLAcKEx3H9XDHRW1hg-TmQ459eNl9tJwPFWiVf4d1-LIVz6KYVguxzEUuFRyXZoVEuWdPK-18kre4yoWp_-4")
             });
             
             const token = localStorage.getItem('sportpit-auth-token');
