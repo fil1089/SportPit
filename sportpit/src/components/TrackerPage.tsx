@@ -239,7 +239,7 @@ export function TrackerPage() {
                             <strong className="block mb-1 text-amber-950 text-base">Курс обновления клеток и митохондрий.</strong> 
                             Строго не менее 3 месяцев непрерывного приема, затем перерыв 1-2 месяца.
                         </div>
-                        {renderList(METABOLIC_COCKTAIL)}
+                        {renderList(METABOLIC_COURSE)}
                     </section>
                 </div>
 
@@ -263,7 +263,7 @@ export function TrackerPage() {
                         <div className="bg-rose-50 border border-rose-100 p-5 rounded-2xl mb-6 text-sm text-rose-900 shadow-sm">
                             Принимать строго отдельно от чая, кофе, молочки и магния. Оптимально — утром натощак с витамином С или через час после еды. <strong>Курс 2–4 месяца.</strong>
                         </div>
-                        {renderList(WOMEN_IRON_PROTOCOL)}
+                        {renderList(WOMEN_COURSE)}
                     </section>
 
                     <section>
@@ -271,7 +271,7 @@ export function TrackerPage() {
                             <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-sm text-sm">4</span>
                             Ситуативные (в дни тренировок)
                         </h2>
-                        {renderList(SITUATIONAL_SUPPLEMENTS)}
+                        {renderList(TRAINING_SITUATION)}
                     </section>
 
                     <section className="bg-white/60 backdrop-blur-xl border border-white/80 p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
