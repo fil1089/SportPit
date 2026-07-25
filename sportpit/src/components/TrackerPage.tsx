@@ -26,6 +26,8 @@ const TRAINING_SITUATION = [
     { id: 'carnitine', name: 'L-карнитин', dose: '900-1000 мг', when: 'Строго натощак за 30-40 мин до тренировки' },
 ];
 
+import { api, type DietData } from '../lib/api.js';
+
 function getTodayString() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -37,34 +39,38 @@ export function TrackerPage() {
     const [dailyChecks, setDailyChecks] = useState<Record<string, boolean>>({});
     const [customMeds, setCustomMeds] = useState<any[]>([]);
     const [newMed, setNewMed] = useState({ name: '', dose: '', when: '' });
+    const [loading, setLoading] = useState(true);
 
     const today = getTodayString();
 
     useEffect(() => {
-        const storedMetabolic = localStorage.getItem('tracker_metabolic_start');
-        if (storedMetabolic) setMetabolicStartDate(storedMetabolic);
-
-        const storedIron = localStorage.getItem('tracker_iron_start');
-        if (storedIron) setIronStartDate(storedIron);
-
-        const storedChecks = localStorage.getItem(`tracker_checks_${today}`);
-        if (storedChecks) {
-            try {
-                setDailyChecks(JSON.parse(storedChecks));
-            } catch (e) {}
-        }
-        
-        const storedMeds = localStorage.getItem('tracker_custom_meds');
-        if (storedMeds) {
-            try {
-                setCustomMeds(JSON.parse(storedMeds));
-            } catch (e) {}
-        }
+        api.getDiet().then(record => {
+            const ts = record?.data?.trackerState || {};
+            setMetabolicStartDate(ts.metabolicStartDate || null);
+            setIronStartDate(ts.ironStartDate || null);
+            setDailyChecks(ts[`checks_${today}`] || {});
+            setCustomMeds(ts.customMeds || []);
+            setLoading(false);
+        }).catch(err => {
+            console.error('Failed to load tracker state', err);
+            setLoading(false);
+        });
     }, [today]);
+
+    const updateServer = async (updates: Record<string, any>) => {
+        try {
+            const record = await api.getDiet();
+            const data = record?.data || {} as DietData;
+            data.trackerState = { ...(data.trackerState || {}), ...updates };
+            await api.saveDiet(data);
+        } catch (err) {
+            console.error('Failed to save tracker state', err);
+        }
+    };
 
     const saveChecks = (newChecks: Record<string, boolean>) => {
         setDailyChecks(newChecks);
-        localStorage.setItem(`tracker_checks_${today}`, JSON.stringify(newChecks));
+        updateServer({ [`checks_${today}`]: newChecks });
     };
 
     const toggleCheck = (id: string) => {
@@ -72,13 +78,13 @@ export function TrackerPage() {
     };
 
     const startMetabolic = () => {
-        localStorage.setItem('tracker_metabolic_start', today);
         setMetabolicStartDate(today);
+        updateServer({ metabolicStartDate: today });
     };
 
     const startIron = () => {
-        localStorage.setItem('tracker_iron_start', today);
         setIronStartDate(today);
+        updateServer({ ironStartDate: today });
     };
 
     const addCustomMed = () => {
@@ -86,8 +92,14 @@ export function TrackerPage() {
         const med = { id: `custom_${Date.now()}`, name: newMed.name, dose: newMed.dose, when: newMed.when };
         const updated = [...customMeds, med];
         setCustomMeds(updated);
-        localStorage.setItem('tracker_custom_meds', JSON.stringify(updated));
+        updateServer({ customMeds: updated });
         setNewMed({ name: '', dose: '', when: '' });
+    };
+
+    const removeCustomMed = (id: string) => {
+        const updated = customMeds.filter((m) => m.id !== id);
+        setCustomMeds(updated);
+        updateServer({ customMeds: updated });
     };
 
     const calcDaysPassed = (startDate: string) => {
@@ -97,11 +109,16 @@ export function TrackerPage() {
         return Math.floor(diffTime / (1000 * 60 * 60 * 24));
     };
 
+    if (loading) {
+        return <div className="p-8 text-center text-steel">Загрузка данных...</div>;
+    }
+
     const renderList = (items: any[]) => {
         return (
             <div className="space-y-3">
                 {items.map((item) => {
                     const checked = !!dailyChecks[item.id];
+                    const isCustom = item.id.startsWith('custom_');
                     return (
                         <div key={item.id} className={`p-4 rounded-xl border transition-colors flex items-start gap-4 ${checked ? 'bg-mint/10 border-mint/30' : 'bg-surface border-border/50'}`}>
                             <button
@@ -114,12 +131,20 @@ export function TrackerPage() {
                                     </svg>
                                 )}
                             </button>
-                            <div>
+                            <div className="flex-1">
                                 <div className="font-bold text-text-primary">{item.name}</div>
                                 <div className="text-sm text-coral font-medium mt-1">Дозировка: {item.dose}</div>
                                 <div className="text-sm text-text-secondary mt-0.5">Время: {item.when}</div>
                                 {item.duration && <div className="text-sm text-mint mt-1">Курс: {item.duration}</div>}
                             </div>
+                            {isCustom && (
+                                <button onClick={() => removeCustomMed(item.id)} className="text-steel hover:text-coral transition-colors p-1" title="Удалить">
+                                    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            )}
                         </div>
                     );
                 })}

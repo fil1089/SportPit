@@ -96,6 +96,7 @@ export interface DietData {
     splitFirstMeal?: boolean;
     ironDeficiency?: boolean;
     ironDeficiency2?: boolean;
+    trackerState?: Record<string, any>;
 }
 
 export type CarbSource = string;
