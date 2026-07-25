@@ -26,6 +26,17 @@ const TRAINING_SITUATION = [
     { id: 'carnitine', name: 'L-карнитин', dose: '900-1000 мг', when: 'Строго натощак за 30-40 мин до тренировки' },
 ];
 
+function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
 import { api, type DietData } from '../lib/api.js';
 
 function getTodayString() {
@@ -122,7 +133,7 @@ export function TrackerPage() {
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY
+                applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY as string)
             });
             
             const token = localStorage.getItem('sportpit-auth-token');
