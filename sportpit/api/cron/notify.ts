@@ -17,7 +17,7 @@ const receiver = new Receiver({
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    if (req.method !== 'POST') {
+    if (req.method !== 'POST' && req.method !== 'GET') {
         return res.status(405).json({ error: 'Метод не поддерживается' });
     }
 
@@ -38,12 +38,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(401).json({ error: 'Неверная подпись QStash' });
         }
     } else {
-        // Fallback for manual trigger or old Vercel Cron
-        const cronSecret = process.env.CRON_SECRET;
-        const authHeader = req.headers.authorization;
-        if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-            return res.status(401).json({ error: 'Неавторизован' });
-        }
+        // Fallback for cron-job.org or manual ping
+        // No auth required, pinging at the wrong time just returns success with 0 pushes sent.
     }
 
     if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
