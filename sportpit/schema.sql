@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS sportpit_push_subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES sportpit_users(id) ON DELETE CASCADE,
     subscription JSONB NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    UNIQUE(user_id, subscription->>'endpoint')
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sportpit_push_sub_endpoint 
+ON sportpit_push_subscriptions(user_id, (subscription->>'endpoint'));
