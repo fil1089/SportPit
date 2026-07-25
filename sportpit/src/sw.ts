@@ -37,7 +37,7 @@ self.addEventListener('push', (event: any) => {
 self.addEventListener('notificationclick', (event: any) => {
     event.notification.close();
     event.waitUntil(
-        self.clients.matchAll({ type: 'window' }).then((windowClients: any[]) => {
+        self.clients.matchAll({ type: 'window' }).then((windowClients) => {
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
                 if (client.url.indexOf('/') >= 0 && 'focus' in client) {
