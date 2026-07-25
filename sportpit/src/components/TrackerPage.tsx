@@ -109,6 +109,35 @@ export function TrackerPage() {
         return Math.floor(diffTime / (1000 * 60 * 60 * 24));
     };
 
+    const subscribeToPush = async () => {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            alert('Push-уведомления не поддерживаются в этом браузере.');
+            return;
+        }
+
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY
+            });
+            
+            const token = localStorage.getItem('sportpit-auth-token');
+            await fetch('/api/push/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ subscription: sub })
+            });
+            alert('Подписка успешно оформлена!');
+        } catch (e: any) {
+            console.error(e);
+            alert('Ошибка подписки: ' + e.message);
+        }
+    };
+
     if (loading) {
         return <div className="p-8 text-center text-steel">Загрузка данных...</div>;
     }
@@ -154,8 +183,22 @@ export function TrackerPage() {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            <h1 className="text-3xl font-black text-text-primary mb-2">Трекер добавок</h1>
-            <p className="text-text-secondary mb-8">Система доктора Егорова. Отмечайте прием добавок каждый день.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+                <div>
+                    <h1 className="text-3xl font-black text-text-primary mb-2">Трекер добавок</h1>
+                    <p className="text-text-secondary">Система доктора Егорова. Отмечайте прием добавок каждый день.</p>
+                </div>
+                <button 
+                    onClick={subscribeToPush}
+                    className="flex items-center gap-2 bg-cobalt text-white px-5 py-2.5 rounded-full font-bold shadow-lg shadow-cobalt/30 hover:scale-105 transition-transform text-sm"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    Включить уведомления
+                </button>
+            </div>
 
             <div className="mb-10">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
