@@ -693,7 +693,8 @@ export function buildDayPlan(
     overrides?: Record<number, MealOverrideItem[]>,
     baseReplacements?: Record<number, Record<string, string>>,
     splitFirstMeal = false,
-    forceIron = false
+    forceIron = false,
+    gender: 'male' | 'female' = 'male'
 ): DayPlan {
     const training = isTrainingDay(date, trainingDates);
 
@@ -837,7 +838,12 @@ export function buildDayPlan(
     const animalPortion1b = splitFirstMeal ? proteinPortion(remainingProteinTarget * 0.55 / 2, animalSource1b) : 0;
     const carbPortionGb = splitFirstMeal ? carbPortion(carbTarget / 2, carbSource1b) : 0;
     
-    const animalPortion2 = proteinPortion(remainingProteinTarget * 0.45, animalSource2);
+    let animalPortion2 = proteinPortion(remainingProteinTarget * 0.45, animalSource2);
+    // Док Егоров: Вечерняя порция мяса строго фиксирована
+    const isMeat = animalSource2.proteinType === 'animal' && !['eggs', 'cottage_cheese_0_5', 'cottage_cheese_9', 'cheese', 'adygei_cheese', 'brynza', 'whey_protein', 'kefir_25'].includes(animalSource2.value);
+    if (isMeat) {
+        animalPortion2 = gender === 'male' ? 280 : 150;
+    }
 
     function formatProtein(source: ProductRef, portion: number): string {
         const rounded = Math.round(portion);
@@ -997,7 +1003,8 @@ export function generateWeekPlan(
     mealOverrides: Record<string, Record<number, MealOverrideItem[]>> = {},
     baseReplacements: Record<string, Record<number, Record<string, string>>> = {},
     splitFirstMeal = false,
-    ironDeficiency = false
+    ironDeficiency = false,
+    gender: 'male' | 'female' = 'male'
 ): { date: string; plan: DayPlan }[] {
     const start = parseLocalDate(startDate);
     const days: { date: string; plan: DayPlan }[] = [];
@@ -1010,7 +1017,7 @@ export function generateWeekPlan(
         // Железо 2 раза в неделю: 3-й и 6-й день каждой 7-дневной недели
         const forceIron = ironDeficiency && (i % 7 === 2 || i % 7 === 5);
         
-        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso], baseReplacements[iso], splitFirstMeal, forceIron);
+        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso], baseReplacements[iso], splitFirstMeal, forceIron, gender);
         days.push({ date: iso, plan });
     }
 

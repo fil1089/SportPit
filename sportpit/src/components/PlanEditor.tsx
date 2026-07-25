@@ -110,12 +110,12 @@ function usePlan(initial: DietData | null) {
     );
 
     const weekPlan = useMemo(() => {
-        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency);
-    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency]);
+        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency, initial?.gender || 'male');
+    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency, initial?.gender]);
 
     const weekPlan2 = useMemo(() => {
         if (!isSecondPersonEnabled) return [];
-        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency2);
+        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency2, 'female');
     }, [isSecondPersonEnabled, startDate, weight2, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal, ironDeficiency2]);
 
     const currentMacros = useMemo(() => {
