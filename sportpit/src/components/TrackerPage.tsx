@@ -51,9 +51,12 @@ export function TrackerPage() {
     const [customMeds, setCustomMeds] = useState<any[]>([]);
     const [newMed, setNewMed] = useState({ name: '', dose: '', when: '' });
     const [notifyTimes, setNotifyTimes] = useState<{morning: string, evening: string}>({morning: '09:00', evening: '21:00'});
+    const [trainingDays, setTrainingDays] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
 
     const today = getTodayString();
+    const currentDayOfWeek = d.getDay();
+    const isTrainingDay = trainingDays.includes(currentDayOfWeek);
 
     useEffect(() => {
         api.getDiet().then(record => {
@@ -64,6 +67,7 @@ export function TrackerPage() {
             setDailyChecks(ts[`checks_${today}`] || {});
             setCustomMeds(ts.customMeds || []);
             setNotifyTimes(ts.notifyTimes || {morning: '09:00', evening: '21:00'});
+            setTrainingDays(ts.trainingDays || []);
             setLoading(false);
         }).catch(err => {
             console.error('Failed to load tracker state', err);
@@ -166,7 +170,7 @@ export function TrackerPage() {
                         <div key={item.id} className="p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-start gap-4">
                             <button
                                 onClick={() => toggleCheck(item.id)}
-                                className={`w-7 h-7 shrink-0 rounded-xl flex items-center justify-center border-2 transition-all mt-0.5 ${checked ? 'bg-green-500 border-green-500 text-white shadow-md shadow-green-500/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}
+                                className={`w-7 h-7 shrink-0 rounded-xl flex items-center justify-center border-2 transition-all mt-0.5 ${checked ? 'bg-success border-success text-white shadow-md shadow-success/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}
                             >
                                 {checked && (
                                     <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -282,16 +286,20 @@ export function TrackerPage() {
                             <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-sm text-sm">4</span>
                             Ситуативные (в дни тренировок)
                         </h2>
-                        {renderList(TRAINING_SITUATION)}
+                        {!isTrainingDay ? (
+                            <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl mb-4 text-sm text-slate-500 shadow-inner">
+                                Сегодня не день тренировки (согласно вашим настройкам). Вы можете отдыхать от этих добавок.
+                            </div>
+                        ) : (
+                            <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-4 text-sm text-blue-800 shadow-sm">
+                                <strong>Сегодня тренировка!</strong> Не забудьте принять эти добавки.
+                            </div>
+                        )}
+                        {isTrainingDay && renderList(TRAINING_SITUATION)}
                     </section>
 
                     <section className="bg-white/60 backdrop-blur-xl border border-white/80 p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                         <h2 className="text-2xl font-bold mb-2 flex items-center gap-3 text-slate-800">
-                            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-blue-600" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M10.5 20.5 4 14l5-5 6.5 6.5-5 5Z"></path>
-                                <path d="M10.5 20.5 14 17l5-5-6.5-6.5-5 5Z"></path>
-                                <path d="m14 7-3 3"></path>
-                            </svg>
                             Персональные препараты
                         </h2>
                         <p className="text-sm text-slate-500 mb-6">Добавьте сюда личные лекарства. Они моментально синхронизируются на все устройства.</p>
@@ -337,13 +345,41 @@ export function TrackerPage() {
             {/* Settings */}
             <div className="p-8 bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2rem] shadow-2xl text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 relative z-10">
-                    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-cobalt" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <h2 className="text-2xl font-bold mb-8 flex items-center gap-3 relative z-10">
+                    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-blue-400" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
-                    Настройки расписания уведомлений
+                    Настройки уведомлений и расписания
                 </h2>
+                
+                <div className="mb-8 relative z-10">
+                    <label className="block text-sm font-medium text-slate-300 mb-3">Дни тренировок (для ситуативных добавок)</label>
+                    <div className="flex flex-wrap gap-2">
+                        {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day, idx) => {
+                            const isSelected = trainingDays.includes(idx);
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => {
+                                        let newDays;
+                                        if (isSelected) {
+                                            newDays = trainingDays.filter(d => d !== idx);
+                                        } else {
+                                            newDays = [...trainingDays, idx];
+                                        }
+                                        setTrainingDays(newDays);
+                                        updateServer({ trainingDays: newDays });
+                                    }}
+                                    className={`w-12 h-12 rounded-xl font-bold transition-all ${isSelected ? 'bg-success text-white shadow-lg shadow-success/30' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`}
+                                >
+                                    {day}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 <div className="flex flex-col sm:flex-row gap-8 relative z-10">
                     <div className="flex-1 bg-white/10 p-5 rounded-2xl backdrop-blur-md border border-white/10">
                         <label className="block text-sm font-medium text-slate-300 mb-2">Утренние добавки</label>

@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+﻿import type { VercelRequest, VercelResponse } from '@vercel/node';
 import webpush from 'web-push';
 import { getDb } from '../_db.js';
 import { Receiver } from '@upstash/qstash';
@@ -25,8 +25,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const signature = req.headers["upstash-signature"] as string;
     if (signature) {
         try {
-            // In Vercel, req.body is parsed. For QStash without body, it might be undefined or empty.
-            // We use empty string if it's not present.
             const bodyStr = req.body && Object.keys(req.body).length > 0 ? JSON.stringify(req.body) : '';
             const isValid = await receiver.verify({
                 signature,
@@ -37,9 +35,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             console.error('QStash verification failed:', err);
             return res.status(401).json({ error: 'Неверная подпись QStash' });
         }
-    } else {
-        // Fallback for cron-job.org or manual ping
-        // No auth required, pinging at the wrong time just returns success with 0 pushes sent.
     }
 
     if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
@@ -51,26 +46,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         
         // Find current time in Moscow (UTC+3)
         const d = new Date();
-        const moscowHour = (d.getUTCHours() + 3) % 24;
-        const moscowMinute = d.getUTCMinutes();
+        const moscowDate = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+        const moscowHour = moscowDate.getUTCHours();
+        const moscowMinute = moscowDate.getUTCMinutes();
+        const moscowDayOfWeek = moscowDate.getUTCDay(); // 0 is Sunday
         
         // Round minute to nearest 15 to match the interval
         const roundedMinute = Math.round(moscowMinute / 15) * 15;
         const finalMinute = roundedMinute === 60 ? 0 : roundedMinute;
         const finalHour = roundedMinute === 60 ? (moscowHour + 1) % 24 : moscowHour;
         
-        const currentTimeStr = `${String(finalHour).padStart(2, '0')}:${String(finalMinute).padStart(2, '0')}`;
+        const currentTimeStr = ${String(finalHour).padStart(2, '0')}:;
 
-        // Get all subscriptions and their diet data (to get trackerState.notifyTimes)
-        const rows = await sql`
-            SELECT s.id, s.subscription, d.data->'trackerState'->'notifyTimes' as notify_times
+        // Get all subscriptions and their diet data
+        const rows = await sql\
+            SELECT s.id, s.subscription, d.data->'trackerState'->'notifyTimes' as notify_times, d.data->'trackerState'->'trainingDays' as training_days
             FROM sportpit_push_subscriptions s
             JOIN sportpit_diet d ON s.user_id = d.user_id
-        `;
+        \;
 
         let sentCount = 0;
         const promises = rows.map(async (row) => {
             const notifyTimes = row.notify_times || {};
+            const trainingDays = row.training_days || [];
+            const isTrainingDay = trainingDays.includes(moscowDayOfWeek);
             let payload = null;
 
             if (notifyTimes.morning === currentTimeStr) {
@@ -79,13 +78,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 payload = { title: 'Вечерние добавки', body: 'Пора выпить магний и вечерние добавки!' };
             }
 
+            if (payload && isTrainingDay) {
+                payload.body += ' (Сегодня тренировка, не забудьте про L-карнитин и Аргинин!)';
+            }
+
             if (payload) {
                 try {
                     await webpush.sendNotification(row.subscription, JSON.stringify(payload));
                     sentCount++;
                 } catch (err: any) {
                     if (err.statusCode === 404 || err.statusCode === 410) {
-                        await sql`DELETE FROM sportpit_push_subscriptions WHERE id = ${row.id}`;
+                        await sql\DELETE FROM sportpit_push_subscriptions WHERE id = \\;
                     } else {
                         console.error('Ошибка отправки пуша:', err);
                     }
