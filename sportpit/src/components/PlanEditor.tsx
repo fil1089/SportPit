@@ -63,6 +63,7 @@ function usePlan(initial: DietData | null) {
     const [name1, setName1] = useState<string>(initial?.name1 ?? '');
     const [isSecondPersonEnabled, setIsSecondPersonEnabled] = useState<boolean>(initial?.isSecondPersonEnabled ?? false);
     const [name2, setName2] = useState<string>(initial?.name2 ?? '');
+    const [weight2, setWeight2] = useState<number>(initial?.weight2 ?? 60);
     const [weight2Input, setWeight2Input] = useState<string>(String(initial?.weight2 ?? 60));
     const [gender2, setGender2] = useState<'male' | 'female'>(initial?.gender2 ?? 'female');
     const [splitFirstMeal, setSplitFirstMeal] = useState<boolean>(initial?.splitFirstMeal ?? plan.initial.splitFirstMeal ?? false);
