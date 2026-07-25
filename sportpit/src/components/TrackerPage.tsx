@@ -39,17 +39,20 @@ export function TrackerPage() {
     const [dailyChecks, setDailyChecks] = useState<Record<string, boolean>>({});
     const [customMeds, setCustomMeds] = useState<any[]>([]);
     const [newMed, setNewMed] = useState({ name: '', dose: '', when: '' });
+    const [notifyTimes, setNotifyTimes] = useState<{morning: string, evening: string}>({morning: '09:00', evening: '21:00'});
     const [loading, setLoading] = useState(true);
 
     const today = getTodayString();
 
     useEffect(() => {
         api.getDiet().then(record => {
-            const ts = record?.data?.trackerState || {};
+            const data = record?.data || {} as DietData;
+            const ts = data.trackerState || {};
             setMetabolicStartDate(ts.metabolicStartDate || null);
             setIronStartDate(ts.ironStartDate || null);
             setDailyChecks(ts[`checks_${today}`] || {});
             setCustomMeds(ts.customMeds || []);
+            setNotifyTimes(ts.notifyTimes || {morning: '09:00', evening: '21:00'});
             setLoading(false);
         }).catch(err => {
             console.error('Failed to load tracker state', err);
@@ -314,6 +317,48 @@ export function TrackerPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Settings */}
+            <div className="mt-12 p-6 bg-surface border border-border/50 rounded-2xl">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-cobalt" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    Настройки уведомлений
+                </h2>
+                <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-text-secondary mb-1">Утренние добавки</label>
+                        <input 
+                            type="time" 
+                            className="w-full p-2 border border-border rounded-lg bg-background text-text-primary focus:outline-none focus:border-cobalt"
+                            value={notifyTimes.morning}
+                            onChange={(e) => {
+                                const newTimes = {...notifyTimes, morning: e.target.value};
+                                setNotifyTimes(newTimes);
+                                updateServer({ notifyTimes: newTimes });
+                            }}
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-text-secondary mb-1">Вечерние добавки</label>
+                        <input 
+                            type="time" 
+                            className="w-full p-2 border border-border rounded-lg bg-background text-text-primary focus:outline-none focus:border-cobalt"
+                            value={notifyTimes.evening}
+                            onChange={(e) => {
+                                const newTimes = {...notifyTimes, evening: e.target.value};
+                                setNotifyTimes(newTimes);
+                                updateServer({ notifyTimes: newTimes });
+                            }}
+                        />
+                    </div>
+                </div>
+                <p className="text-xs text-text-secondary mt-3">Уведомления присылаются с точностью до 15 минут. Включите их кнопкой наверху!</p>
+            </div>
         </div>
     );
 }
+
+export default TrackerPage;

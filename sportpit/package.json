@@ -20,7 +20,8 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tailwindcss": "^4.3.3",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "@upstash/qstash": "^2.7.3"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",
