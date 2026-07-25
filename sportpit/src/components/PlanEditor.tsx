@@ -66,6 +66,7 @@ function usePlan(initial: DietData | null) {
     const [weight2, setWeight2] = useState<number>(initial?.weight2 ?? 60);
     const [weight2Input, setWeight2Input] = useState<string>(String(initial?.weight2 ?? 60));
     const [gender2, setGender2] = useState<'male' | 'female'>(initial?.gender2 ?? 'female');
+    const [splitFirstMeal, setSplitFirstMeal] = useState<boolean>(initial?.splitFirstMeal ?? plan.initial.splitFirstMeal ?? false);
 
     const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -91,6 +92,7 @@ function usePlan(initial: DietData | null) {
             setWeight2(initial.weight2 ?? 60);
             setWeight2Input(String(initial.weight2 ?? 60));
             setGender2(initial.gender2 ?? 'female');
+            setSplitFirstMeal(initial.splitFirstMeal ?? resolved.initial.splitFirstMeal ?? false);
         }
     }, [initial]);
 
@@ -105,13 +107,13 @@ function usePlan(initial: DietData | null) {
     );
 
     const weekPlan = useMemo(() => {
-        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements);
-    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements]);
+        return generateWeekPlan(startDate, weight, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal);
+    }, [startDate, weight, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal]);
 
     const weekPlan2 = useMemo(() => {
         if (!isSecondPersonEnabled) return [];
-        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements);
-    }, [isSecondPersonEnabled, startDate, weight2, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements]);
+        return generateWeekPlan(startDate, weight2, carbProducts, proteinProducts, trainingDates, 6, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal);
+    }, [isSecondPersonEnabled, startDate, weight2, carbProducts, proteinProducts, trainingDates, seedModifiers, mealOverrides, baseReplacements, splitFirstMeal]);
 
     const currentMacros = useMemo(() => {
         const protein = calcProtein(weight);
@@ -145,8 +147,9 @@ function usePlan(initial: DietData | null) {
             name2,
             weight2,
             gender2,
+            splitFirstMeal,
         }),
-        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides, baseReplacements, name1, isSecondPersonEnabled, name2, weight2, gender2]
+        [weight, trainingDates, carbSources, proteinSources, startDate, plan, gender, seedModifiers, mealOverrides, baseReplacements, name1, isSecondPersonEnabled, name2, weight2, gender2, splitFirstMeal]
     );
 
     const refreshDay = (date: string) => {
@@ -337,6 +340,7 @@ function usePlan(initial: DietData | null) {
         weight2, setWeight2,
         weight2Input, setWeight2Input,
         gender2, setGender2,
+        splitFirstMeal, setSplitFirstMeal,
         weekPlan2,
         currentMacros2,
     };
@@ -972,6 +976,7 @@ export function PlanEditor({ initial }: PlanEditorProps) {
         setWeight2,
         weight2Input, setWeight2Input,
         gender2, setGender2,
+        splitFirstMeal, setSplitFirstMeal,
         weekPlan2,
     } = usePlan(initial);
 
@@ -1141,6 +1146,19 @@ export function PlanEditor({ initial }: PlanEditorProps) {
                         className="w-full max-w-xs px-4 py-3 bg-cream border border-silver rounded-xl focus:outline-none focus:ring-2 focus:ring-cobalt text-ink"
                     />
                     <p className="text-xs text-steel mt-1.5">Расписание начинается с этой даты. Применяется к обоим планам.</p>
+                </div>
+
+                <div className="mb-6">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={splitFirstMeal}
+                            onChange={(e) => setSplitFirstMeal(e.target.checked)}
+                            className="w-5 h-5 accent-cobalt cursor-pointer"
+                        />
+                        <span className="text-sm font-semibold text-ink">Разбить первый приём пищи на два (Завтрак и Обед)</span>
+                    </label>
+                    <p className="text-xs text-steel mt-1.5 ml-7">Удобно, если тяжело съедать большие порции белка за один раз.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

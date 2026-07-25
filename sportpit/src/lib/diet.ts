@@ -689,7 +689,8 @@ export function buildDayPlan(
     trainingDates: string[],
     seedModifier = 0,
     overrides?: Record<number, MealOverrideItem[]>,
-    baseReplacements?: Record<number, Record<string, string>>
+    baseReplacements?: Record<number, Record<string, string>>,
+    splitFirstMeal = false
 ): DayPlan {
     const training = isTrainingDay(date, trainingDates);
 
@@ -712,7 +713,8 @@ export function buildDayPlan(
             items.forEach(item => {
                 const p = allProducts.find(prod => prod.value === item.productValue);
                 if (p) {
-                    if (p.proteinPer100g) overrideProtein += (p.proteinPer100g * item.amount) / 100;
+                    if (p.proteinPerPortion) overrideProtein += p.proteinPerPortion * item.amount;
+                    else if (p.proteinPer100g) overrideProtein += (p.proteinPer100g * item.amount) / 100;
                     if (p.carbsPer100g) overrideCarbs += (p.carbsPer100g * item.amount) / 100;
                 }
             });
@@ -728,7 +730,7 @@ export function buildDayPlan(
         const found = allProducts.find(p => p.value === baseReplacements[0]['carb']);
         if (found) carbSource = found;
     }
-    const carbPortionG = carbPortion(carbTarget, carbSource);
+    const carbPortionG = splitFirstMeal ? carbPortion(carbTarget / 2, carbSource) : carbPortion(carbTarget, carbSource);
 
 
     const { animal, plant } = splitByProteinType(proteinSources, training);
@@ -787,7 +789,7 @@ export function buildDayPlan(
     const excludeForAnimal2 = [animalSource1];
     if (isCheese(animalSource1)) excludeForAnimal2.push(...proteinSources.filter(isCheese));
     let animalSource2 = pickRotationExcluding(pool2, excludeForAnimal2, baseSeed + '2');
-    const meal2Index = training ? 2 : 1;
+    const meal2Index = training ? (splitFirstMeal ? 3 : 2) : (splitFirstMeal ? 2 : 1);
     if (baseReplacements?.[meal2Index]?.['protein']) {
         const found = allProducts.find(p => p.value === baseReplacements[meal2Index]['protein']);
         if (found) animalSource2 = found;
@@ -797,7 +799,23 @@ export function buildDayPlan(
     // Остаток белка делим на Приём 1 и Приём 2.
     // Если выходной день, весь белок делим на Приём 1 и Приём 2.
     const remainingProteinTarget = training ? Math.max(0, proteinTarget - 25) : proteinTarget;
-    const animalPortion1 = proteinPortion(remainingProteinTarget * 0.55, animalSource1);
+    const animalPortion1 = proteinPortion(remainingProteinTarget * 0.55 / (splitFirstMeal ? 2 : 1), animalSource1);
+    
+    let animalSource1b = animalSource1;
+    let carbSource1b = carbSource;
+    if (splitFirstMeal) {
+        if (baseReplacements?.[1]?.['protein']) {
+            const found = allProducts.find(p => p.value === baseReplacements[1]['protein']);
+            if (found) animalSource1b = found;
+        }
+        if (baseReplacements?.[1]?.['carb']) {
+            const found = allProducts.find(p => p.value === baseReplacements[1]['carb']);
+            if (found) carbSource1b = found;
+        }
+    }
+    const animalPortion1b = splitFirstMeal ? proteinPortion(remainingProteinTarget * 0.55 / 2, animalSource1b) : 0;
+    const carbPortionGb = splitFirstMeal ? carbPortion(carbTarget / 2, carbSource1b) : 0;
+    
     const animalPortion2 = proteinPortion(remainingProteinTarget * 0.45, animalSource2);
 
     function formatProtein(source: ProductRef, portion: number): string {
@@ -831,70 +849,96 @@ export function buildDayPlan(
         };
     }
 
-    const meals: Meal[] = training
-        ? [
-            {
-                name: 'Приём 1',
-                time: 'После тренировки (~11:30)',
+    const meals: Meal[] = [];
+    if (training) {
+        meals.push({
+            name: splitFirstMeal ? 'Приём 1 (Завтрак)' : 'Приём 1',
+            time: splitFirstMeal ? '09:00–10:30' : 'После тренировки (~11:30)',
+            template: 'Белок + Углеводы',
+            items: [
+                { id: 'protein', category: 'protein', productValue: animalSource1.value, text: formatProtein(animalSource1, animalPortion1) },
+                { id: 'carb', category: 'carbs', productValue: carbSource.value, text: `${carbSource.label} ${carbPortionG} г ` + (carbSource.value === 'potato' ? '(сырой вес/очищенный)' : '(сухой вес)') },
+                'Овощной салат без масла',
+                'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
+            ],
+            dishIdea: generateDishIdea(carbSource, [animalSource1], 'carb', baseSeed),
+            notes: 'Никаких жиров: ни масла, ни сыра, ни жирных соусов.',
+        });
+        if (splitFirstMeal) {
+            meals.push({
+                name: 'Приём 1 (Обед)',
+                time: '13:00–14:30',
                 template: 'Белок + Углеводы',
                 items: [
-                    { id: 'protein', category: 'protein', productValue: animalSource1.value, text: formatProtein(animalSource1, animalPortion1) },
-                    { id: 'carb', category: 'carbs', productValue: carbSource.value, text: `${carbSource.label} ${carbPortionG} г ` + (carbSource.value === 'potato' ? '(сырой вес/очищенный)' : '(сухой вес)') },
+                    { id: 'protein', category: 'protein', productValue: animalSource1b.value, text: formatProtein(animalSource1b, animalPortion1b) },
+                    { id: 'carb', category: 'carbs', productValue: carbSource1b.value, text: `${carbSource1b.label} ${carbPortionGb} г ` + (carbSource1b.value === 'potato' ? '(сырой вес/очищенный)' : '(сухой вес)') },
                     'Овощной салат без масла',
-                    'Опционально: 1–2 фрукта, горсть ягод, зефир, мармелад или мёд после основной порции',
                 ],
-                dishIdea: generateDishIdea(carbSource, [animalSource1], 'carb', baseSeed),
-                notes: 'Никаких жиров: ни масла, ни сыра, ни жирных соусов.',
-            },
-            {
-                name: 'Перекус',
-                time: '~13:30',
-                template: 'Белок',
-                items: [
-                    'Сывороточный протеин 1 порция',
-                    '(на воде, или изолят)',
-                ],
-                dishIdea: 'Протеиновый шейк на воде',
-            },
-            {
-                name: 'Приём 2',
-                time: '~17:00',
+                dishIdea: generateDishIdea(carbSource1b, [animalSource1b], 'carb', baseSeed + 'b'),
+                notes: 'Никаких жиров. Вторая половина утреннего приёма.',
+            });
+        }
+        meals.push({
+            name: 'Перекус',
+            time: splitFirstMeal ? '~16:00' : '~13:30',
+            template: 'Белок',
+            items: [
+                'Сывороточный протеин 1 порция',
+                '(на воде, или изолят)',
+            ],
+            dishIdea: 'Протеиновый шейк на воде',
+        });
+        meals.push({
+            name: 'Приём 2',
+            time: splitFirstMeal ? '~19:00' : '~17:00',
+            template: 'Белок + Жиры',
+            items: [
+                { id: 'protein', category: 'protein', productValue: animalSource2.value, text: formatProtein(animalSource2, animalPortion2) },
+                ...(!isCheese(animalSource2) ? [getExtraFatItem('extra_cheese', 'cheese', 50, meal2Index)] : []),
+                'Овощной салат с 1 ст.л. оливкового масла',
+                getExtraFatItem('extra_nuts', 'walnuts', 30, meal2Index),
+            ],
+            dishIdea: generateDishIdea(null, [animalSource2], 'fat', baseSeed),
+            notes: 'Никаких углеводов: ни круп, ни хлеба, ни фруктов.',
+        });
+    } else {
+        meals.push({
+            name: splitFirstMeal ? 'Приём 1 (Завтрак)' : 'Приём 1',
+            time: '09:00–11:00',
+            template: 'Белок + Жиры',
+            items: [
+                { id: 'protein', category: 'protein', productValue: animalSource1.value, text: formatProtein(animalSource1, animalPortion1) },
+                'Овощной салат с оливковым маслом',
+            ],
+            dishIdea: generateDishIdea(null, [animalSource1], 'fat', baseSeed),
+            notes: 'Углеводы только из овощей/зелени/орехов, до 50–80 г в день.',
+        });
+        if (splitFirstMeal) {
+            meals.push({
+                name: 'Приём 1 (Обед)',
+                time: '13:00–14:30',
                 template: 'Белок + Жиры',
                 items: [
-                    { id: 'protein', category: 'protein', productValue: animalSource2.value, text: formatProtein(animalSource2, animalPortion2) },
-                    ...(!isCheese(animalSource2) ? [getExtraFatItem('extra_cheese', 'cheese', 50, 2)] : []),
-                    'Овощной салат с 1 ст.л. оливкового масла',
-                    getExtraFatItem('extra_nuts', 'walnuts', 30, 2),
-                ],
-                dishIdea: generateDishIdea(null, [animalSource2], 'fat', baseSeed),
-                notes: 'Никаких углеводов: ни круп, ни хлеба, ни фруктов.',
-            },
-        ]
-        : [
-            {
-                name: 'Приём 1',
-                time: '09:00–11:00',
-                template: 'Белок + Жиры',
-                items: [
-                    { id: 'protein', category: 'protein', productValue: animalSource1.value, text: formatProtein(animalSource1, animalPortion1) },
+                    { id: 'protein', category: 'protein', productValue: animalSource1b.value, text: formatProtein(animalSource1b, animalPortion1b) },
                     'Овощной салат с оливковым маслом',
                 ],
-                dishIdea: generateDishIdea(null, [animalSource1], 'fat', baseSeed),
-                notes: 'Углеводы только из овощей/зелени/орехов, до 50–80 г в день.',
-            },
-            {
-                name: 'Приём 2',
-                time: '14:00–17:00',
-                template: 'Белок + Жиры',
-                items: [
-                    { id: 'protein', category: 'protein', productValue: animalSource2.value, text: formatProtein(animalSource2, animalPortion2) },
-                    ...(!isCheese(animalSource2) ? [getExtraFatItem('extra_cheese', 'cheese', 50, 1)] : []),
-                    'Большой овощной салат с оливковым маслом',
-                    getExtraFatItem('extra_nuts', 'walnuts', 30, 1),
-                ],
-                dishIdea: generateDishIdea(null, [animalSource2], 'fat', baseSeed),
-            },
-        ];
+                dishIdea: generateDishIdea(null, [animalSource1b], 'fat', baseSeed + 'b'),
+                notes: 'Вторая половина утреннего приёма.',
+            });
+        }
+        meals.push({
+            name: 'Приём 2',
+            time: splitFirstMeal ? '17:00–19:00' : '14:00–17:00',
+            template: 'Белок + Жиры',
+            items: [
+                { id: 'protein', category: 'protein', productValue: animalSource2.value, text: formatProtein(animalSource2, animalPortion2) },
+                ...(!isCheese(animalSource2) ? [getExtraFatItem('extra_cheese', 'cheese', 50, meal2Index)] : []),
+                'Большой овощной салат с оливковым маслом',
+                getExtraFatItem('extra_nuts', 'walnuts', 30, meal2Index),
+            ],
+            dishIdea: generateDishIdea(null, [animalSource2], 'fat', baseSeed),
+        });
+    }
 
     if (overrides) {
         meals.forEach((meal, i) => {
@@ -930,7 +974,8 @@ export function generateWeekPlan(
     weeks = 6,
     seedModifiers: Record<string, number> = {},
     mealOverrides: Record<string, Record<number, MealOverrideItem[]>> = {},
-    baseReplacements: Record<string, Record<number, Record<string, string>>> = {}
+    baseReplacements: Record<string, Record<number, Record<string, string>>> = {},
+    splitFirstMeal = false
 ): { date: string; plan: DayPlan }[] {
     const start = parseLocalDate(startDate);
     const days: { date: string; plan: DayPlan }[] = [];
@@ -939,7 +984,7 @@ export function generateWeekPlan(
         const date = new Date(start);
         date.setDate(start.getDate() + i);
         const iso = formatISOLocal(date);
-        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso], baseReplacements[iso]);
+        const plan = buildDayPlan(iso, weight, carbSources, proteinSources, trainingDates, seedModifiers[iso] || 0, mealOverrides[iso], baseReplacements[iso], splitFirstMeal);
         days.push({ date: iso, plan });
     }
 

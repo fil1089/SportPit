@@ -42,6 +42,7 @@ export interface PlanInitial {
     name2?: string;
     weight2?: number;
     gender2?: 'male' | 'female';
+    splitFirstMeal?: boolean;
 }
 
 export interface MacroTargets {
@@ -90,6 +91,7 @@ export interface DietData {
     name2?: string;
     weight2?: number;
     gender2?: 'male' | 'female';
+    splitFirstMeal?: boolean;
 }
 
 export type CarbSource = string;
